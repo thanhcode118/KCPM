@@ -8,13 +8,34 @@ namespace HomeDecorShop.Infrastructure;
 // --- GIỮ LẠI IN-MEMORY CỦA PRODUCT ---
 public sealed class InMemoryProductRepository : IProductRepository
 {
-    /* ... (Giữ nguyên phần code InMemoryProductRepository cũ của bạn ở đây để không lỗi Product) ... */
-    // (Mình rút gọn để tiết kiệm độ dài, bạn paste lại class InMemoryProductRepository cũ vào đây)
-    public IReadOnlyCollection<Product> GetAll() => throw new NotImplementedException();
-    public Product? GetById(int id) => throw new NotImplementedException();
-    public Product Create(Product product) => throw new NotImplementedException();
-    public Product? Update(Product product) => throw new NotImplementedException();
-    public bool Delete(int id) => throw new NotImplementedException();
+    private readonly List<Product> _products = new();
+
+    public IReadOnlyCollection<Product> GetAll() => _products.AsReadOnly();
+
+    public Product? GetById(int id) => _products.FirstOrDefault(p => p.Id == id);
+
+    public Product Create(Product product)
+    {
+        var id = _products.Count > 0 ? _products.Max(p => p.Id) + 1 : 1;
+        var newProduct = product with { Id = id };
+        _products.Add(newProduct);
+        return newProduct;
+    }
+
+    public Product? Update(Product product)
+    {
+        var index = _products.FindIndex(p => p.Id == product.Id);
+        if (index == -1) return null;
+        _products[index] = product;
+        return product;
+    }
+
+    public bool Delete(int id)
+    {
+        var product = GetById(id);
+        if (product == null) return false;
+        return _products.Remove(product);
+    }
 }
 
 // --- THÊM DB CONTEXT CHO EF CORE ---

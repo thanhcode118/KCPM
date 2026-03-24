@@ -1,12 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "i9XxmNO0tRY=",
+  "dgSpecHash": "Wf/cAIrcLbk=",
   "success": true,
-  "projectFilePath": "D:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
-  "expectedPackageFiles": [
-    "C:\\Users\\TUF\\.nuget\\packages\\microsoft.netcore.app.ref\\9.0.14\\microsoft.netcore.app.ref.9.0.14.nupkg.sha512",
-    "C:\\Users\\TUF\\.nuget\\packages\\microsoft.windowsdesktop.app.ref\\9.0.14\\microsoft.windowsdesktop.app.ref.9.0.14.nupkg.sha512",
-    "C:\\Users\\TUF\\.nuget\\packages\\microsoft.aspnetcore.app.ref\\9.0.14\\microsoft.aspnetcore.app.ref.9.0.14.nupkg.sha512"
-  ],
+  "projectFilePath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
+  "expectedPackageFiles": [],
   "logs": []
 }

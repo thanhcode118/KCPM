@@ -150,7 +150,7 @@ public static class ApplicationDependencyInjection
 {
     public static IServiceCollection AddApplication(this IServiceCollection services)
     {
-        // ... (Giữ nguyên đăng ký ProductService cũ) ...
+        services.AddScoped<IProductService, ProductService>();
         services.AddScoped<IUserService, UserService>();
         return services;
     }

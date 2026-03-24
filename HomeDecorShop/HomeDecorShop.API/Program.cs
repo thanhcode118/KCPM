@@ -1,55 +1,7 @@
-<<<<<<< HEAD
-using Microsoft.EntityFrameworkCore;
-using ShopDecorAPI;   // 👈 QUAN TRỌNG: để nhận AppDbContext
-
-var builder = WebApplication.CreateBuilder(args);
-
-// ================== SERVICES ==================
-
-// Controller
-builder.Services.AddControllers();
-
-// Swagger
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Database InMemory
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseInMemoryDatabase("ShopDecorDB"));
-
-// CORS
-builder.Services.AddCors(options =>
-{
-    options.AddPolicy("AllowAll",
-        policy => policy.AllowAnyOrigin()
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
-});
-
-var app = builder.Build();
-
-// ================== MIDDLEWARE ==================
-
-// Swagger (luôn bật)
-app.UseSwagger();
-app.UseSwaggerUI();
-
-// CORS
-app.UseCors("AllowAll");
-
-app.UseHttpsRedirection();
-
-app.UseAuthorization();
-
-// Map controller
-app.MapControllers();
-
-app.Run();
-=======
 using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc; // <-- Thêm dòng này để dùng [FromServices]
+using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -59,6 +11,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddControllers(); // Thêm cái này nếu cần cho MVC Controllers cũ
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -89,7 +43,7 @@ if (app.Environment.IsDevelopment())
 // API PRODUCTS
 // ==========================================
 app.MapGet("/api/products", (
-    [FromServices] IProductService productService, // <-- Thêm [FromServices]
+    [FromServices] IProductService productService,
     string? q,
     string? category,
     string? brand,
@@ -232,4 +186,3 @@ static string GetToken(HttpContext context)
 
     return string.Empty;
 }
->>>>>>> 0f36af5f506d655fd91dfcbbfdec989f911eb644
