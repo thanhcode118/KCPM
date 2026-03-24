@@ -6,35 +6,41 @@ using Microsoft.Extensions.DependencyInjection;
 namespace HomeDecorShop.Infrastructure;
 
 // --- GIỮ LẠI IN-MEMORY CỦA PRODUCT ---
-public sealed class InMemoryProductRepository : IProductRepository
+// --- TẠO REPOSITORY MỚI DÙNG EF CORE ---
+public sealed class SqlProductRepository : IProductRepository
 {
-    private readonly List<Product> _products = new();
+    private readonly AppDbContext _context;
 
-    public IReadOnlyCollection<Product> GetAll() => _products.AsReadOnly();
+    public SqlProductRepository(AppDbContext context)
+    {
+        _context = context;
+    }
 
-    public Product? GetById(int id) => _products.FirstOrDefault(p => p.Id == id);
+    public IReadOnlyCollection<Product> GetAll() => _context.Products.ToList();
+
+    public Product? GetById(int productId) => _context.Products.FirstOrDefault(p => p.ProductId == productId);
 
     public Product Create(Product product)
     {
-        var id = _products.Count > 0 ? _products.Max(p => p.Id) + 1 : 1;
-        var newProduct = product with { Id = id };
-        _products.Add(newProduct);
-        return newProduct;
+        _context.Products.Add(product);
+        _context.SaveChanges();
+        return product;
     }
 
     public Product? Update(Product product)
     {
-        var index = _products.FindIndex(p => p.Id == product.Id);
-        if (index == -1) return null;
-        _products[index] = product;
+        _context.Products.Update(product);
+        _context.SaveChanges();
         return product;
     }
 
-    public bool Delete(int id)
+    public bool Delete(int productId)
     {
-        var product = GetById(id);
+        var product = _context.Products.Find(productId);
         if (product == null) return false;
-        return _products.Remove(product);
+        _context.Products.Remove(product);
+        _context.SaveChanges();
+        return true;
     }
 }
 
@@ -44,18 +50,25 @@ public class AppDbContext : DbContext
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options) { }
 
     public DbSet<User> Users => Set<User>();
-    public DbSet<Address> Addresses => Set<Address>();
+    public DbSet<Product> Products => Set<Product>();
+    public DbSet<Feedback> Feedbacks => Set<Feedback>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>()
-            .HasIndex(u => u.Email)
-            .IsUnique(); // Ràng buộc Email duy nhất
+            .HasKey(u => u.UserId);
 
         modelBuilder.Entity<User>()
-            .HasMany(u => u.Addresses)
-            .WithOne(a => a.User)
-            .HasForeignKey(a => a.UserId);
+            .HasIndex(u => u.Email)
+            .IsUnique();
+
+        modelBuilder.Entity<Feedback>()
+            .ToTable("Feedback")
+            .HasKey(f => f.FeedbackId);
+
+        modelBuilder.Entity<Product>()
+            .ToTable("Products")
+            .HasKey(p => p.ProductId);
     }
 }
 
@@ -71,22 +84,22 @@ public sealed class SqlUserRepository : IUserRepository
 
     public IReadOnlyCollection<User> GetAll()
     {
-        return _context.Users.Include(u => u.Addresses).ToList();
+        return _context.Users.ToList();
     }
 
     public User? GetById(int id)
     {
-        return _context.Users.Include(u => u.Addresses).FirstOrDefault(u => u.Id == id);
+        return _context.Users.FirstOrDefault(u => u.UserId == id);
     }
 
     public User? GetByEmail(string email)
     {
-        return _context.Users.Include(u => u.Addresses).FirstOrDefault(u => u.Email == email.ToLower());
+        return _context.Users.FirstOrDefault(u => u.Email == email.ToLower());
     }
 
     public User? GetByToken(string token)
     {
-        return _context.Users.Include(u => u.Addresses).FirstOrDefault(u => u.CurrentToken == token);
+        return _context.Users.FirstOrDefault(u => u.CurrentToken == token);
     }
 
     public User Create(User user)
@@ -105,15 +118,38 @@ public sealed class SqlUserRepository : IUserRepository
     }
 }
 
+public sealed class SqlFeedbackRepository : IFeedbackRepository
+{
+    private readonly AppDbContext _context;
+
+    public SqlFeedbackRepository(AppDbContext context)
+    {
+        _context = context;
+    }
+
+    public IReadOnlyCollection<Feedback> GetAll()
+    {
+        return _context.Feedbacks.OrderByDescending(f => f.CreatedAt).ToList();
+    }
+
+    public Feedback Create(Feedback feedback)
+    {
+        _context.Feedbacks.Add(feedback);
+        _context.SaveChanges();
+        return feedback;
+    }
+}
+
 // --- CẬP NHẬT DEPENDENCY INJECTION ---
 public static class InfrastructureDependencyInjection
 {
     public static IServiceCollection AddInfrastructure(this IServiceCollection services)
     {
-        services.AddSingleton<IProductRepository, InMemoryProductRepository>();
+        services.AddScoped<IProductRepository, SqlProductRepository>();
         
         // Đổi từ Singleton InMemory sang Scoped cho EF Core
         services.AddScoped<IUserRepository, SqlUserRepository>(); 
+        services.AddScoped<IFeedbackRepository, SqlFeedbackRepository>();
         return services;
     }
 }
