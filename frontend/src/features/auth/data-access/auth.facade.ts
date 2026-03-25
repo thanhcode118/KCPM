@@ -14,7 +14,7 @@ export interface AuthUser {
 export class AuthFacade {
   private http = inject(HttpClient);
   
-private readonly apiUrl = 'https://localhost:5020/api/users'; 
+private readonly apiUrl = 'http://localhost:5020/api/users'; 
 
   private readonly currentUserSignal = signal<AuthUser | null>(null);
   private readonly errorSignal = signal('');
@@ -27,9 +27,13 @@ private readonly apiUrl = 'https://localhost:5020/api/users';
   login(email: string, password: string): Observable<boolean> {
     this.errorSignal.set('');
     return this.http.post<AuthUser>(`${this.apiUrl}/login`, { email, password }).pipe(
-      tap(user => {
-        this.currentUserSignal.set(user);
-        localStorage.setItem('token', user.token);
+      tap((res: any) => {
+        const authUser: AuthUser = {
+          ...res.user,
+          token: res.token
+        };
+        this.currentUserSignal.set(authUser);
+        localStorage.setItem('token', authUser.token);
       }),
       map(() => true),
       catchError(err => {
@@ -41,16 +45,19 @@ private readonly apiUrl = 'https://localhost:5020/api/users';
 
   register(data: any): Observable<boolean> {
     this.errorSignal.set('');
-    return this.http.post<AuthUser>(`${this.apiUrl}/register`, data).pipe(
-      tap(user => {
-        this.currentUserSignal.set(user);
-        localStorage.setItem('token', user.token);
-      }),
+    return this.http.post<any>(`${this.apiUrl}/register`, data).pipe(
       map(() => true),
       catchError(err => {
         this.errorSignal.set(err.error?.message || 'Đăng ký thất bại. Email có thể đã tồn tại.');
         return of(false);
       })
+    );
+  }
+
+  confirmEmail(token: string): Observable<string> {
+    return this.http.get<any>(`${this.apiUrl}/confirm-email`, { params: { token } }).pipe(
+      map(res => res.message || 'Xác nhận thành công!'),
+      catchError(err => of(err.error?.message || 'Lỗi xác nhận email.'))
     );
   }
 

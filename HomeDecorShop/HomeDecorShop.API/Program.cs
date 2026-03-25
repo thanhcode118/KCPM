@@ -1,5 +1,6 @@
 using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
+using HomeDecorShop.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
 
@@ -17,7 +18,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
     {
-        policy.WithOrigins("http://localhost:4200", "http://localhost:5173")
+        policy.WithOrigins("http://localhost:4200", "http://localhost:5173", "http://localhost:3000")
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -28,6 +29,25 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var app = builder.Build();
+
+// Auto-seed Admin Account
+using (var scope = app.Services.CreateScope())
+{
+    var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
+    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    
+    // --- XÓA TOÀN BỘ TÀI KHOẢN HIỆN TẠI THEO YÊU CẦU ---
+    // CẢNH BÁO: Dòng này sẽ xóa tất cả User mỗi khi khởi động lại backend.
+    // Hãy comment lại (//) sau khi đã chạy lần đầu tiên.
+    db.Users.RemoveRange(db.Users.ToList());
+    db.SaveChanges();
+
+    // Tạo tài khoản admin1
+    if (!db.Users.Any(u => u.Email == "admin1"))
+    {
+        userService.Register(new RegisterUserInput("admin1", "Administrator", "0123456789", "admin123", "admin"));
+    }
+}
 
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
@@ -85,7 +105,7 @@ app.MapGet("/api/products/{id:int}", ([FromServices] IProductService productServ
 app.MapPost("/api/products", ([FromServices] IProductService productService, [FromBody] ProductUpsertInput input) =>
 {
     var created = productService.Create(input);
-    return Results.Created($"/api/products/{created.Id}", created);
+    return Results.Created($"/api/products/{created.ProductId}", created);
 })
 .WithName("CreateProduct");
 
@@ -121,7 +141,7 @@ app.MapPost("/api/users/register", ([FromServices] IUserService userService, [Fr
         var auth = userService.Register(input);
         return Results.Ok(auth);
     }
-    catch (InvalidOperationException ex)
+    catch (Exception ex)
     {
         return Results.BadRequest(new { message = ex.Message });
     }
@@ -130,12 +150,30 @@ app.MapPost("/api/users/register", ([FromServices] IUserService userService, [Fr
 
 app.MapPost("/api/users/login", ([FromServices] IUserService userService, [FromBody] LoginInput input) =>
 {
-    var auth = userService.Login(input);
-    return auth is null
-        ? Results.Unauthorized() 
-        : Results.Ok(auth);
+    try 
+    {
+        var auth = userService.Login(input);
+        return auth is null
+            ? Results.Unauthorized() 
+            : Results.Ok(auth);
+    }
+    catch (Exception ex)
+    {
+        return Results.BadRequest(new { message = ex.Message });
+    }
 })
 .WithName("LoginUser");
+
+app.MapGet("/api/users/confirm-email", ([FromServices] IUserService userService, [FromQuery] string token) =>
+{
+    var success = userService.ConfirmEmail(token);
+    if (success)
+    {
+        return Results.Ok(new { message = "Xác nhận Email thành công! Bạn có thể đăng nhập." });
+    }
+    return Results.BadRequest(new { message = "Mã xác nhận không hợp lệ hoặc đã hết hạn." });
+})
+.WithName("ConfirmEmail");
 
 app.MapGet("/api/users/me", ([FromServices] IUserService userService, HttpContext httpContext) =>
 {
@@ -160,6 +198,14 @@ app.MapPost("/api/users/me/addresses", ([FromServices] IUserService userService,
     return user is null ? Results.Unauthorized() : Results.Ok(user);
 })
 .WithName("AddCurrentUserAddress");
+
+app.MapPut("/api/users/{id:int}/role", ([FromServices] IUserService userService, int id, [FromBody] string newRole) =>
+{
+    var role = newRole.ToLower() == "admin" ? UserRole.Admin : UserRole.Customer;
+    var success = userService.UpdateRole(id, role);
+    return success ? Results.Ok(new { message = "Cập nhật quyền thành công." }) : Results.NotFound();
+})
+.WithName("UpdateUserRole");
 
 app.Run();
 

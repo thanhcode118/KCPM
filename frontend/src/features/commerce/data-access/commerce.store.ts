@@ -9,7 +9,12 @@ export class CommerceStore {
 
   readonly users = signal<User[]>(MOCK_USERS);
   readonly orders = signal<Order[]>(MOCK_ORDERS);
-  readonly activeCart = signal<Cart>(MOCK_CARTS[0]);
+  readonly activeCart = signal<Cart>({
+    id: 0,
+    userId: 0,
+    items: [],
+    updatedAt: new Date().toISOString()
+  });
 
   readonly cartCount = computed(() => {
     return this.activeCart().items.reduce((total, item) => total + item.quantity, 0);
@@ -50,6 +55,16 @@ export class CommerceStore {
             unitPrice: product.price
           }
         ],
+        updatedAt: new Date().toISOString()
+      };
+    });
+  }
+
+  removeFromCart(productId: number): void {
+    this.activeCart.update((cart) => {
+      return {
+        ...cart,
+        items: cart.items.filter((item) => item.productId !== productId),
         updatedAt: new Date().toISOString()
       };
     });

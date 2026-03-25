@@ -26,15 +26,19 @@ public interface IUserService
     UserView? GetByToken(string token);
     UserView? UpdateProfile(string token, UpdateProfileInput input);
     UserView? AddAddress(string token, UpsertAddressInput input);
+    bool ConfirmEmail(string token);
+    bool UpdateRole(int userId, UserRole role);
 }
 
 public sealed class UserService : IUserService
 {
     private readonly IUserRepository _repository;
+    private readonly IEmailService _emailService;
 
-    public UserService(IUserRepository repository)
+    public UserService(IUserRepository repository, IEmailService emailService)
     {
         _repository = repository;
+        _emailService = emailService;
     }
 
     public IReadOnlyCollection<UserView> GetAll() =>
@@ -50,6 +54,7 @@ public sealed class UserService : IUserService
 
         var role = Normalize(input.Role) == "admin" ? UserRole.Admin : UserRole.Customer;
         var token = Guid.NewGuid().ToString("N");
+        var verifyToken = Guid.NewGuid().ToString("N");
 
         var user = new User
         {
@@ -60,10 +65,20 @@ public sealed class UserService : IUserService
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(input.Password), // Mã hóa Password
             CreatedAt = DateTime.UtcNow,
             CurrentToken = token,
-            Addresses = new List<Address>()
+            Addresses = new List<Address>(),
+            IsEmailConfirmed = true, // Bypass email verification
+            EmailConfirmationToken = verifyToken
         };
 
         var createdUser = _repository.Create(user);
+
+        // Gửi email xác nhận (Tạm thời tắt để đăng ký nhanh - không bị delay kết nối SMTP)
+        // var confirmLink = $"http://localhost:4200/confirm-email?token={verifyToken}";
+        // _emailService.SendEmail(
+        //     user.Email,
+        //     "Xác nhận Email đăng ký - BeeShop",
+        //     $"Chào {user.FullName},\n\nĐể kích hoạt tài khoản của bạn, vui lòng click vào link sau:\n\n{confirmLink}\n\nTrân trọng!");
+
         return new AuthResult(token, MapUser(createdUser));
     }
 
@@ -75,6 +90,12 @@ public sealed class UserService : IUserService
         if (user is null || !BCrypt.Net.BCrypt.Verify(input.Password, user.PasswordHash))
         {
             return null;
+        }
+
+        // Chặn nếu chưa xác nhận email
+        if (!user.IsEmailConfirmed)
+        {
+            throw new InvalidOperationException("Vui lòng xác minh email trước khi đăng nhập.");
         }
 
         // Cấp lại token mới mỗi lần login
@@ -132,9 +153,32 @@ public sealed class UserService : IUserService
         return saved is null ? null : MapUser(saved);
     }
 
+    public bool ConfirmEmail(string token)
+    {
+        if (string.IsNullOrWhiteSpace(token)) return false;
+        
+        var user = _repository.GetAll().FirstOrDefault(u => u.EmailConfirmationToken == token);
+        if (user is null) return false;
+
+        user.IsEmailConfirmed = true;
+        user.EmailConfirmationToken = null; // Clear token sau khi đã xài
+        _repository.Update(user);
+        return true;
+    }
+
+    public bool UpdateRole(int userId, UserRole role)
+    {
+        var user = _repository.GetById(userId);
+        if (user is null) return false;
+
+        user.Role = role;
+        _repository.Update(user);
+        return true;
+    }
+
     private static UserView MapUser(User user) =>
         new(
-            user.Id,
+            user.UserId,
             user.Email,
             user.FullName,
             user.Phone,

@@ -69,6 +69,19 @@ public class AppDbContext : DbContext
         modelBuilder.Entity<Product>()
             .ToTable("Products")
             .HasKey(p => p.ProductId);
+
+        modelBuilder.Entity<User>().HasData(new User
+        {
+            UserId = 99,
+            Email = "admin@gmail.com",
+            FullName = "Administrator",
+            Phone = "0000000000",
+            Address = "System",
+            Role = UserRole.Admin,
+            PasswordHash = "$2a$11$XZKAs1.hhd1cRoCH2eTlquOBAAEoA/Cfkt028hduwkCKNQ4eHd5bC",
+            CreatedAt = new DateTime(2026, 3, 24, 15, 53, 10, DateTimeKind.Utc),
+            IsEmailConfirmed = true
+        });
     }
 }
 
@@ -150,6 +163,7 @@ public static class InfrastructureDependencyInjection
         // Đổi từ Singleton InMemory sang Scoped cho EF Core
         services.AddScoped<IUserRepository, SqlUserRepository>(); 
         services.AddScoped<IFeedbackRepository, SqlFeedbackRepository>();
+        services.AddScoped<IEmailService, EmailService>();
         return services;
     }
 }

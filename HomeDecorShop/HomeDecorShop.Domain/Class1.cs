@@ -41,6 +41,14 @@ public class User
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public string? CurrentToken { get; set; }
+    public bool IsEmailConfirmed { get; set; } = false;
+    public string? EmailConfirmationToken { get; set; }
+    public ICollection<Address> Addresses { get; set; } = new List<Address>();
+}
+
+public interface IEmailService
+{
+    void SendEmail(string to, string subject, string body);
 }
 
 public interface IProductRepository

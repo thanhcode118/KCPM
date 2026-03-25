@@ -101,6 +101,7 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
             input.Style.Trim(),
             input.InStock,
             input.IsActive,
+            false,
             now);
 
         return repository.Create(product);
@@ -117,10 +118,10 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
         var updated = existing with
         {
             Sku = input.Sku.Trim(),
-            Name = input.Name.Trim(),
+            ProductName = input.Name.Trim(),
             Slug = input.Slug.Trim(),
             Price = input.Price,
-            OriginalPrice = input.OriginalPrice,
+            OldPrice = input.OriginalPrice,
             CategoryId = input.CategoryId,
             Category = input.Category.Trim(),
             Image = input.Image.Trim(),
@@ -153,26 +154,26 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
         {
             "price-asc" or "price_asc" => query
                 .OrderBy(p => p.Price)
-                .ThenByDescending(p => p.Id),
+                .ThenByDescending(p => p.ProductId),
             "price-desc" or "price_desc" => query
                 .OrderByDescending(p => p.Price)
-                .ThenByDescending(p => p.Id),
+                .ThenByDescending(p => p.ProductId),
             "rating-desc" or "best_selling" => query
                 .OrderByDescending(p => p.Rating)
                 .ThenByDescending(p => p.Reviews)
-                .ThenByDescending(p => p.Id),
+                .ThenByDescending(p => p.ProductId),
             "newest" => query
                 .OrderByDescending(p => p.CreatedAt)
-                .ThenByDescending(p => p.Id),
+                .ThenByDescending(p => p.ProductId),
             _ => string.IsNullOrWhiteSpace(normalizedQuery)
                 ? query
                     .OrderByDescending(p => p.CreatedAt)
-                    .ThenByDescending(p => p.Id)
+                    .ThenByDescending(p => p.ProductId)
                 : query
                     .OrderByDescending(p => GetRelevanceScore(p, normalizedQuery))
                     .ThenByDescending(p => p.Rating)
                     .ThenByDescending(p => p.Reviews)
-                    .ThenByDescending(p => p.Id)
+                    .ThenByDescending(p => p.ProductId)
         };
     }
 
@@ -180,7 +181,7 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
     {
         var terms = new[]
         {
-            product.Name,
+            product.ProductName,
             product.Sku,
             product.Category,
             product.Brand,
@@ -196,12 +197,12 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
         product.InStock || product.StockLeft > 0;
 
     private static bool IsOnSale(Product product) =>
-        product.OriginalPrice is not null && product.OriginalPrice > product.Price;
+        product.OldPrice is not null && product.OldPrice > product.Price;
 
     private static int GetRelevanceScore(Product product, string query)
     {
         var score = 0;
-        var name = Normalize(product.Name);
+        var name = Normalize(product.ProductName);
         var sku = Normalize(product.Sku);
         var category = Normalize(product.Category);
         var brand = Normalize(product.Brand);

@@ -47,6 +47,19 @@
           }
         }
       },
+      "BCrypt.Net-Next/4.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.1/BCrypt.Net-Next.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.1/BCrypt.Net-Next.dll": {
+            "related": ".xml"
+          }
+        }
+      },
       "Microsoft.Bcl.AsyncInterfaces/1.1.1": {
         "type": "package",
         "compile": {
@@ -1038,6 +1051,35 @@
         "azureicon.png",
         "lib/netstandard2.0/Azure.Identity.dll",
         "lib/netstandard2.0/Azure.Identity.xml"
+      ]
+    },
+    "BCrypt.Net-Next/4.1.0": {
+      "sha512": "5YT3DKllmtkyW68PjURu/V1TOe4MKiByKwsRNVcfYE1S5KuFTeozdmKzyNzolKiQF391OXCaQtINvYT3j1ERzQ==",
+      "type": "package",
+      "path": "bcrypt.net-next/4.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "bcrypt.net-next.4.1.0.nupkg.sha512",
+        "bcrypt.net-next.nuspec",
+        "ico.png",
+        "lib/net10.0/BCrypt.Net-Next.dll",
+        "lib/net10.0/BCrypt.Net-Next.xml",
+        "lib/net20/BCrypt.Net-Next.dll",
+        "lib/net20/BCrypt.Net-Next.xml",
+        "lib/net35/BCrypt.Net-Next.dll",
+        "lib/net35/BCrypt.Net-Next.xml",
+        "lib/net462/BCrypt.Net-Next.dll",
+        "lib/net462/BCrypt.Net-Next.xml",
+        "lib/net472/BCrypt.Net-Next.dll",
+        "lib/net472/BCrypt.Net-Next.xml",
+        "lib/net48/BCrypt.Net-Next.dll",
+        "lib/net48/BCrypt.Net-Next.xml",
+        "lib/netstandard2.0/BCrypt.Net-Next.dll",
+        "lib/netstandard2.0/BCrypt.Net-Next.xml",
+        "lib/netstandard2.1/BCrypt.Net-Next.dll",
+        "lib/netstandard2.1/BCrypt.Net-Next.xml",
+        "readme.md"
       ]
     },
     "Microsoft.Bcl.AsyncInterfaces/1.1.1": {
@@ -2757,29 +2799,30 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "BCrypt.Net-Next >= 4.1.0",
       "HomeDecorShop.Domain >= 1.0.0",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.0",
       "Microsoft.Extensions.DependencyInjection.Abstractions >= 9.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\KHANG\\.nuget\\packages\\": {},
+    "C:\\Users\\Mr VU\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
       "projectName": "HomeDecorShop.Infrastructure",
-      "projectPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\KHANG\\.nuget\\packages\\",
-      "outputPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\Mr VU\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\KHANG\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\Mr VU\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2788,15 +2831,14 @@
       ],
       "sources": {
         "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-        "C:\\Program Files\\dotnet\\library-packs": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
-              "projectPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
+            "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+              "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
             }
           }
         }
@@ -2809,14 +2851,18 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
+        "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "BCrypt.Net-Next": {
+            "target": "Package",
+            "version": "[4.1.0, )"
+          },
           "Microsoft.EntityFrameworkCore.SqlServer": {
             "target": "Package",
             "version": "[9.0.0, )"
@@ -2842,7 +2888,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
