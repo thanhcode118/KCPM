@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
@@ -8,7 +8,7 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
   selector: 'app-login',
   standalone: true,
   imports: [CommonModule, FormsModule, RouterLink],
-  changeDetection: ChangeDetectionStrategy.OnPush,
+  // Removed OnPush to fix async change detection
   template: `
     <section class="min-h-[70vh] bg-cream py-16">
       <div class="container mx-auto px-4 max-w-xl">
@@ -18,8 +18,8 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
           @if (!authFacade.isAuthenticated()) {
             <form class="space-y-4" (ngSubmit)="submitLogin()">
               <div>
-                <label class="text-sm font-semibold text-charcoal">Email</label>
-                <input [(ngModel)]="email" name="email" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2" type="email" required>
+                <label class="text-sm font-semibold text-charcoal">Tên đăng nhập (Email)</label>
+                <input [(ngModel)]="email" name="email" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2" type="text" required>
               </div>
               <div>
                 <label class="text-sm font-semibold text-charcoal">Mật khẩu</label>
@@ -74,7 +74,12 @@ export class LoginComponent {
       next: (success) => {
         this.isLoading = false;
         if (success) {
-          this.router.navigate(['/']);
+          const user = this.authFacade.currentUser();
+          if (user?.role === 'admin') {
+            this.router.navigate(['/admin']);
+          } else {
+            this.router.navigate(['/']);
+          }
         }
       },
       error: () => {

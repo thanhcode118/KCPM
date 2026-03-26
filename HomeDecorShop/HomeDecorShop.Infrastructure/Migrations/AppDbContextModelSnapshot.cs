@@ -135,13 +135,41 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         });
                 });
 
-            modelBuilder.Entity("HomeDecorShop.Domain.Product", b =>
+            modelBuilder.Entity("HomeDecorShop.Domain.Feedback", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("FeedbackId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("FeedbackId"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("FeedbackId");
+
+                    b.ToTable("Feedback", (string)null);
+                });
+
+            modelBuilder.Entity("HomeDecorShop.Domain.Product", b =>
+                {
+                    b.Property<int>("ProductId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("ProductId"));
 
                     b.Property<string>("Brand")
                         .IsRequired()
@@ -161,6 +189,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("HoverImage")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -179,17 +210,17 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal?>("OriginalPrice")
+                    b.Property<decimal?>("OldPrice")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ProductName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<double>("Rating")
                         .HasColumnType("float");
@@ -221,16 +252,16 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.Property<string>("VideoUrl")
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("Id");
+                    b.HasKey("ProductId");
 
                     b.HasIndex("CategoryId");
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
 
                     b.HasData(
                         new
                         {
-                            Id = 101,
+                            ProductId = 101,
                             Brand = "BeeShop",
                             Category = "Phụ kiện bàn",
                             CategoryId = 1,
@@ -241,9 +272,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Khay Cắm Bút Gỗ Sồi",
-                            OriginalPrice = 180000m,
+                            OldPrice = 180000m,
                             Price = 150000m,
+                            ProductName = "Khay Cắm Bút Gỗ Sồi",
                             Rating = 4.7999999999999998,
                             Reviews = 45,
                             Sku = "BEE-101",
@@ -254,7 +285,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 102,
+                            ProductId = 102,
                             Brand = "BeeShop",
                             Category = "Lighting",
                             CategoryId = 2,
@@ -265,8 +296,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Kim loại",
-                            Name = "Đèn Bàn Pixar",
                             Price = 350000m,
+                            ProductName = "Đèn Bàn Pixar",
                             Rating = 4.9000000000000004,
                             Reviews = 120,
                             Sku = "BEE-102",
@@ -277,7 +308,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 103,
+                            ProductId = 103,
                             Brand = "BeeShop",
                             Category = "Phụ kiện bàn",
                             CategoryId = 1,
@@ -288,8 +319,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Vải",
-                            Name = "Bảng Ghim Ghi Chú",
                             Price = 120000m,
+                            ProductName = "Bảng Ghim Ghi Chú",
                             Rating = 4.5,
                             Reviews = 30,
                             Sku = "BEE-103",
@@ -299,7 +330,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 104,
+                            ProductId = 104,
                             Brand = "BeeShop",
                             Category = "Decor",
                             CategoryId = 3,
@@ -310,8 +341,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gốm sứ",
-                            Name = "Chậu Cây Mini Để Bàn",
                             Price = 85000m,
+                            ProductName = "Chậu Cây Mini Để Bàn",
                             Rating = 5.0,
                             Reviews = 210,
                             Sku = "BEE-104",
@@ -322,7 +353,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 105,
+                            ProductId = 105,
                             Brand = "BeeShop",
                             Category = "Phụ kiện bàn",
                             CategoryId = 1,
@@ -333,8 +364,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Lịch Gỗ Để Bàn",
                             Price = 190000m,
+                            ProductName = "Lịch Gỗ Để Bàn",
                             Rating = 4.7000000000000002,
                             Reviews = 15,
                             Sku = "BEE-105",
@@ -344,7 +375,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 106,
+                            ProductId = 106,
                             Brand = "BeeShop",
                             Category = "Decor",
                             CategoryId = 3,
@@ -355,9 +386,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gốm sứ",
-                            Name = "Cốc Gốm Handmade",
-                            OriginalPrice = 160000m,
+                            OldPrice = 160000m,
                             Price = 145000m,
+                            ProductName = "Cốc Gốm Handmade",
                             Rating = 4.5999999999999996,
                             Reviews = 55,
                             Sku = "BEE-106",
@@ -367,7 +398,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 107,
+                            ProductId = 107,
                             Brand = "BeeShop",
                             Category = "Decor",
                             CategoryId = 3,
@@ -378,8 +409,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Nhựa",
-                            Name = "Đồng Hồ Lật Số",
                             Price = 450000m,
+                            ProductName = "Đồng Hồ Lật Số",
                             Rating = 4.9000000000000004,
                             Reviews = 80,
                             Sku = "BEE-107",
@@ -390,7 +421,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 108,
+                            ProductId = 108,
                             Brand = "Nordic Nest",
                             Category = "Phụ kiện bàn",
                             CategoryId = 1,
@@ -401,8 +432,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Da",
-                            Name = "Thảm Chuột Da",
                             Price = 220000m,
+                            ProductName = "Thảm Chuột Da",
                             Rating = 4.7999999999999998,
                             Reviews = 90,
                             Sku = "BEE-108",
@@ -412,7 +443,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 109,
+                            ProductId = 109,
                             Brand = "Moc Decor",
                             Category = "Kitchen",
                             CategoryId = 6,
@@ -423,9 +454,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Bộ Khay Gỗ Trang Trí Bàn Ăn",
-                            OriginalPrice = 690000m,
+                            OldPrice = 690000m,
                             Price = 520000m,
+                            ProductName = "Bộ Khay Gỗ Trang Trí Bàn Ăn",
                             Rating = 4.5999999999999996,
                             Reviews = 66,
                             Sku = "BEE-109",
@@ -435,7 +466,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 110,
+                            ProductId = 110,
                             Brand = "LumiHome",
                             Category = "Lighting",
                             CategoryId = 2,
@@ -446,8 +477,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Kim loại",
-                            Name = "Đèn Thả Trần Cafe Loft",
                             Price = 890000m,
+                            ProductName = "Đèn Thả Trần Cafe Loft",
                             Rating = 4.9000000000000004,
                             Reviews = 143,
                             Sku = "BEE-110",
@@ -458,7 +489,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 111,
+                            ProductId = 111,
                             Brand = "SoftNest",
                             Category = "Textile",
                             CategoryId = 5,
@@ -469,9 +500,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Vải",
-                            Name = "Gối Tựa Sofa Boho",
-                            OriginalPrice = 240000m,
+                            OldPrice = 240000m,
                             Price = 180000m,
+                            ProductName = "Gối Tựa Sofa Boho",
                             Rating = 4.4000000000000004,
                             Reviews = 38,
                             Sku = "BEE-111",
@@ -481,7 +512,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 112,
+                            ProductId = 112,
                             Brand = "BeeLiving",
                             Category = "Decor",
                             CategoryId = 3,
@@ -492,8 +523,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = false,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Kệ Gỗ Treo Tường Hex",
                             Price = 430000m,
+                            ProductName = "Kệ Gỗ Treo Tường Hex",
                             Rating = 4.7000000000000002,
                             Reviews = 57,
                             Sku = "BEE-112",
@@ -503,7 +534,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 113,
+                            ProductId = 113,
                             Brand = "SoftNest",
                             Category = "Textile",
                             CategoryId = 5,
@@ -514,9 +545,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Vải",
-                            Name = "Thảm Lụa Trang Trí Phòng Ngủ",
-                            OriginalPrice = 960000m,
+                            OldPrice = 960000m,
                             Price = 760000m,
+                            ProductName = "Thảm Lụa Trang Trí Phòng Ngủ",
                             Rating = 4.9000000000000004,
                             Reviews = 102,
                             Sku = "BEE-113",
@@ -526,7 +557,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 114,
+                            ProductId = 114,
                             Brand = "Moc Decor",
                             Category = "Kitchen",
                             CategoryId = 6,
@@ -537,8 +568,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Set Thìa Nĩa Gỗ 6 Món",
                             Price = 250000m,
+                            ProductName = "Set Thìa Nĩa Gỗ 6 Món",
                             Rating = 4.2999999999999998,
                             Reviews = 22,
                             Sku = "BEE-114",
@@ -548,7 +579,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 115,
+                            ProductId = 115,
                             Brand = "LumiHome",
                             Category = "Lighting",
                             CategoryId = 2,
@@ -559,8 +590,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Đèn Ngủ Gỗ Có Dimmer",
                             Price = 680000m,
+                            ProductName = "Đèn Ngủ Gỗ Có Dimmer",
                             Rating = 4.7999999999999998,
                             Reviews = 41,
                             Sku = "BEE-115",
@@ -571,7 +602,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 116,
+                            ProductId = 116,
                             Brand = "Nordic Nest",
                             Category = "Furniture",
                             CategoryId = 4,
@@ -582,8 +613,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Tủ Đầu Giường 2 Ngăn Kéo",
                             Price = 1490000m,
+                            ProductName = "Tủ Đầu Giường 2 Ngăn Kéo",
                             Rating = 4.5999999999999996,
                             Reviews = 29,
                             Sku = "BEE-116",
@@ -593,7 +624,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 117,
+                            ProductId = 117,
                             Brand = "BeeLiving",
                             Category = "Kitchen",
                             CategoryId = 6,
@@ -604,9 +635,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = false,
                             IsActive = true,
                             Material = "Vải",
-                            Name = "Khăn Trải Bàn Linen Kem",
-                            OriginalPrice = 390000m,
+                            OldPrice = 390000m,
                             Price = 310000m,
+                            ProductName = "Khăn Trải Bàn Linen Kem",
                             Rating = 4.5,
                             Reviews = 36,
                             Sku = "BEE-117",
@@ -616,7 +647,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 118,
+                            ProductId = 118,
                             Brand = "Artify",
                             Category = "Decor",
                             CategoryId = 3,
@@ -627,8 +658,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Canvas",
-                            Name = "Bộ 3 Khung Tranh Trừu Tượng",
                             Price = 580000m,
+                            ProductName = "Bộ 3 Khung Tranh Trừu Tượng",
                             Rating = 4.7000000000000002,
                             Reviews = 73,
                             Sku = "BEE-118",
@@ -638,7 +669,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 119,
+                            ProductId = 119,
                             Brand = "AromaBee",
                             Category = "Decor",
                             CategoryId = 3,
@@ -649,9 +680,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Sáp đậu nành",
-                            Name = "Nến Thơm Vani Hũ Thủy Tinh",
-                            OriginalPrice = 210000m,
+                            OldPrice = 210000m,
                             Price = 165000m,
+                            ProductName = "Nến Thơm Vani Hũ Thủy Tinh",
                             Rating = 4.2000000000000002,
                             Reviews = 64,
                             Sku = "BEE-119",
@@ -661,7 +692,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 120,
+                            ProductId = 120,
                             Brand = "Artify",
                             Category = "Decor",
                             CategoryId = 3,
@@ -672,8 +703,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Thủy tinh",
-                            Name = "Bình Hoa Thủy Tinh Xanh Rêu",
                             Price = 410000m,
+                            ProductName = "Bình Hoa Thủy Tinh Xanh Rêu",
                             Rating = 4.7999999999999998,
                             Reviews = 88,
                             Sku = "BEE-120",
@@ -683,7 +714,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 121,
+                            ProductId = 121,
                             Brand = "Nordic Nest",
                             Category = "Furniture",
                             CategoryId = 4,
@@ -694,8 +725,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Vải",
-                            Name = "Ghế Đôn Bọc Vải Nhung",
                             Price = 980000m,
+                            ProductName = "Ghế Đôn Bọc Vải Nhung",
                             Rating = 4.5,
                             Reviews = 27,
                             Sku = "BEE-121",
@@ -705,7 +736,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 122,
+                            ProductId = 122,
                             Brand = "Moc Decor",
                             Category = "Kitchen",
                             CategoryId = 6,
@@ -716,9 +747,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Thủy tinh",
-                            Name = "Bộ Ly Thủy Tinh Viền Vàng",
-                            OriginalPrice = 520000m,
+                            OldPrice = 520000m,
                             Price = 460000m,
+                            ProductName = "Bộ Ly Thủy Tinh Viền Vàng",
                             Rating = 4.9000000000000004,
                             Reviews = 112,
                             Sku = "BEE-122",
@@ -728,7 +759,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 123,
+                            ProductId = 123,
                             Brand = "BeeLiving",
                             Category = "Decor",
                             CategoryId = 3,
@@ -739,8 +770,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = true,
                             IsActive = true,
                             Material = "Gỗ",
-                            Name = "Gương Tròn Viền Gỗ Sồi",
                             Price = 1250000m,
+                            ProductName = "Gương Tròn Viền Gỗ Sồi",
                             Rating = 4.7000000000000002,
                             Reviews = 46,
                             Sku = "BEE-123",
@@ -750,7 +781,7 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         },
                         new
                         {
-                            Id = 124,
+                            ProductId = 124,
                             Brand = "AromaBee",
                             Category = "Kitchen",
                             CategoryId = 6,
@@ -761,8 +792,8 @@ namespace HomeDecorShop.Infrastructure.Migrations
                             InStock = false,
                             IsActive = true,
                             Material = "Gốm sứ",
-                            Name = "Set Khay Gốm Breakfast",
                             Price = 340000m,
+                            ProductName = "Set Khay Gốm Breakfast",
                             Rating = 4.2999999999999998,
                             Reviews = 18,
                             Sku = "BEE-124",
@@ -774,11 +805,15 @@ namespace HomeDecorShop.Infrastructure.Migrations
 
             modelBuilder.Entity("HomeDecorShop.Domain.User", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("UserId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("int");
 
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("UserId"));
+
+                    b.Property<string>("Address")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -790,9 +825,15 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<string>("EmailConfirmationToken")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("FullName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsEmailConfirmed")
+                        .HasColumnType("bit");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
@@ -805,12 +846,26 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.Property<int>("Role")
                         .HasColumnType("int");
 
-                    b.HasKey("Id");
+                    b.HasKey("UserId");
 
                     b.HasIndex("Email")
                         .IsUnique();
 
                     b.ToTable("Users");
+
+                    b.HasData(
+                        new
+                        {
+                            UserId = 99,
+                            Address = "System",
+                            CreatedAt = new DateTime(2026, 3, 24, 15, 53, 10, 0, DateTimeKind.Utc),
+                            Email = "admin@gmail.com",
+                            FullName = "Administrator",
+                            IsEmailConfirmed = true,
+                            PasswordHash = "$2a$11$XZKAs1.hhd1cRoCH2eTlquOBAAEoA/Cfkt028hduwkCKNQ4eHd5bC",
+                            Phone = "0000000000",
+                            Role = 0
+                        });
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.Address", b =>

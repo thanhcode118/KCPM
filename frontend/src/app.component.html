@@ -1,10 +1,14 @@
 <div class="min-h-screen flex flex-col relative">
-  <app-header></app-header>
+  @if (!isAdminRoute()) {
+    <app-header></app-header>
+  }
   
-  <main class="flex-grow" [class.pt-24]="!isHomePage()">
+  <main class="flex-grow" [class.pt-24]="!isHomePage() && !isAdminRoute()">
     <router-outlet></router-outlet>
   </main>
 
-  <app-footer></app-footer>
-  <app-floating-actions></app-floating-actions>
+  @if (!isAdminRoute()) {
+    <app-footer></app-footer>
+    <app-floating-actions></app-floating-actions>
+  }
 </div>

@@ -24,4 +24,8 @@ export class AppComponent {
   isHomePage(): boolean {
     return this.router.url === '/' || this.router.url === '/home';
   }
+
+  isAdminRoute(): boolean {
+    return this.router.url.startsWith('/admin');
+  }
 }

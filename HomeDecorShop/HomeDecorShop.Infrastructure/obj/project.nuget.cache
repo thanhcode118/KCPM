@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "dgSpecHash": "gEVsp1AVHZU=",
+  "dgSpecHash": "/youvbQ1p10=",
   "success": true,
   "projectFilePath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\KHANG\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\KHANG\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
+    "C:\\Users\\KHANG\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
     "C:\\Users\\KHANG\\.nuget\\packages\\microsoft.bcl.asyncinterfaces\\1.1.1\\microsoft.bcl.asyncinterfaces.1.1.1.nupkg.sha512",
     "C:\\Users\\KHANG\\.nuget\\packages\\microsoft.csharp\\4.5.0\\microsoft.csharp.4.5.0.nupkg.sha512",
     "C:\\Users\\KHANG\\.nuget\\packages\\microsoft.data.sqlclient\\5.1.6\\microsoft.data.sqlclient.5.1.6.nupkg.sha512",

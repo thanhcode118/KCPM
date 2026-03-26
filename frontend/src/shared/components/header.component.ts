@@ -98,6 +98,7 @@ import { HeaderSearchComponent } from './header-search.component';
         [grandTotal]="cartGrandTotal()"
         (close)="closeCartDrawer()"
         (checkout)="goToCheckout()"
+        (remove)="checkoutFacade.removeFromCart($event)"
       />
     }
   `,

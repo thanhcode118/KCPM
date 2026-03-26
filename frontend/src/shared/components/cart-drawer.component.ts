@@ -68,9 +68,14 @@ export interface CartDrawerItem {
                         SL {{ item.quantity }} x {{ item.unitPrice | currency:'VND':'symbol':'1.0-0' }}
                       </p>
                     </div>
-                    <p class="whitespace-nowrap text-sm font-bold text-honey">
-                      {{ item.lineTotal | currency:'VND':'symbol':'1.0-0' }}
-                    </p>
+                    <div class="flex flex-col items-end gap-2">
+                       <button type="button" class="text-gray-400 hover:text-red-500 transition-colors" (click)="remove.emit(item.productId)">
+                         <app-icon name="close" class="h-4 w-4"></app-icon>
+                       </button>
+                       <p class="whitespace-nowrap text-sm font-bold text-honey">
+                         {{ item.lineTotal | currency:'VND':'symbol':'1.0-0' }}
+                       </p>
+                    </div>
                   </div>
                 </div>
               }
@@ -147,4 +152,5 @@ export class CartDrawerComponent {
 
   @Output() readonly close = new EventEmitter<void>();
   @Output() readonly checkout = new EventEmitter<void>();
+  @Output() readonly remove = new EventEmitter<number>();
 }

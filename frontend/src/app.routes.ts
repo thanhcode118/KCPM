@@ -8,18 +8,25 @@ import { LoginComponent } from '@/features/auth/components/login.component';
 import { ContactComponent } from '@/features/contact/components/contact.component';
 import { PoliciesComponent } from '@/features/policies/components/policies.component';
 import { ProductDetailComponent } from '@/features/product/components/product-detail.component';
+import { RegisterComponent } from '@/features/auth/components/register.component';
+import { ConfirmEmailComponent } from '@/features/auth/components/confirm-email.component';
 import { AdminDashboardComponent } from '@/features/admin/components/admin-dashboard.component';
+
+import { adminGuard } from '@/core/guards/admin.guard';
+import { authGuard } from '@/core/guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'collections/:slug', component: CategoryComponent },
     { path: 'new-collection', component: NewCollectionComponent },
-    { path: 'product/:id', component: ProductDetailComponent },
+    { path: 'product/:id', component: ProductDetailComponent, canActivate: [authGuard] },
     { path: 'search', component: SearchResultsComponent },
     { path: 'checkout', component: CheckoutComponent },
     { path: 'login', component: LoginComponent },
+    { path: 'register', component: RegisterComponent },
+    { path: 'confirm-email', component: ConfirmEmailComponent },
     { path: 'contact', component: ContactComponent },
     { path: 'policies', component: PoliciesComponent },
-    { path: 'admin', component: AdminDashboardComponent },
+    { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: '**', redirectTo: '' }
 ];
