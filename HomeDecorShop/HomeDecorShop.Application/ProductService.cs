@@ -78,44 +78,9 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
     public Product Create(ProductUpsertInput input)
     {
         var now = DateTime.UtcNow;
-        var product = new Product(
-            0,
-            input.Sku.Trim(),
-            input.Name.Trim(),
-            input.Slug.Trim(),
-            input.Price,
-            input.OriginalPrice,
-            input.CategoryId,
-            input.Category.Trim(),
-            input.Image.Trim(),
-            input.HoverImage.Trim(),
-            string.IsNullOrWhiteSpace(input.VideoUrl) ? null : input.VideoUrl.Trim(),
-            string.IsNullOrWhiteSpace(input.Tag) ? null : input.Tag.Trim(),
-            input.SoldPercentage,
-            Math.Max(input.StockLeft, 0),
-            Math.Clamp(input.Rating, 0, 5),
-            Math.Max(input.Reviews, 0),
-            input.Brand.Trim(),
-            input.Color.Trim(),
-            input.Material.Trim(),
-            input.Style.Trim(),
-            input.InStock,
-            input.IsActive,
-            now);
-
-        return repository.Create(product);
-    }
-
-    public Product? Update(int id, ProductUpsertInput input)
-    {
-        var existing = repository.GetById(id);
-        if (existing is null)
+        var product = new Product
         {
-            return null;
-        }
-
-        var updated = existing with
-        {
+            Id = 0,
             Sku = input.Sku.Trim(),
             Name = input.Name.Trim(),
             Slug = input.Slug.Trim(),
@@ -136,10 +101,44 @@ public sealed class ProductService(IProductRepository repository) : IProductServ
             Material = input.Material.Trim(),
             Style = input.Style.Trim(),
             InStock = input.InStock,
-            IsActive = input.IsActive
+            IsActive = input.IsActive,
+            CreatedAt = now
         };
 
-        return repository.Update(updated);
+        return repository.Create(product);
+    }
+
+    public Product? Update(int id, ProductUpsertInput input)
+    {
+        var existing = repository.GetById(id);
+        if (existing is null)
+        {
+            return null;
+        }
+
+        existing.Sku = input.Sku.Trim();
+        existing.Name = input.Name.Trim();
+        existing.Slug = input.Slug.Trim();
+        existing.Price = input.Price;
+        existing.OriginalPrice = input.OriginalPrice;
+        existing.CategoryId = input.CategoryId;
+        existing.Category = input.Category.Trim();
+        existing.Image = input.Image.Trim();
+        existing.HoverImage = input.HoverImage.Trim();
+        existing.VideoUrl = string.IsNullOrWhiteSpace(input.VideoUrl) ? null : input.VideoUrl.Trim();
+        existing.Tag = string.IsNullOrWhiteSpace(input.Tag) ? null : input.Tag.Trim();
+        existing.SoldPercentage = input.SoldPercentage;
+        existing.StockLeft = Math.Max(input.StockLeft, 0);
+        existing.Rating = Math.Clamp(input.Rating, 0, 5);
+        existing.Reviews = Math.Max(input.Reviews, 0);
+        existing.Brand = input.Brand.Trim();
+        existing.Color = input.Color.Trim();
+        existing.Material = input.Material.Trim();
+        existing.Style = input.Style.Trim();
+        existing.InStock = input.InStock;
+        existing.IsActive = input.IsActive;
+
+        return repository.Update(existing);
     }
 
     public bool Delete(int id) => repository.Delete(id);

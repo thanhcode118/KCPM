@@ -1,11 +1,44 @@
 namespace HomeDecorShop.Domain;
 
-public sealed record Product(
-    int Id, string Sku, string Name, string Slug, decimal Price, decimal? OriginalPrice,
-    int CategoryId, string Category, string Image, string HoverImage, string? VideoUrl,
-    string? Tag, int? SoldPercentage, int StockLeft, double Rating, int Reviews,
-    string Brand, string Color, string Material, string Style, bool InStock,
-    bool IsActive, DateTime CreatedAt);
+public class Category
+{
+    public int Id { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public bool IsActive { get; set; }
+
+    public ICollection<Product> Products { get; set; } = new List<Product>();
+}
+
+// Chuyển thành Class cho EF Core
+public class Product
+{
+    public int Id { get; set; }
+    public string Sku { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
+    public string Slug { get; set; } = string.Empty;
+    public decimal Price { get; set; }
+    public decimal? OriginalPrice { get; set; }
+    public int CategoryId { get; set; }
+    public string Category { get; set; } = string.Empty;
+    public string Image { get; set; } = string.Empty;
+    public string HoverImage { get; set; } = string.Empty;
+    public string? VideoUrl { get; set; }
+    public string? Tag { get; set; }
+    public int? SoldPercentage { get; set; }
+    public int StockLeft { get; set; }
+    public double Rating { get; set; }
+    public int Reviews { get; set; }
+    public string Brand { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
+    public string Material { get; set; } = string.Empty;
+    public string Style { get; set; } = string.Empty;
+    public bool InStock { get; set; }
+    public bool IsActive { get; set; }
+    public DateTime CreatedAt { get; set; }
+
+    public Category CategoryNavigation { get; set; } = null!;
+}
 
 public enum UserRole
 {
