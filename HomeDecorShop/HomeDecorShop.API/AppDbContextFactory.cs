@@ -9,7 +9,7 @@ public sealed class AppDbContextFactory : IDesignTimeDbContextFactory<AppDbConte
     public AppDbContext CreateDbContext(string[] args)
     {
         var optionsBuilder = new DbContextOptionsBuilder<AppDbContext>();
-        optionsBuilder.UseSqlServer("Server=localhost;Database=BeeShopDB;Trusted_Connection=True;TrustServerCertificate=True;");
+        optionsBuilder.UseSqlServer(DesignTimeConnectionStringResolver.Resolve());
 
         return new AppDbContext(optionsBuilder.Options);
     }

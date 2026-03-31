@@ -6,7 +6,7 @@ public record CreateFeedbackCommand(string Name, string Email, string Message);
 
 public sealed class CreateFeedbackHandler(IFeedbackRepository repository)
 {
-    public Feedback Handle(CreateFeedbackCommand command)
+    public FeedbackView Handle(CreateFeedbackCommand command)
     {
         var feedback = new Feedback(
             0,
@@ -15,6 +15,15 @@ public sealed class CreateFeedbackHandler(IFeedbackRepository repository)
             command.Message.Trim(),
             DateTime.UtcNow);
 
-        return repository.Create(feedback);
+        var created = repository.Create(feedback);
+        return MapFeedback(created);
     }
+
+    private static FeedbackView MapFeedback(Feedback feedback) =>
+        new(
+            feedback.FeedbackId,
+            feedback.Name,
+            feedback.Email,
+            feedback.Message,
+            feedback.CreatedAt);
 }

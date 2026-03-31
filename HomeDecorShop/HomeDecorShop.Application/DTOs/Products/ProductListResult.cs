@@ -1,9 +1,7 @@
-using HomeDecorShop.Domain;
-
 namespace HomeDecorShop.Application;
 
 public sealed record ProductListResult(
-    IReadOnlyCollection<Product> Items,
+    IReadOnlyCollection<ProductView> Items,
     int Total,
     int Page,
     int PageSize,

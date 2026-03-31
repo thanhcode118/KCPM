@@ -1,6 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
+    <ProjectReference Include="..\HomeDecorShop.Application\HomeDecorShop.Application.csproj" />
     <ProjectReference Include="..\HomeDecorShop.Domain\HomeDecorShop.Domain.csproj" />
   </ItemGroup>
 

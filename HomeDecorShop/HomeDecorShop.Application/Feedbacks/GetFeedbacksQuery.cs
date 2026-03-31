@@ -6,8 +6,16 @@ public record GetFeedbacksQuery();
 
 public sealed class GetFeedbacksHandler(IFeedbackRepository repository)
 {
-    public IReadOnlyCollection<Feedback> Handle(GetFeedbacksQuery query)
+    public IReadOnlyCollection<FeedbackView> Handle(GetFeedbacksQuery query)
     {
-        return repository.GetAll();
+        return repository
+            .GetAll()
+            .Select(feedback => new FeedbackView(
+                feedback.FeedbackId,
+                feedback.Name,
+                feedback.Email,
+                feedback.Message,
+                feedback.CreatedAt))
+            .ToArray();
     }
 }

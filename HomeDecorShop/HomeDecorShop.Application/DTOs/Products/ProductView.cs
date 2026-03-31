@@ -1,11 +1,12 @@
 namespace HomeDecorShop.Application;
 
-public sealed record ProductUpsertInput(
+public sealed record ProductView(
+    int ProductId,
     string Sku,
-    string Name,
+    string ProductName,
     string Slug,
     decimal Price,
-    decimal? OriginalPrice,
+    decimal? OldPrice,
     int CategoryId,
     string Category,
     string Image,
@@ -21,4 +22,7 @@ public sealed record ProductUpsertInput(
     string Material,
     string Style,
     bool InStock,
-    bool IsActive);
+    bool IsActive,
+    DateTime CreatedAt,
+    string? Description,
+    ProductCategoryView? CategoryNavigation);
