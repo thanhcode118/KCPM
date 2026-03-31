@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace HomeDecorShop.API.Controllers;
 
+[Produces("application/json")]
 public abstract class ApiControllerBase : ControllerBase
 {
     protected string ReadRequiredToken()

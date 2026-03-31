@@ -12,6 +12,11 @@ public class AppDbContext : DbContext
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
+    public DbSet<Cart> Carts => Set<Cart>();
+    public DbSet<CartItem> CartItems => Set<CartItem>();
+    public DbSet<Order> Orders => Set<Order>();
+    public DbSet<OrderItem> OrderItems => Set<OrderItem>();
+    public DbSet<Payment> Payments => Set<Payment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -52,6 +57,87 @@ public class AppDbContext : DbContext
                 .WithMany(p => p.Products)
                 .HasForeignKey(d => d.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Cart>(entity =>
+        {
+            entity.ToTable("Carts");
+            entity.HasKey(e => e.Id);
+
+            entity.HasIndex(e => e.UserId)
+                .IsUnique();
+
+            entity.HasOne(e => e.User)
+                .WithOne(e => e.Cart)
+                .HasForeignKey<Cart>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.Items)
+                .WithOne(e => e.Cart)
+                .HasForeignKey(e => e.CartId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<CartItem>(entity =>
+        {
+            entity.ToTable("CartItems");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.Product)
+                .WithMany(e => e.CartItems)
+                .HasForeignKey(e => e.ProductId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<Order>(entity =>
+        {
+            entity.ToTable("Orders");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Subtotal).HasPrecision(18, 2);
+            entity.Property(e => e.ShippingFee).HasPrecision(18, 2);
+            entity.Property(e => e.TotalAmount).HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.OrderNumber)
+                .IsUnique();
+
+            entity.HasOne(e => e.User)
+                .WithMany(e => e.Orders)
+                .HasForeignKey(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.Items)
+                .WithOne(e => e.Order)
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasMany(e => e.Payments)
+                .WithOne(e => e.Order)
+                .HasForeignKey(e => e.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrderItem>(entity =>
+        {
+            entity.ToTable("OrderItems");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UnitPrice).HasPrecision(18, 2);
+            entity.Property(e => e.LineTotal).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.Product)
+                .WithMany(e => e.OrderItems)
+                .HasForeignKey(e => e.ProductId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        modelBuilder.Entity<Payment>(entity =>
+        {
+            entity.ToTable("Payments");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+
+            entity.HasIndex(e => e.TransactionCode)
+                .IsUnique();
         });
 
         SeedData(modelBuilder);

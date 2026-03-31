@@ -6,6 +6,7 @@ namespace HomeDecorShop.API.Controllers;
 [ApiController]
 [ApiExplorerSettings(IgnoreApi = true)]
 [Route("api/users")]
+[Produces("application/json")]
 public sealed class LegacyAuthController(IUserService userService) : ControllerBase
 {
     [HttpPost("register")]

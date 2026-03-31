@@ -11,6 +11,9 @@ public static class ApplicationDependencyInjection
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<ICategoryService, CategoryService>();
         services.AddScoped<IFeedbackService, FeedbackService>();
+        services.AddScoped<ICartService, CartService>();
+        services.AddScoped<IOrderService, OrderService>();
+        services.AddScoped<IPaymentService, PaymentService>();
         services.AddScoped<CreateFeedbackHandler>();
         services.AddScoped<GetFeedbacksHandler>();
         return services;

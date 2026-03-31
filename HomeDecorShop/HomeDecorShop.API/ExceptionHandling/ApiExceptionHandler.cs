@@ -5,8 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace HomeDecorShop.API.ExceptionHandling;
 
 internal sealed class ApiExceptionHandler(
-    ILogger<ApiExceptionHandler> logger,
-    IProblemDetailsService problemDetailsService) : IExceptionHandler
+    ILogger<ApiExceptionHandler> logger) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
@@ -15,6 +14,8 @@ internal sealed class ApiExceptionHandler(
     {
         var problemDetails = CreateProblemDetails(httpContext, exception);
         httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
+        httpContext.Response.ContentType = "application/problem+json; charset=utf-8";
+        problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
 
         if (problemDetails.Status >= 500)
         {
@@ -35,12 +36,8 @@ internal sealed class ApiExceptionHandler(
                 problemDetails.Status);
         }
 
-        return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problemDetails,
-            Exception = exception
-        });
+        await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
+        return true;
     }
 
     private static ProblemDetails CreateProblemDetails(HttpContext httpContext, Exception exception)
