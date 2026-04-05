@@ -1002,6 +1002,21 @@
           }
         }
       },
+      "HomeDecorShop.Application/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v9.0",
+        "dependencies": {
+          "BCrypt.Net-Next": "4.1.0",
+          "HomeDecorShop.Domain": "1.0.0",
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "9.0.0"
+        },
+        "compile": {
+          "bin/placeholder/HomeDecorShop.Application.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/HomeDecorShop.Application.dll": {}
+        }
+      },
       "HomeDecorShop.Domain/1.0.0": {
         "type": "project",
         "framework": ".NETCoreApp,Version=v9.0",
@@ -2791,6 +2806,11 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "HomeDecorShop.Application/1.0.0": {
+      "type": "project",
+      "path": "../HomeDecorShop.Application/HomeDecorShop.Application.csproj",
+      "msbuildProject": "../HomeDecorShop.Application/HomeDecorShop.Application.csproj"
+    },
     "HomeDecorShop.Domain/1.0.0": {
       "type": "project",
       "path": "../HomeDecorShop.Domain/HomeDecorShop.Domain.csproj",
@@ -2800,29 +2820,30 @@
   "projectFileDependencyGroups": {
     "net9.0": [
       "BCrypt.Net-Next >= 4.1.0",
+      "HomeDecorShop.Application >= 1.0.0",
       "HomeDecorShop.Domain >= 1.0.0",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.0",
       "Microsoft.Extensions.DependencyInjection.Abstractions >= 9.0.0"
     ]
   },
   "packageFolders": {
-    "C:\\Users\\KHANG\\.nuget\\packages\\": {},
+    "C:\\Users\\LENOVO\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+      "projectUniqueName": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
       "projectName": "HomeDecorShop.Infrastructure",
-      "projectPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
-      "packagesPath": "C:\\Users\\KHANG\\.nuget\\packages\\",
-      "outputPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
+      "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+      "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\KHANG\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
@@ -2838,8 +2859,11 @@
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
-              "projectPath": "C:\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
+            "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
+              "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj"
+            },
+            "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+              "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
             }
           }
         }
@@ -2852,9 +2876,9 @@
       "restoreAuditProperties": {
         "enableAudit": "true",
         "auditLevel": "low",
-        "auditMode": "all"
+        "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "9.0.100"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -2889,7 +2913,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.100/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

@@ -14,7 +14,7 @@ export interface AuthUser {
 export class AuthFacade {
   private http = inject(HttpClient);
   
-private readonly apiUrl = 'http://localhost:5020/api/users'; 
+private readonly apiUrl = 'http://localhost:5020/api/auth'; 
 
   private readonly currentUserSignal = signal<AuthUser | null>(null);
   private readonly errorSignal = signal('');
@@ -46,6 +46,14 @@ private readonly apiUrl = 'http://localhost:5020/api/users';
   register(data: any): Observable<boolean> {
     this.errorSignal.set('');
     return this.http.post<any>(`${this.apiUrl}/register`, data).pipe(
+      tap((res: any) => {
+        const authUser: AuthUser = {
+          ...res.user,
+          token: res.token
+        };
+        this.currentUserSignal.set(authUser);
+        localStorage.setItem('token', authUser.token);
+      }),
       map(() => true),
       catchError(err => {
         this.errorSignal.set(err.error?.message || 'Đăng ký thất bại. Email có thể đã tồn tại.');

@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("HomeDecorShop.Infrastructure")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+342ca1b4d7596b38033634e84c3de173ce778bcd")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3039076fd79a1ea2ed576cb1e28caa326c3993ae")]
 [assembly: System.Reflection.AssemblyProductAttribute("HomeDecorShop.Infrastructure")]
 [assembly: System.Reflection.AssemblyTitleAttribute("HomeDecorShop.Infrastructure")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

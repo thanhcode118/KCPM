@@ -12,7 +12,6 @@ internal static class DatabaseStartupExtensions
         using var scope = app.Services.CreateScope();
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var userService = scope.ServiceProvider.GetRequiredService<IUserService>();
         var canConnect = db.Database.CanConnect();
         var pendingMigrations = db.Database.GetPendingMigrations().ToArray();
 
@@ -31,17 +30,43 @@ internal static class DatabaseStartupExtensions
 
         EnsureCommerceSchema(db);
 
-        if (!db.Users.Any(user => user.Email == "admin1"))
+        SeedAdminAccounts(db);
+    }
+
+    private static void SeedAdminAccounts(AppDbContext db)
+    {
+        var admins = new[]
         {
-            userService.Register(new RegisterUserInput
+            new { Email = "admin1@homedecor.com", FullName = "Administrator 1", Phone = "0900000001", Password = "Admin@123456" },
+            new { Email = "admin2@homedecor.com", FullName = "Administrator 2", Phone = "0900000002", Password = "Admin@123456" },
+        };
+
+        foreach (var admin in admins)
+        {
+            var normalizedEmail = admin.Email.Trim().ToLowerInvariant();
+            if (db.Users.Any(u => u.Email == normalizedEmail))
             {
-                Email = "admin1",
-                FullName = "Administrator",
-                Phone = "0123456789",
-                Password = "admin123",
-                Role = "admin"
-            });
+                continue;
+            }
+
+            var user = new HomeDecorShop.Domain.User
+            {
+                Email = normalizedEmail,
+                FullName = admin.FullName,
+                Phone = admin.Phone,
+                Role = HomeDecorShop.Domain.UserRole.Admin,
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password),
+                CreatedAt = DateTime.UtcNow,
+                CurrentToken = Guid.NewGuid().ToString("N"),
+                Addresses = new List<HomeDecorShop.Domain.Address>(),
+                IsEmailConfirmed = true,
+                EmailConfirmationToken = null
+            };
+
+            db.Users.Add(user);
         }
+
+        db.SaveChanges();
     }
 
     private static bool HasExistingApplicationSchema(AppDbContext db)

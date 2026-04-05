@@ -20,8 +20,5 @@ public sealed class RegisterUserInput
     [Required]
     [StringLength(100, MinimumLength = 6)]
     public string Password { get; init; } = string.Empty;
-
-    [Required]
-    [RegularExpression("(?i)^(admin|customer)$")]
-    public string Role { get; init; } = string.Empty;
 }
+

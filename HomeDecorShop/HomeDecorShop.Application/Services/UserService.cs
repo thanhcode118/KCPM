@@ -30,7 +30,6 @@ public sealed class UserService : IUserService
             throw new ConflictException("Email đã tồn tại trong hệ thống.");
         }
 
-        var role = Normalize(input.Role) == "admin" ? UserRole.Admin : UserRole.Customer;
         var token = Guid.NewGuid().ToString("N");
         var verifyToken = Guid.NewGuid().ToString("N");
 
@@ -39,7 +38,7 @@ public sealed class UserService : IUserService
             Email = normalizedEmail,
             FullName = input.FullName.Trim(),
             Phone = input.Phone?.Trim() ?? string.Empty,
-            Role = role,
+            Role = UserRole.Customer,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(input.Password),
             CreatedAt = DateTime.UtcNow,
             CurrentToken = token,
