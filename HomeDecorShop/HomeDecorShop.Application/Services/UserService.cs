@@ -70,6 +70,16 @@ public sealed class UserService : IUserService
                 });
         }
 
+        if (!user.IsActive)
+        {
+            throw new RequestValidationException(
+                "Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.",
+                new Dictionary<string, string[]>
+                {
+                    ["email"] = ["Tài khoản đang bị tạm khóa."]
+                });
+        }
+
         user.CurrentToken = Guid.NewGuid().ToString("N");
         _repository.Update(user);
 
@@ -239,6 +249,19 @@ public sealed class UserService : IUserService
         return true;
     }
 
+    public bool ToggleStatus(int userId)
+    {
+        var user = _repository.GetById(userId);
+        if (user is null)
+        {
+            return false;
+        }
+
+        user.IsActive = !user.IsActive;
+        _repository.Update(user);
+        return true;
+    }
+
     public bool Delete(int userId) => _repository.Delete(userId);
 
     private static UserView MapUser(User user) =>
@@ -249,6 +272,7 @@ public sealed class UserService : IUserService
             user.Phone,
             user.Role.ToString().ToLowerInvariant(),
             user.CreatedAt,
+            user.IsActive,
             user.Addresses
                 .OrderByDescending(address => address.IsDefault)
                 .ThenBy(address => address.Id)

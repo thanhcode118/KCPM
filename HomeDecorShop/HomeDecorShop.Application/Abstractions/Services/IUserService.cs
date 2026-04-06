@@ -17,5 +17,6 @@ public interface IUserService
     bool DeleteAddress(string token, int addressId);
     bool ConfirmEmail(string token);
     bool UpdateRole(int userId, UserRole role);
+    bool ToggleStatus(int userId);
     bool Delete(int userId);
 }

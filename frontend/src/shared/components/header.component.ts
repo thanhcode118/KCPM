@@ -82,6 +82,7 @@ import { HeaderSearchComponent } from './header-search.component';
             [cartCount]="checkoutFacade.cartCount()"
             (toggleUserMenu)="toggleUserMenu()"
             (goToLogin)="goToLogin()"
+            (goToMyOrders)="goToMyOrders()"
             (goToAdmin)="goToAdmin()"
             (logout)="doLogout()"
             (openCart)="openCartDrawer()"
@@ -287,6 +288,11 @@ export class HeaderComponent implements OnInit, OnDestroy {
   goToLogin() {
     this.closeTransientUi();
     this.router.navigate(['/login']);
+  }
+
+  goToMyOrders() {
+    this.closeTransientUi();
+    this.router.navigate(['/my-orders']);
   }
 
   goToAdmin() {

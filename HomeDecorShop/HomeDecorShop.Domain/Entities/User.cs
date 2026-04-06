@@ -10,6 +10,7 @@ public class User
     public UserRole Role { get; set; }
     public string PasswordHash { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; } = true;
     public string? CurrentToken { get; set; }
     public bool IsEmailConfirmed { get; set; }
     public string? EmailConfirmationToken { get; set; }

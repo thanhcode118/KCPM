@@ -45,7 +45,7 @@ export class CheckoutFacade {
     this.commerceStore.addToCart(productId, quantity);
   }
 
-  removeFromCart(productId: number): void {
-    this.commerceStore.removeFromCart(productId);
+  placeOrder(input: any) {
+    return this.commerceStore.placeOrder(input);
   }
 }

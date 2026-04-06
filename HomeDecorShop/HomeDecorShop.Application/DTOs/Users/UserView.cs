@@ -7,4 +7,5 @@ public sealed record UserView(
     string Phone,
     string Role,
     DateTime CreatedAt,
+    bool IsActive,
     IReadOnlyCollection<AddressView> Addresses);

@@ -37,10 +37,18 @@ import { IconComponent } from './icon.component';
                 </a>
               }
 
+              <a
+                (click)="goToMyOrders.emit()"
+                class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
+              >
+                <app-icon name="list" class="w-4 h-4"></app-icon>
+                Đơn hàng của tôi
+              </a>
+
               <button
                 type="button"
                 (click)="logout.emit()"
-                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
+                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors border-t border-gray-50"
               >
                 <app-icon name="close" class="w-4 h-4"></app-icon>
                 Đăng xuất
@@ -127,6 +135,7 @@ export class HeaderActionsComponent {
 
   @Output() readonly toggleUserMenu = new EventEmitter<void>();
   @Output() readonly goToLogin = new EventEmitter<void>();
+  @Output() readonly goToMyOrders = new EventEmitter<void>();
   @Output() readonly goToAdmin = new EventEmitter<void>();
   @Output() readonly logout = new EventEmitter<void>();
   @Output() readonly openCart = new EventEmitter<void>();

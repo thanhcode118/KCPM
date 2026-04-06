@@ -1,11 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "YDk2t/WM8fU=",
+  "dgSpecHash": "/yYrH5fHYCA=",
   "success": true,
-  "projectFilePath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
+  "projectFilePath": "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
   "expectedPackageFiles": [
-    "C:\\Users\\Mr VU\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
-    "C:\\Users\\Mr VU\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\9.0.0\\microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512"
+    "C:\\Users\\TUF\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
+    "C:\\Users\\TUF\\.nuget\\packages\\microsoft.extensions.dependencyinjection.abstractions\\9.0.0\\microsoft.extensions.dependencyinjection.abstractions.9.0.0.nupkg.sha512"
   ],
   "logs": []
 }

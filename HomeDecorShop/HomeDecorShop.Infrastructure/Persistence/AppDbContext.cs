@@ -17,6 +17,10 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<Coupon> Coupons => Set<Coupon>();
+    public DbSet<Banner> Banners => Set<Banner>();
+    public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
+    public DbSet<SystemSetting> SystemSettings => Set<SystemSetting>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -140,6 +144,36 @@ public class AppDbContext : DbContext
                 .IsUnique();
         });
 
+        modelBuilder.Entity<Coupon>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Code).IsUnique();
+            entity.Property(e => e.Code).IsRequired();
+        });
+
+        modelBuilder.Entity<Banner>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Title).IsRequired();
+            entity.Property(e => e.ImageUrl).IsRequired();
+        });
+
+        modelBuilder.Entity<BlogPost>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.HasIndex(e => e.Slug).IsUnique();
+            entity.Property(e => e.Title).IsRequired();
+            entity.Property(e => e.Slug).IsRequired();
+        });
+
+        modelBuilder.Entity<SystemSetting>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.StoreName).IsRequired();
+            entity.Property(e => e.VatPercentage).HasPrecision(18, 2);
+            entity.Property(e => e.DefaultShippingFee).HasPrecision(18, 2);
+        });
+
         SeedData(modelBuilder);
     }
 
@@ -181,6 +215,10 @@ public class AppDbContext : DbContext
             new Product { ProductId = 122, Sku = "BEE-122", Slug = "bo-ly-thuy-tinh-co-vien-vang", ProductName = "Bộ Ly Thủy Tinh Viền Vàng", Price = 460000, OldPrice = 520000, CategoryId = 6, Category = "Kitchen", Image = "https://picsum.photos/id/394/400/500", HoverImage = "https://picsum.photos/id/395/400/500", Rating = 4.9, Reviews = 112, Color = "#F4EBD0", Material = "Thủy tinh", Style = "Hiện đại", Brand = "Moc Decor", InStock = true, IsActive = true, CreatedAt = now },
             new Product { ProductId = 123, Sku = "BEE-123", Slug = "guong-tron-vien-go-soi", ProductName = "Gương Tròn Viền Gỗ Sồi", Price = 1250000, CategoryId = 3, Category = "Decor", Image = "https://picsum.photos/id/401/400/500", HoverImage = "https://picsum.photos/id/402/400/500", Rating = 4.7, Reviews = 46, Color = "#D6CCC2", Material = "Gỗ", Style = "Minimalist", Brand = "BeeLiving", InStock = true, IsActive = true, CreatedAt = now },
             new Product { ProductId = 124, Sku = "BEE-124", Slug = "set-khay-gom-breakfast", ProductName = "Set Khay Gốm Breakfast", Price = 340000, CategoryId = 6, Category = "Kitchen", Image = "https://picsum.photos/id/409/400/500", HoverImage = "https://picsum.photos/id/410/400/500", Rating = 4.3, Reviews = 18, Color = "#E3D5CA", Material = "Gốm sứ", Style = "Dễ thương", Brand = "AromaBee", InStock = false, IsActive = true, CreatedAt = now }
+        );
+
+        modelBuilder.Entity<SystemSetting>().HasData(
+            new SystemSetting { Id = 1, StoreName = "BeeShop - Phụ Kiện Decor", VatPercentage = 10, DefaultShippingFee = 30000, UpdatedAt = now }
         );
 
         // User seed is handled in DatabaseStartupExtensions.cs

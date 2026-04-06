@@ -49,6 +49,18 @@ public sealed class UsersController(IUserService userService) : ApiControllerBas
         return Ok(new MessageResponse("Cap nhat quyen thanh cong."));
     }
 
+    [HttpPatch("{id:int}/status")]
+    [SwaggerOperation(
+        Summary = "Toggle user status",
+        Description = "Toggles the IsActive flag of a user.")]
+    [ProducesResponseType(typeof(MessageResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public ActionResult<MessageResponse> ToggleStatus(int id)
+    {
+        EnsureResourceExists(userService.ToggleStatus(id), $"User with id {id} was not found.");
+        return Ok(new MessageResponse("Cap nhat trang thai thanh cong."));
+    }
+
     [HttpDelete("{id:int}")]
     [SwaggerOperation(
         Summary = "Delete a user",

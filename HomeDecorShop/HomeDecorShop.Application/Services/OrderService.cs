@@ -15,6 +15,21 @@ public sealed class OrderService(
     {
         var user = RequireUser(token);
         return orderRepository.GetByUserId(user.UserId)
+            .OrderByDescending(o => o.CreatedAt)
+            .Select(MapOrder)
+            .ToArray();
+    }
+
+    public IReadOnlyCollection<OrderView> GetAll(string token)
+    {
+        var user = RequireUser(token);
+        if (user.Role != UserRole.Admin)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        return orderRepository.GetAll()
+            .OrderByDescending(o => o.CreatedAt)
             .Select(MapOrder)
             .ToArray();
     }
@@ -145,6 +160,33 @@ public sealed class OrderService(
         var updated = orderRepository.Update(order);
         scope.Complete();
         return MapOrder(updated);
+    }
+
+    public OrderView? UpdateStatus(string token, int orderId, string status)
+    {
+        var user = RequireUser(token);
+        if (user.Role != UserRole.Admin)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        var order = orderRepository.GetById(orderId);
+        if (order is null)
+        {
+            return null;
+        }
+
+        var newStatus = MapFromSnakeCase<OrderStatus>(status);
+        order.Status = newStatus;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        // Auto-update payment status if completed
+        if (newStatus == OrderStatus.Completed)
+        {
+            order.PaymentStatus = PaymentStatus.Paid;
+        }
+
+        return MapOrder(orderRepository.Update(order));
     }
 
     private User RequireUser(string token) =>
@@ -293,6 +335,15 @@ public sealed class OrderService(
                     index > 0 && char.IsUpper(character)
                         ? $"_{char.ToLowerInvariant(character)}"
                         : char.ToLowerInvariant(character).ToString()));
+
+    private static TEnum MapFromSnakeCase<TEnum>(string value) where TEnum : struct, Enum
+    {
+        var normalized = string.Concat(
+            value.Split('_')
+                .Select(part => char.ToUpperInvariant(part[0]) + (part.Length > 1 ? part[1..] : "")));
+        
+        return Enum.TryParse<TEnum>(normalized, true, out var result) ? result : default;
+    }
 
     private static TransactionScope CreateTransactionScope() =>
         new(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);

@@ -14,6 +14,13 @@ public sealed class SqlOrderRepository(AppDbContext context) : IOrderRepository
             .ToList();
     }
 
+    public IReadOnlyCollection<Order> GetAll()
+    {
+        return Query()
+            .OrderByDescending(order => order.CreatedAt)
+            .ToList();
+    }
+
     public Order? GetById(int orderId)
     {
         return Query()

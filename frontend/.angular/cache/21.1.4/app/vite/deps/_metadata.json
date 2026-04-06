@@ -1,70 +1,79 @@
 {
-  "hash": "d633ece2",
-  "configHash": "d636e03a",
-  "lockfileHash": "a4126bd9",
-  "browserHash": "c695e985",
+  "hash": "5fc06a48",
+  "configHash": "bff6b206",
+  "lockfileHash": "35e9dc59",
+  "browserHash": "cf1731fa",
   "optimized": {
     "@angular/common": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/common.mjs",
       "file": "@angular_common.js",
-      "fileHash": "1b6f1c4a",
+      "fileHash": "23f8b328",
       "needsInterop": false
     },
     "@angular/common/http": {
       "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
       "file": "@angular_common_http.js",
-      "fileHash": "99fe7e42",
+      "fileHash": "2a53e362",
       "needsInterop": false
     },
     "@angular/core": {
       "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
       "file": "@angular_core.js",
-      "fileHash": "d6a10643",
+      "fileHash": "7d0811b7",
       "needsInterop": false
     },
     "@angular/forms": {
       "src": "../../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
       "file": "@angular_forms.js",
-      "fileHash": "bed52cd4",
+      "fileHash": "5518133e",
       "needsInterop": false
     },
     "@angular/platform-browser": {
       "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
       "file": "@angular_platform-browser.js",
-      "fileHash": "83c4aa32",
+      "fileHash": "25acf53d",
       "needsInterop": false
     },
     "@angular/router": {
       "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
       "file": "@angular_router.js",
-      "fileHash": "daf95395",
+      "fileHash": "a62acdb9",
       "needsInterop": false
     },
     "rxjs": {
       "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
       "file": "rxjs.js",
-      "fileHash": "34aa0b08",
+      "fileHash": "459c187c",
+      "needsInterop": false
+    },
+    "chart.js": {
+      "src": "../../../../../../node_modules/chart.js/dist/chart.js",
+      "file": "chart__js.js",
+      "fileHash": "2e57e2e6",
       "needsInterop": false
     }
   },
   "chunks": {
-    "chunk-LW2LCJHN": {
-      "file": "chunk-LW2LCJHN.js"
+    "chunk-ZQ3DLRSR": {
+      "file": "chunk-ZQ3DLRSR.js"
     },
-    "chunk-CCEEOG6R": {
-      "file": "chunk-CCEEOG6R.js"
+    "chunk-ZNBUJBIU": {
+      "file": "chunk-ZNBUJBIU.js"
     },
-    "chunk-VKFUGLZM": {
-      "file": "chunk-VKFUGLZM.js"
+    "chunk-D7RZW7QP": {
+      "file": "chunk-D7RZW7QP.js"
     },
-    "chunk-BNJGT3QT": {
-      "file": "chunk-BNJGT3QT.js"
+    "chunk-VGZJHDFJ": {
+      "file": "chunk-VGZJHDFJ.js"
     },
-    "chunk-QFF6SDYS": {
-      "file": "chunk-QFF6SDYS.js"
+    "chunk-SGG6DOPJ": {
+      "file": "chunk-SGG6DOPJ.js"
     },
-    "chunk-PJVWDKLX": {
-      "file": "chunk-PJVWDKLX.js"
+    "chunk-RSS3ODKE": {
+      "file": "chunk-RSS3ODKE.js"
+    },
+    "chunk-GOMI4DH3": {
+      "file": "chunk-GOMI4DH3.js"
     }
   }
 }

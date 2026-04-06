@@ -11,6 +11,7 @@ import { ProductDetailComponent } from '@/features/product/components/product-de
 import { RegisterComponent } from '@/features/auth/components/register.component';
 import { ConfirmEmailComponent } from '@/features/auth/components/confirm-email.component';
 import { AdminDashboardComponent } from '@/features/admin/components/admin-dashboard.component';
+import { MyOrdersComponent } from '@/features/commerce/components/my-orders.component';
 
 import { adminGuard } from '@/core/guards/admin.guard';
 import { authGuard } from '@/core/guards/auth.guard';
@@ -27,6 +28,7 @@ export const routes: Routes = [
     { path: 'confirm-email', component: ConfirmEmailComponent },
     { path: 'contact', component: ContactComponent },
     { path: 'policies', component: PoliciesComponent },
+    { path: 'my-orders', component: MyOrdersComponent, canActivate: [authGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: '**', redirectTo: '' }
 ];

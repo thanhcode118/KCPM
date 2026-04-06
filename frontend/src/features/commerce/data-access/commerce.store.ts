@@ -2,13 +2,17 @@ import { Injectable, computed, inject, signal } from '@angular/core';
 import { Cart, Order, User } from '@/core/models';
 import { MOCK_CARTS, MOCK_ORDERS, MOCK_USERS } from '@/core/mock-data/ecommerce.mock';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
+import { CommerceOrderService, PlaceOrderInput } from './order.service';
+import { OrderView } from '@/features/admin/data-access/admin-order.service';
+import { Observable, tap } from 'rxjs';
 
 @Injectable({ providedIn: 'root' })
 export class CommerceStore {
   private readonly catalogStore = inject(CatalogStore);
+  private readonly orderService = inject(CommerceOrderService);
 
   readonly users = signal<User[]>(MOCK_USERS);
-  readonly orders = signal<Order[]>(MOCK_ORDERS);
+  readonly orders = signal<OrderView[]>([]);
   readonly activeCart = signal<Cart>({
     id: 0,
     userId: 0,
@@ -68,6 +72,27 @@ export class CommerceStore {
         updatedAt: new Date().toISOString()
       };
     });
+  }
+
+  clearCart(): void {
+    this.activeCart.update((cart) => ({
+      ...cart,
+      items: [],
+      updatedAt: new Date().toISOString()
+    }));
+  }
+
+  fetchMyOrders(): void {
+    this.orderService.getMyOrders().subscribe((orders) => this.orders.set(orders));
+  }
+
+  placeOrder(input: PlaceOrderInput): Observable<OrderView> {
+    return this.orderService.placeOrder(input).pipe(
+      tap((newOrder) => {
+        this.orders.update((list) => [newOrder, ...list]);
+        this.clearCart();
+      })
+    );
   }
 }
 
