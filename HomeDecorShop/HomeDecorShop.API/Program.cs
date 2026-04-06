@@ -3,7 +3,7 @@ using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-using HomeDecorShop.Application.Promotions;
+// using HomeDecorShop.Application.Promotions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -47,7 +47,7 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 // Khởi tạo Database (Nếu nhóm có hỗ trợ)
-// app.InitializeDatabase();
+app.InitializeDatabase();
 
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
@@ -61,10 +61,10 @@ if (app.Environment.IsDevelopment())
 app.MapControllers();
 
 // Giữ lại các Endpoint Minimal API quan trọng cho Frontend hiện tại
-app.MapGet("/api/promotions", ([FromServices] GetPromotionsHandler handler) =>
-{
-    var result = handler.Handle(new GetPromotionsQuery());
-    return Results.Ok(result);
-});
+// app.MapGet("/api/promotions", ([FromServices] GetPromotionsHandler handler) =>
+// {
+//     var result = handler.Handle(new GetPromotionsQuery());
+//     return Results.Ok(result);
+// });
 
 app.Run();

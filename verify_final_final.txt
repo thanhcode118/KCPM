@@ -1,0 +1,15 @@
+FINAL VERIFICATION SUCCESS!
+{
+    "token":  "84046c96647c4186a48bda3dbeb95bb9",
+    "user":  {
+                 "id":  1,
+                 "email":  "admin1",
+                 "fullName":  "Administrator 1",
+                 "phone":  "0900000001",
+                 "role":  "admin",
+                 "createdAt":  "2026-04-06T11:35:22.1221563",
+                 "addresses":  [
+
+                               ]
+             }
+}

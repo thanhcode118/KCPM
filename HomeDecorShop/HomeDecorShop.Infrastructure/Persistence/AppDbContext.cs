@@ -183,17 +183,6 @@ public class AppDbContext : DbContext
             new Product { ProductId = 124, Sku = "BEE-124", Slug = "set-khay-gom-breakfast", ProductName = "Set Khay Gốm Breakfast", Price = 340000, CategoryId = 6, Category = "Kitchen", Image = "https://picsum.photos/id/409/400/500", HoverImage = "https://picsum.photos/id/410/400/500", Rating = 4.3, Reviews = 18, Color = "#E3D5CA", Material = "Gốm sứ", Style = "Dễ thương", Brand = "AromaBee", InStock = false, IsActive = true, CreatedAt = now }
         );
 
-        modelBuilder.Entity<User>().HasData(new User
-        {
-            UserId = 99,
-            Email = "admin@gmail.com",
-            FullName = "Administrator",
-            Phone = "0000000000",
-            Address = "System",
-            Role = UserRole.Admin,
-            PasswordHash = "$2a$11$XZKAs1.hhd1cRoCH2eTlquOBAAEoA/Cfkt028hduwkCKNQ4eHd5bC",
-            CreatedAt = new DateTime(2026, 3, 24, 15, 53, 10, DateTimeKind.Utc),
-            IsEmailConfirmed = true
-        });
+        // User seed is handled in DatabaseStartupExtensions.cs
     }
 }

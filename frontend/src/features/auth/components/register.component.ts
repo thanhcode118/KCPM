@@ -158,16 +158,16 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
                      type="text" required>
             </div>
             <div>
-              <label class="text-sm font-semibold text-charcoal">Email</label>
+              <label class="text-sm font-semibold text-charcoal">Gmail</label>
               <input [(ngModel)]="email" name="email"
                      class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-honey outline-none"
-                     type="email" required>
+                     type="text" required>
             </div>
             <div>
               <label class="text-sm font-semibold text-charcoal">Số điện thoại</label>
               <input [(ngModel)]="phone" name="phone"
                      class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-honey outline-none"
-                     type="text">
+                     type="text" required minlength="8">
             </div>
             <div>
               <label class="text-sm font-semibold text-charcoal">Mật khẩu</label>
@@ -231,7 +231,7 @@ export class RegisterComponent {
   }
 
   submitRegister(): void {
-    if (!this.email || !this.password || !this.fullName) return;
+    if (!this.email || !this.password || !this.fullName || !this.phone) return;
 
     this.isLoading = true;
     this.authFacade.register({

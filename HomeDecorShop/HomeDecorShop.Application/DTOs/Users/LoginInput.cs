@@ -5,7 +5,6 @@ namespace HomeDecorShop.Application;
 public sealed class LoginInput
 {
     [Required]
-    [EmailAddress]
     [StringLength(256)]
     public string Email { get; init; } = string.Empty;
 

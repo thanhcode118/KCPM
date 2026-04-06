@@ -18,7 +18,7 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
           @if (!authFacade.isAuthenticated()) {
             <form class="space-y-4" (ngSubmit)="submitLogin()">
               <div>
-                <label class="text-sm font-semibold text-charcoal">Tên đăng nhập (Email)</label>
+                <label class="text-sm font-semibold text-charcoal">Gmail</label>
                 <input [(ngModel)]="email" name="email" class="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2" type="text" required>
               </div>
               <div>

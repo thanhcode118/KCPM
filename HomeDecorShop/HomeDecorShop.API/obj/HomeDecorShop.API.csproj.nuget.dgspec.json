@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj": {}
+    "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj": {}
   },
   "projects": {
-    "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj": {
+    "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj",
+        "projectUniqueName": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj",
         "projectName": "HomeDecorShop.API",
-        "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj",
-        "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\obj\\",
+        "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\HomeDecorShop.API.csproj",
+        "packagesPath": "C:\\Users\\Mr VU\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.API\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Mr VU\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,18 +26,17 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
-                "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj"
+              "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
+                "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj"
               },
-              "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj": {
-                "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj"
+              "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj": {
+                "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj"
               }
             }
           }
@@ -90,24 +89,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
+    "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
+        "projectUniqueName": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
         "projectName": "HomeDecorShop.Application",
-        "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
-        "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\obj\\",
+        "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
+        "packagesPath": "C:\\Users\\Mr VU\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Mr VU\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -116,15 +115,14 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
-                "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
+              "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+                "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
               }
             }
           }
@@ -170,24 +168,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+    "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
+        "projectUniqueName": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
         "projectName": "HomeDecorShop.Domain",
-        "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
-        "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\obj\\",
+        "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj",
+        "packagesPath": "C:\\Users\\Mr VU\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Mr VU\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -196,7 +194,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -236,24 +233,24 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     },
-    "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj": {
+    "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+        "projectUniqueName": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
         "projectName": "HomeDecorShop.Infrastructure",
-        "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
-        "packagesPath": "C:\\Users\\LENOVO\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
+        "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\HomeDecorShop.Infrastructure.csproj",
+        "packagesPath": "C:\\Users\\Mr VU\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Infrastructure\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\LENOVO\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Mr VU\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -262,18 +259,17 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
           "net9.0": {
             "targetAlias": "net9.0",
             "projectReferences": {
-              "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
-                "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj"
+              "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj": {
+                "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj"
               },
-              "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
-                "projectPath": "C:\\Users\\LENOVO\\Downloads\\GIT\\TMDT\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
+              "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+                "projectPath": "C:\\Users\\Mr VU\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
               }
             }
           }
@@ -323,7 +319,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.312/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.306/PortableRuntimeIdentifierGraph.json"
         }
       }
     }

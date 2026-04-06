@@ -12,24 +12,17 @@ internal static class DatabaseStartupExtensions
         using var scope = app.Services.CreateScope();
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        var canConnect = db.Database.CanConnect();
-        var pendingMigrations = db.Database.GetPendingMigrations().ToArray();
-
-        if (pendingMigrations.Length > 0)
+        try
         {
-            if (canConnect && HasExistingApplicationSchema(db))
-            {
-                Console.WriteLine(
-                    "Skipping auto-migration because the application schema already exists but the EF migration history is empty or out of sync.");
-            }
-            else
-            {
-                db.Database.EnsureCreated();
-            }
+            db.Database.Migrate();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Migration failed: {ex.Message}. Attempting EnsureCreated as fallback...");
+            db.Database.EnsureCreated();
         }
 
         EnsureCommerceSchema(db);
-
         SeedAdminAccounts(db);
     }
 
@@ -37,8 +30,8 @@ internal static class DatabaseStartupExtensions
     {
         var admins = new[]
         {
-            new { Email = "admin1@homedecor.com", FullName = "Administrator 1", Phone = "0900000001", Password = "Admin@123456" },
-            new { Email = "admin2@homedecor.com", FullName = "Administrator 2", Phone = "0900000002", Password = "Admin@123456" },
+            new { Email = "admin1", FullName = "Administrator 1", Phone = "0900000001", Password = "admin123" },
+            new { Email = "admin2", FullName = "Administrator 2", Phone = "0900000002", Password = "admin123" },
         };
 
         foreach (var admin in admins)
