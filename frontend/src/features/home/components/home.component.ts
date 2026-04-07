@@ -38,7 +38,7 @@ import { SocialProofComponent } from './social-proof.component';
     <app-shop-look></app-shop-look>
     
     <!-- 5. Deal Mật Ngọt -->
-    <app-flash-sale></app-flash-sale>
+    <app-flash-sale id="flash-sale"></app-flash-sale>
     
     <!-- 6. Góc Tổ Ong -->
     <app-trending></app-trending>
