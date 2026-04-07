@@ -1,4 +1,4 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
 import { Category, Product } from '@/core/models';
 import {
   MOCK_CATEGORIES,
@@ -9,14 +9,25 @@ import {
   MOCK_TRENDING_PRODUCTS
 } from '@/core/mock-data/ecommerce.mock';
 
+import { ApiService } from '@/core/services/api.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
+  private apiService = inject(ApiService);
+  
   readonly categories = signal<Category[]>(MOCK_CATEGORIES);
   readonly categoryProducts = signal<Product[]>(MOCK_CATEGORY_PRODUCTS);
   readonly trendingProducts = signal<Product[]>(MOCK_TRENDING_PRODUCTS);
-  readonly flashSaleProducts = signal<Product[]>(MOCK_FLASH_SALE_PRODUCTS);
+  readonly flashSaleProducts = signal<Product[]>([]);
   readonly newCollectionProducts = signal<Product[]>(MOCK_NEW_COLLECTION_PRODUCTS);
   readonly newArrivals = signal<Product[]>(MOCK_NEW_ARRIVALS_PRODUCTS);
+
+  constructor() {
+    this.apiService.getPromotions()
+      .pipe(takeUntilDestroyed())
+      .subscribe(products => this.flashSaleProducts.set(products));
+  }
 
   readonly allProducts = computed(() => {
     const uniqueById = new Map<number, Product>();
