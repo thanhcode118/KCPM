@@ -11,9 +11,13 @@ import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-naviga
     <nav class="hidden xl:flex items-center h-full flex-1 justify-center">
       <ul class="flex items-center gap-0 h-full">
         @for (cat of navigationStructure; track cat.label) {
-          <li class="nav-item group h-full flex items-center px-2 xl:px-2.5 2xl:px-3 cursor-pointer whitespace-nowrap" [class.relative]="cat.type === 'dropdown'" [class.static]="cat.type === 'mega'">
+          <li 
+            (click)="navigate.emit(cat)"
+            class="nav-item group h-full flex items-center px-2 xl:px-2.5 2xl:px-3 cursor-pointer whitespace-nowrap" 
+            [class.relative]="cat.type === 'dropdown'" 
+            [class.static]="cat.type === 'mega'"
+          >
             <a
-              (click)="navigate.emit(cat)"
               class="nav-link relative py-4 text-xs xl:text-[13px] 2xl:text-sm font-semibold tracking-wide transition-colors duration-300 cursor-pointer hover:text-honey group-hover/header:text-black"
               [ngClass]="solidStyle ? 'text-black' : 'text-white'"
             >
