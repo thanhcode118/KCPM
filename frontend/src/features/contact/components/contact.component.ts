@@ -95,7 +95,7 @@ interface Branch {
         <div class="bg-white rounded-xl shadow p-6">
           <h2 class="text-xl font-bold mb-4">Danh sách feedback</h2>
           <div class="space-y-3">
-            @for (item of contactFacade.feedbackList(); track item.id) {
+            @for (item of contactFacade.feedbackList(); track item.feedbackId) {
               <div class="border border-gray-200 rounded-lg p-3">
                 <div class="flex justify-between">
                   <p class="font-semibold text-charcoal">{{ item.name }}</p>
