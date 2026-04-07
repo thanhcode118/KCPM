@@ -3,7 +3,6 @@ using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
-// using HomeDecorShop.Application.Promotions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,11 +18,6 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Đăng ký các lớp (Layers)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
-
-// Các dịch vụ mở rộng của Nhóm (Giả định đã có trong project)
-// builder.Services.AddApiControllers(); 
-// builder.Services.AddApiExceptionHandling();
-// builder.Services.AddApiSwagger();
 
 // Dự phòng nếu nhóm chưa định nghĩa các hàm trên
 builder.Services.AddControllers();
@@ -46,7 +40,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-// Khởi tạo Database (Nếu nhóm có hỗ trợ)
+// Khởi tạo Database (tự động tạo schema + seed dữ liệu)
 app.InitializeDatabase();
 
 app.UseHttpsRedirection();
@@ -60,11 +54,18 @@ if (app.Environment.IsDevelopment())
 
 app.MapControllers();
 
-// Giữ lại các Endpoint Minimal API quan trọng cho Frontend hiện tại
-// app.MapGet("/api/promotions", ([FromServices] GetPromotionsHandler handler) =>
-// {
-//     var result = handler.Handle(new GetPromotionsQuery());
-//     return Results.Ok(result);
-// });
+// =====================================================
+// PHẦN CỦA BẠN: Endpoint Khuyến mại (Giá mới / Giá cũ)
+// Trả về danh sách sản phẩm đang có OnSaleOnly = true
+// Được gọi bởi Frontend tại: GET /api/promotions
+// =====================================================
+app.MapGet("/api/promotions", ([FromServices] IProductService productService) =>
+{
+    var result = productService.Search(new ProductQuery(
+        Query: null, Category: null, Brand: null, Style: null,
+        MinPrice: null, MaxPrice: null, InStockOnly: false, OnSaleOnly: true,
+        RatingGte: null, SortBy: null, Page: 1, PageSize: 20));
+    return Results.Ok(result.Items);
+});
 
 app.Run();
