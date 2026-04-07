@@ -1,7 +1,9 @@
-import { Injectable, computed, signal } from '@angular/core';
+import { Injectable, computed, signal, inject } from '@angular/core';
+import { ApiService } from '@/core/services/api.service';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 interface FeedbackItem {
-  id: number;
+  feedbackId: number;
   name: string;
   email: string;
   message: string;
@@ -10,35 +12,24 @@ interface FeedbackItem {
 
 @Injectable({ providedIn: 'root' })
 export class ContactFacade {
-  private readonly feedbackSignal = signal<FeedbackItem[]>([
-    {
-      id: 1,
-      name: 'Linh Trần',
-      email: 'linh@gmail.com',
-      message: 'Sản phẩm đẹp và giao nhanh, sẽ ủng hộ tiếp.',
-      createdAt: '2026-03-10'
-    },
-    {
-      id: 2,
-      name: 'Minh Lê',
-      email: 'minh@gmail.com',
-      message: 'Cần thêm nhiều mẫu đèn trang trí cho phòng ngủ.',
-      createdAt: '2026-03-11'
-    }
-  ]);
+  private apiService = inject(ApiService);
+  private readonly feedbackSignal = signal<FeedbackItem[]>([]);
 
   readonly feedbackList = computed(() => this.feedbackSignal());
 
+  constructor() {
+    this.loadFeedbacks();
+  }
+
+  private loadFeedbacks(): void {
+    this.apiService.getFeedbacks()
+      .pipe(takeUntilDestroyed())
+      .subscribe(list => this.feedbackSignal.set(list));
+  }
+
   submitFeedback(name: string, email: string, message: string): void {
-    this.feedbackSignal.update((list) => [
-      {
-        id: Date.now(),
-        name,
-        email,
-        message,
-        createdAt: new Date().toISOString().split('T')[0]
-      },
-      ...list
-    ]);
+    const newFeedback = { name, email, message, createdAt: new Date().toISOString() };
+    this.apiService.postFeedback(newFeedback)
+      .subscribe(() => this.loadFeedbacks());
   }
 }
