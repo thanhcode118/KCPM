@@ -20,6 +20,12 @@ export interface HeaderNavCategory {
 
 export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
   {
+    label: 'Khuyến mại',
+    slug: 'promotions',
+    type: 'link',
+    link: '/#flash-sale'
+  },
+  {
     label: 'Trang trí nội thất',
     slug: 'interior-decoration',
     type: 'mega',
@@ -151,6 +157,12 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
       { label: 'BST "Thu Cúc" x Họa sĩ A' },
       { label: 'BST "Mùa Yêu" x Designer B' }
     ]
+  },
+  {
+    label: 'Liên hệ',
+    slug: 'contact',
+    type: 'link',
+    link: '/contact'
   },
   {
     label: 'Blog',
