@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, HostListener, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, HostListener, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IconComponent } from './icon.component';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-floating-actions',
@@ -11,7 +12,11 @@ import { IconComponent } from './icon.component';
     <div class="fixed bottom-6 right-6 flex flex-col gap-4 z-50">
       
       <!-- Chat Button -->
-      <button class="w-12 h-12 md:w-14 md:h-14 bg-[#0068FF] text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform animate-bounce-slow" title="Chat với BeeShop">
+      <button 
+        (click)="goToContact()"
+        class="w-12 h-12 md:w-14 md:h-14 bg-[#0068FF] text-white rounded-full shadow-lg flex items-center justify-center hover:scale-110 transition-transform animate-bounce-slow" 
+        title="Chat với BeeShop"
+      >
         <app-icon name="message-circle" class="w-6 h-6 md:w-8 md:h-8"></app-icon>
       </button>
 
@@ -41,6 +46,7 @@ import { IconComponent } from './icon.component';
   }
 })
 export class FloatingActionsComponent {
+  private readonly router = inject(Router);
   showBackToTop = signal(false);
 
   onWindowScroll() {
@@ -49,5 +55,9 @@ export class FloatingActionsComponent {
 
   scrollToTop() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  goToContact() {
+    this.router.navigate(['/contact']);
   }
 }
