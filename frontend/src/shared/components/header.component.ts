@@ -197,18 +197,29 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
+  // =====================================================
+  // PHẦN CỦA BẠN: Hỗ trợ điều hướng menu Khuyến mại & Liên hệ
+  // Ưu tiên dùng cat.link nếu có (type: 'link')
+  // Hỗ trợ anchor fragment ví dụ: '/#flash-sale'
+  // =====================================================
   navigateTo(cat: HeaderNavCategory) {
     this.closeTransientUi();
-    if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
-    } else if (cat.link === 'home') {
-      this.router.navigate(['/']);
-    } else if (cat.link === 'new-collection') {
-      this.router.navigate(['/new-collection']);
+
+    if (cat.link) {
+      // Tách đường dẫn và anchor (fragment)
+      const [path, fragment] = cat.link.split('#');
+      if (fragment) {
+        this.router.navigate([path || '/'], { fragment });
+      } else {
+        this.router.navigate([path]);
+      }
+      if (!fragment) {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     } else if (cat.slug) {
       this.router.navigate(['/collections', cat.slug]);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   navigateToSub(cat: HeaderNavCategory, item: HeaderSubItem) {
