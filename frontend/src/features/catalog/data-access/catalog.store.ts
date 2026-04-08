@@ -15,7 +15,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
   private apiService = inject(ApiService);
-  
+
   readonly categories = signal<Category[]>([]);
   readonly categoryProducts = signal<Product[]>([]);
   readonly trendingProducts = signal<Product[]>([]);
@@ -24,22 +24,39 @@ export class CatalogStore {
   readonly newArrivals = signal<Product[]>([]);
 
   constructor() {
+    // Pre-populate with mock data so the UI isn't empty if the API hangs
+    this.categoryProducts.set(MOCK_CATEGORY_PRODUCTS);
+    this.trendingProducts.set(MOCK_TRENDING_PRODUCTS);
+    this.flashSaleProducts.set(MOCK_FLASH_SALE_PRODUCTS);
+    this.newCollectionProducts.set(MOCK_NEW_COLLECTION_PRODUCTS);
+    this.newArrivals.set(MOCK_NEW_ARRIVALS_PRODUCTS);
+
     this.apiService.getCategories()
       .pipe(takeUntilDestroyed())
-      .subscribe(cats => this.categories.set(cats));
+      .subscribe(cats => {
+        if (cats && cats.length > 0) {
+          this.categories.set(cats);
+        }
+      });
 
     this.apiService.getProducts()
       .pipe(takeUntilDestroyed())
       .subscribe(products => {
-        this.categoryProducts.set(products);
-        this.trendingProducts.set(products.filter(p => p.tag === 'Best Seller' || p.tag === 'HOT'));
-        this.newArrivals.set(products.filter(p => p.tag === 'NEW'));
-        this.newCollectionProducts.set(products.slice(0, 10)); // just fallback logic
+        if (products && products.length > 0) {
+          this.categoryProducts.set(products);
+          this.trendingProducts.set(products.filter(p => p.tag === 'Best Seller' || p.tag === 'HOT'));
+          this.newArrivals.set(products.filter(p => p.tag === 'NEW'));
+          this.newCollectionProducts.set(products.slice(0, 10));
+        }
       });
 
     this.apiService.getPromotions()
       .pipe(takeUntilDestroyed())
-      .subscribe(products => this.flashSaleProducts.set(products));
+      .subscribe(products => {
+        if (products && products.length > 0) {
+          this.flashSaleProducts.set(products);
+        }
+      });
   }
 
   readonly allProducts = computed(() => {

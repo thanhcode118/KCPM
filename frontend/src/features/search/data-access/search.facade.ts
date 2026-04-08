@@ -20,6 +20,8 @@ export class SearchFacade {
   readonly selectedCategories = signal<string[]>([]);
   readonly selectedBrands = signal<string[]>([]);
   readonly selectedStyles = signal<string[]>([]);
+  readonly selectedMaterials = signal<string[]>([]);
+  readonly selectedColors = signal<string[]>([]);
   readonly minPrice = signal<number | null>(null);
   readonly maxPrice = signal<number | null>(null);
   readonly inStockOnly = signal(false);
@@ -46,6 +48,8 @@ export class SearchFacade {
       this.selectedCategories();
       this.selectedBrands();
       this.selectedStyles();
+      this.selectedMaterials();
+      this.selectedColors();
       this.minPrice();
       this.maxPrice();
       this.inStockOnly();
@@ -134,11 +138,33 @@ export class SearchFacade {
     ).sort((a, b) => a.localeCompare(b));
   });
 
+  readonly availableMaterials = computed(() => {
+    return Array.from(
+      new Set(
+        this.allProducts()
+          .map((item) => item.material)
+          .filter((m): m is string => !!m)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  });
+
+  readonly availableColors = computed(() => {
+    return Array.from(
+      new Set(
+        this.allProducts()
+          .map((item) => item.color)
+          .filter((c): c is string => !!c)
+      )
+    ).sort((a, b) => a.localeCompare(b));
+  });
+
   readonly hasActiveFilters = computed(() => {
     return (
       this.selectedCategories().length > 0 ||
       this.selectedBrands().length > 0 ||
       this.selectedStyles().length > 0 ||
+      this.selectedMaterials().length > 0 ||
+      this.selectedColors().length > 0 ||
       this.minPrice() !== null ||
       this.maxPrice() !== null ||
       this.inStockOnly() ||
@@ -158,8 +184,11 @@ export class SearchFacade {
         return false;
       }
 
-      if (this.selectedCategories().length > 0 && !this.selectedCategories().includes(product.category)) {
-        return false;
+      if (this.selectedCategories().length > 0) {
+        const lowerSelected = this.selectedCategories().map(c => c.toLowerCase());
+        if (!lowerSelected.includes(product.category.toLowerCase())) {
+          return false;
+        }
       }
 
       if (this.selectedBrands().length > 0 && !this.selectedBrands().includes(this.toBrand(product))) {
@@ -169,6 +198,20 @@ export class SearchFacade {
       if (
         this.selectedStyles().length > 0 &&
         (!product.style || !this.selectedStyles().includes(product.style))
+      ) {
+        return false;
+      }
+
+      if (
+        this.selectedMaterials().length > 0 &&
+        (!product.material || !this.selectedMaterials().includes(product.material))
+      ) {
+        return false;
+      }
+
+      if (
+        this.selectedColors().length > 0 &&
+        (!product.color || !this.selectedColors().includes(product.color))
       ) {
         return false;
       }
@@ -312,6 +355,18 @@ export class SearchFacade {
     );
   }
 
+  toggleMaterial(material: string): void {
+    this.selectedMaterials.update((list) =>
+      list.includes(material) ? list.filter((item) => item !== material) : [...list, material]
+    );
+  }
+
+  toggleColor(color: string): void {
+    this.selectedColors.update((list) =>
+      list.includes(color) ? list.filter((item) => item !== color) : [...list, color]
+    );
+  }
+
   setPriceRange(minPrice: number | null, maxPrice: number | null): void {
     const normalizedMin = typeof minPrice === 'number' && Number.isFinite(minPrice) ? Math.max(minPrice, 0) : null;
     const normalizedMax = typeof maxPrice === 'number' && Number.isFinite(maxPrice) ? Math.max(maxPrice, 0) : null;
@@ -338,7 +393,7 @@ export class SearchFacade {
     this.ratingGte.set(Math.max(0, Math.min(5, value)));
   }
 
-  removeFilterChip(type: 'category' | 'brand' | 'style' | 'minPrice' | 'maxPrice' | 'inStock' | 'onSale' | 'rating') {
+  removeFilterChip(type: 'category' | 'brand' | 'style' | 'material' | 'color' | 'minPrice' | 'maxPrice' | 'inStock' | 'onSale' | 'rating') {
     switch (type) {
       case 'minPrice':
         this.minPrice.set(null);
@@ -364,6 +419,8 @@ export class SearchFacade {
     this.selectedCategories.set([]);
     this.selectedBrands.set([]);
     this.selectedStyles.set([]);
+    this.selectedMaterials.set([]);
+    this.selectedColors.set([]);
     this.minPrice.set(null);
     this.maxPrice.set(null);
     this.inStockOnly.set(false);
@@ -378,6 +435,8 @@ export class SearchFacade {
       selectedCategories: this.selectedCategories(),
       selectedBrands: this.selectedBrands(),
       selectedStyles: this.selectedStyles(),
+      selectedMaterials: this.selectedMaterials(),
+      selectedColors: this.selectedColors(),
       minPrice: this.minPrice(),
       maxPrice: this.maxPrice(),
       inStockOnly: this.inStockOnly(),
@@ -394,6 +453,8 @@ export class SearchFacade {
     this.selectedCategories.set(state.selectedCategories);
     this.selectedBrands.set(state.selectedBrands);
     this.selectedStyles.set(state.selectedStyles);
+    this.selectedMaterials.set(state.selectedMaterials);
+    this.selectedColors.set(state.selectedColors);
     this.setPriceRange(state.minPrice, state.maxPrice);
     this.inStockOnly.set(state.inStockOnly);
     this.onSaleOnly.set(state.onSaleOnly);

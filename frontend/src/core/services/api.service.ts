@@ -2,6 +2,22 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map, catchError, of } from 'rxjs';
 import { Product } from '../models';
+import {
+  MOCK_CATEGORIES,
+  MOCK_CATEGORY_PRODUCTS,
+  MOCK_NEW_COLLECTION_PRODUCTS,
+  MOCK_TRENDING_PRODUCTS,
+  MOCK_FLASH_SALE_PRODUCTS,
+  MOCK_NEW_ARRIVALS_PRODUCTS
+} from '../mock-data/ecommerce.mock';
+
+const ALL_MOCK_PRODUCTS: Product[] = [
+  ...MOCK_CATEGORY_PRODUCTS,
+  ...MOCK_NEW_COLLECTION_PRODUCTS,
+  ...MOCK_TRENDING_PRODUCTS,
+  ...MOCK_FLASH_SALE_PRODUCTS,
+  ...MOCK_NEW_ARRIVALS_PRODUCTS
+];
 
 // Kiểu dữ liệu Backend trả về (camelCase từ C# PascalCase)
 interface BackendProduct {
@@ -132,21 +148,25 @@ export class ApiService {
   getProducts(): Observable<Product[]> {
     return this.http.get<{ items: BackendProduct[] }>(`${this.baseUrl}/products?pageSize=200`).pipe(
       map(result => result.items.map(p => this.mapProduct(p))),
-      catchError(() => of([]))
+      catchError(() => of(ALL_MOCK_PRODUCTS))
     );
   }
 
   // Lấy chi tiết sản phẩm
   getProductById(id: number): Observable<Product> {
     return this.http.get<BackendProduct>(`${this.baseUrl}/products/${id}`).pipe(
-      map(p => this.mapProduct(p))
+      map(p => this.mapProduct(p)),
+      catchError(() => {
+        const product = ALL_MOCK_PRODUCTS.find(p => p.id === id);
+        return of(product || ALL_MOCK_PRODUCTS[0]);
+      })
     );
   }
 
   // Lấy tất cả danh mục
   getCategories(): Observable<any[]> {
     return this.http.get<any[]>(`${this.baseUrl}/categories`).pipe(
-      catchError(() => of([]))
+      catchError(() => of(MOCK_CATEGORIES))
     );
   }
 

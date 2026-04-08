@@ -13,9 +13,8 @@ import { IconComponent } from '@/shared/components/icon.component';
     <section class="py-20 bg-cream">
       <div class="container mx-auto px-4">
         <h2 class="text-3xl font-bold text-charcoal text-center mb-2">Shop The Look</h2>
-        <p class="text-center text-gray-500 mb-10">Mua cả không gian sống với gợi ý từ BeeShop</p>
+        <p class="text-center text-gray-500 mb-10">Tự tay sắp xếp không gian sống mơ ước</p>
 
-        <!-- Room Selector Tabs -->
         <div class="flex flex-wrap justify-center gap-4 mb-12">
           @for (look of homeFacade.shopLooks(); track look.id) {
             <button
@@ -34,58 +33,53 @@ import { IconComponent } from '@/shared/components/icon.component';
           }
         </div>
 
-        <!-- Animated Content Container -->
         <div class="animate-fade-in-up">
           <div class="grid lg:grid-cols-3 gap-8 items-start">
             
-            <!-- Big Interactive Image -->
-            <div class="lg:col-span-2 relative rounded-2xl overflow-hidden shadow-xl group">
-              <!-- Using @for loop with a single item to force DOM re-creation and trigger CSS animation when ID changes -->
+            <div class="lg:col-span-2 relative rounded-2xl overflow-hidden shadow-2xl bg-gray-200 aspect-[3/2] group">
               @for (look of [selectedLook()]; track look.id) {
                 <img 
                   [src]="look.image" 
-                  class="w-full h-auto object-cover animate-zoom-in" 
+                  class="absolute inset-0 w-full h-full object-cover transition-opacity duration-700" 
                   [alt]="look.name"
                 >
               }
               
-              <!-- Hotspots -->
               @for (spot of selectedLook().hotspots; track spot.id) {
                 <div 
-                  class="absolute" 
+                  class="absolute transition-all duration-500 origin-center" 
                   [style.top.%]="spot.y" 
                   [style.left.%]="spot.x"
+                  [class.opacity-0]="!isItemPlaced(spot.id)"
+                  [class.scale-50]="!isItemPlaced(spot.id)"
+                  [class.opacity-100]="isItemPlaced(spot.id)"
+                  [class.scale-100]="isItemPlaced(spot.id)"
                 >
-                  <!-- Pulse Effect -->
-                  <div class="absolute -inset-2 bg-honey/50 rounded-full animate-ping"></div>
-                  
-                  <!-- Button -->
-                  <button 
-                    (click)="toggleHotspot(spot.id)"
-                    class="relative w-8 h-8 bg-white text-honey rounded-full shadow-lg flex items-center justify-center hover:bg-honey hover:text-white transition-colors z-10"
-                  >
-                    <app-icon name="plus" class="w-5 h-5"></app-icon>
-                  </button>
-
-                  <!-- Popover (Only show if active) -->
-                  @if (activeHotspot() === spot.id) {
-                    <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-48 bg-white p-3 rounded-lg shadow-2xl z-20 animate-fade-in origin-bottom">
-                      <!-- Arrow -->
-                      <div class="absolute -bottom-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white rotate-45"></div>
-                      
-                      <div class="relative z-10 text-center">
-                        <img [src]="spot.product.image" class="w-16 h-16 mx-auto rounded mb-2 object-cover">
-                        <h4 class="font-bold text-sm text-charcoal leading-tight">{{ spot.product.name }}</h4>
-                        <p class="text-honey text-sm font-bold my-1">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
-                        <button class="w-full text-xs bg-charcoal text-white py-1 rounded hover:bg-honey transition-colors">Xem chi tiết</button>
-                      </div>
+                  <div class="relative group/item cursor-pointer" (click)="togglePlacement(spot.id)">
+                    <img [src]="spot.product.image" class="w-24 h-24 md:w-32 md:h-32 object-contain drop-shadow-2xl hover:scale-110 transition-transform">
+                    <div class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center opacity-0 group-hover/item:opacity-100 transition-opacity shadow-lg">
+                      <app-icon name="plus" class="w-3 h-3 rotate-45"></app-icon>
                     </div>
-                  }
+                  </div>
+                </div>
+
+                <div 
+                  class="absolute" 
+                  [style.top.%]="spot.y + 10" 
+                  [style.left.%]="spot.x + 5"
+                >
+                  <button 
+                    (click)="togglePlacement(spot.id)"
+                    class="relative w-8 h-8 bg-white/80 backdrop-blur-sm text-honey rounded-full shadow-lg flex items-center justify-center hover:bg-honey hover:text-white transition-colors z-10"
+                    [class.bg-honey]="isItemPlaced(spot.id)"
+                    [class.text-white]="isItemPlaced(spot.id)"
+                  >
+                    <app-icon [name]="isItemPlaced(spot.id) ? 'check' : 'plus'" class="w-5 h-5"></app-icon>
+                  </button>
                 </div>
               }
             </div>
 
-            <!-- Side Products List -->
             <div class="space-y-6">
               <div class="border-l-4 border-honey pl-4">
                 <h3 class="text-xl font-bold text-charcoal">{{ selectedLook().name }}</h3>
@@ -94,20 +88,47 @@ import { IconComponent } from '@/shared/components/icon.component';
               
               <div class="space-y-4">
                 @for (spot of selectedLook().hotspots; track spot.id) {
-                  <div class="flex items-center gap-4 p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-shadow cursor-pointer border border-transparent hover:border-honey" (click)="toggleHotspot(spot.id)">
-                    <img [src]="spot.product.image" class="w-20 h-20 rounded object-cover bg-gray-100">
-                    <div class="flex-grow">
-                      <h5 class="font-bold text-charcoal text-sm md:text-base">{{ spot.product.name }}</h5>
-                      <p class="text-gray-500 text-xs mb-2">{{ spot.product.category }}</p>
-                      <div class="flex items-center justify-between">
-                        <span class="text-honey font-bold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</span>
-                        <button class="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-charcoal hover:bg-honey hover:text-white transition-colors">
-                          <app-icon name="arrow-right" class="w-4 h-4"></app-icon>
-                        </button>
-                      </div>
+                  <div 
+                    class="flex items-center gap-4 p-4 bg-white rounded-xl shadow-sm hover:shadow-md transition-all cursor-pointer border-2" 
+                    [class.border-honey]="isItemPlaced(spot.id)"
+                    [class.border-transparent]="!isItemPlaced(spot.id)"
+                    (click)="togglePlacement(spot.id)"
+                  >
+                    <div class="relative">
+                      <img [src]="spot.product.image" class="w-16 h-16 rounded-lg object-cover bg-gray-50">
+                      @if (isItemPlaced(spot.id)) {
+                        <div class="absolute -top-2 -right-2 bg-honey text-white rounded-full p-1 shadow-sm">
+                          <app-icon name="check" class="w-3 h-3"></app-icon>
+                        </div>
+                      }
                     </div>
+                    <div class="flex-grow">
+                      <h5 class="font-bold text-charcoal text-sm">{{ spot.product.name }}</h5>
+                      <p class="text-honey text-xs font-bold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+                    </div>
+                    <button 
+                      class="px-3 py-1 text-xs rounded-lg transition-colors font-semibold"
+                      [class.bg-charcoal]="!isItemPlaced(spot.id)"
+                      [class.text-white]="!isItemPlaced(spot.id)"
+                      [class.bg-gray-100]="isItemPlaced(spot.id)"
+                      [class.text-gray-500]="isItemPlaced(spot.id)"
+                    >
+                      {{ isItemPlaced(spot.id) ? 'Gỡ ra' : 'Đặt vào' }}
+                    </button>
                   </div>
                 }
+              </div>
+
+              <div class="pt-4 mt-6 border-t border-gray-100">
+                <button 
+                  (click)="addAllToCart()"
+                  class="w-full py-4 bg-honey text-charcoal font-bold rounded-xl shadow-lg hover:shadow-xl active:scale-95 transition-all flex items-center justify-center gap-2"
+                  [disabled]="getPlacedCount() === 0"
+                  [class.opacity-50]="getPlacedCount() === 0"
+                >
+                  <app-icon name="shopping-cart" class="w-5 h-5"></app-icon>
+                  Mua tất cả các món ({{ getPlacedCount() }})
+                </button>
               </div>
             </div>
 
@@ -117,39 +138,66 @@ import { IconComponent } from '@/shared/components/icon.component';
     </section>
   `,
   styles: [`
-    .animate-fade-in {
-      animation: fadeIn 0.3s ease-out forwards;
+    .animate-fade-in-up {
+      animation: fadeInUp 0.6s ease-out forwards;
     }
-    .animate-zoom-in {
-      animation: zoomIn 0.5s ease-out forwards;
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translate(-50%, 10px); }
-      to { opacity: 1; transform: translate(-50%, 0); }
-    }
-    @keyframes zoomIn {
-      from { opacity: 0; transform: scale(1.02); }
-      to { opacity: 1; transform: scale(1); }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
     }
   `]
 })
 export class ShopLookComponent {
   homeFacade = inject(HomeFacade);
-  
-  // Start with the first look
+
   selectedLook = signal<ShopLook>(this.homeFacade.shopLooks()[0]);
-  activeHotspot = signal<number | null>(null);
+  placedHotspots = signal<Set<number>>(new Set());
+
+  constructor() {
+    // Start with all items placed by default or empty
+    const initialSet = new Set<number>();
+    this.selectedLook().hotspots.forEach(s => initialSet.add(s.id));
+    this.placedHotspots.set(initialSet);
+  }
 
   selectLook(look: ShopLook) {
     this.selectedLook.set(look);
-    this.activeHotspot.set(null); // Reset hotspots when changing room
+    const newSet = new Set<number>();
+    look.hotspots.forEach(s => newSet.add(s.id));
+    this.placedHotspots.set(newSet);
   }
 
-  toggleHotspot(id: number) {
-    if (this.activeHotspot() === id) {
-      this.activeHotspot.set(null);
-    } else {
-      this.activeHotspot.set(id);
-    }
+  togglePlacement(id: number) {
+    this.placedHotspots.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  }
+
+  isItemPlaced(id: number): boolean {
+    return this.placedHotspots().has(id);
+  }
+
+  getPlacedCount(): number {
+    return this.placedHotspots().size;
+  }
+
+  addAllToCart() {
+    const look = this.selectedLook();
+    const placedIds = this.placedHotspots();
+
+    look.hotspots.forEach(spot => {
+      if (placedIds.has(spot.id)) {
+        this.homeFacade.addToCart(spot.product.id, 1);
+      }
+    });
+
+    // Optional: show a notification or redirect
+    alert(`Đã thêm ${this.getPlacedCount()} món vào giỏ hàng!`);
   }
 }

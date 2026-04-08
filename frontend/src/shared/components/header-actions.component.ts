@@ -82,6 +82,7 @@ import { IconComponent } from './icon.component';
 
       <button
         type="button"
+        (click)="toggleMobileMenu.emit()"
         class="xl:hidden action-btn header-icon transition-all duration-300 hover:text-honey group-hover/header:text-[#333]"
         [ngClass]="solidStyle ? 'text-[#333]' : 'text-white'"
       >
@@ -139,4 +140,5 @@ export class HeaderActionsComponent {
   @Output() readonly goToAdmin = new EventEmitter<void>();
   @Output() readonly logout = new EventEmitter<void>();
   @Output() readonly openCart = new EventEmitter<void>();
+  @Output() readonly toggleMobileMenu = new EventEmitter<void>();
 }

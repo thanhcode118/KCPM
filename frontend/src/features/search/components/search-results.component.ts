@@ -87,9 +87,13 @@ import { SearchFilterChip, SearchQuickPriceRange } from './search-results.types'
               [availableCategories]="searchFacade.availableCategories()"
               [availableBrands]="searchFacade.availableBrands()"
               [availableStyles]="searchFacade.availableStyles()"
+              [availableMaterials]="searchFacade.availableMaterials()"
+              [availableColors]="searchFacade.availableColors()"
               [selectedCategories]="searchFacade.selectedCategories()"
               [selectedBrands]="searchFacade.selectedBrands()"
               [selectedStyles]="searchFacade.selectedStyles()"
+              [selectedMaterials]="searchFacade.selectedMaterials()"
+              [selectedColors]="searchFacade.selectedColors()"
               [minPriceInput]="minPriceInput()"
               [maxPriceInput]="maxPriceInput()"
               [quickPriceRanges]="quickPriceRanges"
@@ -99,6 +103,8 @@ import { SearchFilterChip, SearchQuickPriceRange } from './search-results.types'
               (toggleCategoryRequested)="toggleCategory($event)"
               (toggleBrandRequested)="toggleBrand($event)"
               (toggleStyleRequested)="toggleStyle($event)"
+              (toggleMaterialRequested)="toggleMaterial($event)"
+              (toggleColorRequested)="toggleColor($event)"
               (priceInputChanged)="onPriceInputChange($event.type, $event.value)"
               (applyPriceRangeRequested)="applyPriceRange()"
               (applyQuickPriceRequested)="applyQuickPrice($event.min, $event.max)"
@@ -142,6 +148,12 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
     });
     this.searchFacade.selectedStyles().forEach((item) => {
       chips.push({ type: 'style', value: item, label: `Phong cách: ${item}` });
+    });
+    this.searchFacade.selectedMaterials().forEach((item) => {
+      chips.push({ type: 'material', value: item, label: `Chất liệu: ${item}` });
+    });
+    this.searchFacade.selectedColors().forEach((item) => {
+      chips.push({ type: 'color', value: item, label: `Màu sắc: ${item}` });
     });
 
     if (this.searchFacade.minPrice() !== null) {
@@ -198,6 +210,8 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
         category: queryParamMap.get('category') ?? undefined,
         brand: queryParamMap.get('brand') ?? undefined,
         style: queryParamMap.get('style') ?? undefined,
+        material: queryParamMap.get('material') ?? undefined,
+        color: queryParamMap.get('color') ?? undefined,
         minPrice: queryParamMap.get('minPrice') ?? undefined,
         maxPrice: queryParamMap.get('maxPrice') ?? undefined,
         inStock: queryParamMap.get('inStock') ?? undefined,
@@ -242,6 +256,14 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
 
   toggleStyle(style: string): void {
     this.commitSearchStateChange(() => this.searchFacade.toggleStyle(style));
+  }
+
+  toggleMaterial(material: string): void {
+    this.commitSearchStateChange(() => this.searchFacade.toggleMaterial(material));
+  }
+
+  toggleColor(color: string): void {
+    this.commitSearchStateChange(() => this.searchFacade.toggleColor(color));
   }
 
   toggleInStockOnly(enabled: boolean): void {
@@ -299,6 +321,16 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
         case 'style':
           if (chip.value) {
             this.searchFacade.toggleStyle(chip.value);
+          }
+          break;
+        case 'material':
+          if (chip.value) {
+            this.searchFacade.toggleMaterial(chip.value);
+          }
+          break;
+        case 'color':
+          if (chip.value) {
+            this.searchFacade.toggleColor(chip.value);
           }
           break;
         case 'minPrice':

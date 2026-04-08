@@ -12,9 +12,13 @@ Chart.register(...registerables);
   standalone: true,
   imports: [CommonModule, RouterLink, DecimalPipe, ReactiveFormsModule],
   template: `
-    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex font-sans text-charcoal">
+    <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex font-sans text-charcoal relative overflow-x-hidden">
+      @if (sidebarOpen()) {
+        <div class="fixed inset-0 bg-charcoal/40 z-10 lg:hidden backdrop-blur-sm transition-opacity" (click)="sidebarOpen.set(false)"></div>
+      }
       <!-- Sidebar -->
-      <aside class="w-72 bg-charcoal text-white fixed h-full shadow-2xl z-20 flex flex-col">
+      <aside class="w-72 bg-charcoal text-white fixed h-full shadow-2xl z-20 flex flex-col transition-transform duration-300"
+             [ngClass]="sidebarOpen() ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'">
         <div class="p-6 border-b border-gray-800 flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-honey to-yellow-400 flex items-center justify-center font-black text-charcoal text-xl shadow-lg shadow-honey/30">
             B
@@ -27,7 +31,7 @@ Chart.register(...registerables);
         
         <nav class="p-4 space-y-1 flex-1 mt-4 overflow-y-auto">
           <!-- Nav Item Dashboard -->
-          <button (click)="activeTab = 'dashboard'"
+          <button (click)="switchTab('dashboard')"
             [ngClass]="activeTab === 'dashboard' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">1</i>
@@ -35,7 +39,7 @@ Chart.register(...registerables);
           </button>
 
           <!-- Nav Item Products -->
-          <button (click)="activeTab = 'products'"
+          <button (click)="switchTab('products')"
             [ngClass]="activeTab === 'products' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">2</i>
@@ -43,7 +47,7 @@ Chart.register(...registerables);
           </button>
 
           <!-- Nav Item Orders -->
-          <button (click)="activeTab = 'orders'"
+          <button (click)="switchTab('orders')"
             [ngClass]="activeTab === 'orders' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">3</i>
@@ -51,7 +55,7 @@ Chart.register(...registerables);
           </button>
 
           <!-- Nav Item Customers -->
-          <button (click)="activeTab = 'customers'"
+          <button (click)="switchTab('customers')"
             [ngClass]="activeTab === 'customers' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">4</i>
@@ -59,7 +63,7 @@ Chart.register(...registerables);
           </button>
 
           <!-- Nav Item Marketing -->
-          <button (click)="activeTab = 'marketing'"
+          <button (click)="switchTab('marketing')"
             [ngClass]="activeTab === 'marketing' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">5</i>
@@ -67,7 +71,7 @@ Chart.register(...registerables);
           </button>
 
           <!-- Nav Item Settings -->
-          <button (click)="activeTab = 'settings'"
+          <button (click)="switchTab('settings')"
             [ngClass]="activeTab === 'settings' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
             class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
             <i class="w-5 h-5 flex items-center justify-center font-black">6</i>
@@ -84,23 +88,28 @@ Chart.register(...registerables);
       </aside>
 
       <!-- Main Content -->
-      <main class="ml-72 flex-1 p-8 overflow-y-auto min-h-screen">
+      <main class="lg:ml-72 flex-1 p-4 md:p-8 overflow-y-auto min-h-screen w-full transition-all duration-300">
         <!-- Top Header -->
-        <header class="flex justify-between items-center mb-8 bg-white/80 backdrop-blur-xl px-8 py-5 rounded-3xl shadow-[0_10px_40px_rgba(0,0,0,0.03)] border border-white/40 sticky top-0 z-10">
-          <div>
-            <h1 class="text-3xl font-black tracking-tight capitalize text-gray-900">
-              {{ getTitle() }}
-            </h1>
-            <p class="text-gray-400 text-sm mt-0.5 font-medium">Phiên làm việc Admin BeeShop 2026</p>
+        <header class="flex justify-between items-center mb-6 md:mb-8 bg-white/80 backdrop-blur-xl px-4 md:px-8 py-4 md:py-5 rounded-2xl md:rounded-3xl shadow-sm md:shadow-[0_10px_40px_rgba(0,0,0,0.03)] border border-white/40 sticky top-0 z-10">
+          <div class="flex items-center gap-3 md:gap-4">
+            <button (click)="sidebarOpen.set(true)" class="lg:hidden p-2 rounded-xl bg-gray-100 hover:bg-honey transition-colors">
+               <svg class="w-6 h-6 text-charcoal" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+            </button>
+            <div>
+              <h1 class="text-xl md:text-3xl font-black tracking-tight capitalize text-gray-900">
+                {{ getTitle() }}
+              </h1>
+              <p class="text-gray-400 text-xs md:text-sm mt-0.5 font-medium hidden sm:block">Phiên làm việc Admin BeeShop 2026</p>
+            </div>
           </div>
-          <div class="flex items-center gap-5">
-            <div class="h-10 w-px bg-gray-200"></div>
+          <div class="flex items-center gap-3 md:gap-5">
+            <div class="hidden sm:block h-10 w-px bg-gray-200"></div>
             <div class="flex items-center gap-3">
-              <div class="text-right">
+              <div class="text-right hidden sm:block">
                 <p class="text-sm font-black text-gray-900">Quản trị viên</p>
                 <p class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Toàn quyền</p>
               </div>
-              <div class="w-11 h-11 rounded-2xl bg-gradient-to-tr from-honey to-yellow-300 shadow-lg shadow-honey/30 flex items-center justify-center font-black text-charcoal">
+              <div class="w-10 h-10 md:w-11 md:h-11 rounded-xl md:rounded-2xl bg-gradient-to-tr from-honey to-yellow-300 shadow-lg shadow-honey/30 flex items-center justify-center font-black text-charcoal">
                 A
               </div>
             </div>
@@ -688,6 +697,12 @@ export class AdminDashboardComponent implements OnInit {
   private fb = inject(FormBuilder);
   activeTab = 'dashboard';
   productSubTab = 'list';
+  sidebarOpen = signal(false);
+
+  switchTab(tab: string) {
+    this.activeTab = tab;
+    this.sidebarOpen.set(false);
+  }
 
   // Product CRUD State
   isProductFormVisible = false;

@@ -17,17 +17,17 @@ import { adminGuard } from '@/core/guards/admin.guard';
 import { authGuard } from '@/core/guards/auth.guard';
 
 export const routes: Routes = [
-    { path: '', component: HomeComponent },
-    { path: 'collections/:slug', component: CategoryComponent },
-    { path: 'new-collection', component: NewCollectionComponent },
-    { path: 'product/:id', component: ProductDetailComponent },
-    { path: 'search', component: SearchResultsComponent },
-    { path: 'checkout', component: CheckoutComponent },
+    { path: '', component: HomeComponent, canActivate: [authGuard] },
+    { path: 'collections/:slug', component: CategoryComponent, canActivate: [authGuard] },
+    { path: 'new-collection', component: NewCollectionComponent, canActivate: [authGuard] },
+    { path: 'product/:id', component: ProductDetailComponent, canActivate: [authGuard] },
+    { path: 'search', component: SearchResultsComponent, canActivate: [authGuard] },
+    { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'confirm-email', component: ConfirmEmailComponent },
-    { path: 'contact', component: ContactComponent },
-    { path: 'policies', component: PoliciesComponent },
+    { path: 'contact', component: ContactComponent, canActivate: [authGuard] },
+    { path: 'policies', component: PoliciesComponent, canActivate: [authGuard] },
     { path: 'my-orders', component: MyOrdersComponent, canActivate: [authGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: '**', redirectTo: '' }

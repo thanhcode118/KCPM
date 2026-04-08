@@ -9,6 +9,8 @@ export type SearchQueryStateSnapshot = {
   selectedCategories: string[];
   selectedBrands: string[];
   selectedStyles: string[];
+  selectedMaterials: string[];
+  selectedColors: string[];
   minPrice: number | null;
   maxPrice: number | null;
   inStockOnly: boolean;
@@ -34,6 +36,8 @@ export function serializeSearchQueryState(state: SearchQueryStateSnapshot): Para
   if (state.selectedCategories.length) queryParams.category = state.selectedCategories.join(',');
   if (state.selectedBrands.length) queryParams.brand = state.selectedBrands.join(',');
   if (state.selectedStyles.length) queryParams.style = state.selectedStyles.join(',');
+  if (state.selectedMaterials.length) queryParams.material = state.selectedMaterials.join(',');
+  if (state.selectedColors.length) queryParams.color = state.selectedColors.join(',');
   if (state.minPrice !== null) queryParams.minPrice = state.minPrice;
   if (state.maxPrice !== null) queryParams.maxPrice = state.maxPrice;
   if (state.inStockOnly) queryParams.inStock = 'true';
@@ -52,6 +56,8 @@ export function parseSearchQueryState(
     selectedCategories: parseListParam(params.category),
     selectedBrands: parseListParam(params.brand),
     selectedStyles: parseListParam(params.style),
+    selectedMaterials: parseListParam(params.material),
+    selectedColors: parseListParam(params.color),
     minPrice: parseNumberParam(params.minPrice),
     maxPrice: parseNumberParam(params.maxPrice),
     inStockOnly: parseBooleanParam(params.inStock),

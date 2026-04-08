@@ -101,6 +101,44 @@ import { SearchPriceInputChange, SearchQuickPriceRange } from './search-results.
         </div>
 
         <div>
+          <h4 class="text-sm font-semibold mb-2">Chất liệu</h4>
+          <div class="flex flex-wrap gap-2">
+            @for (mat of availableMaterials; track mat) {
+              <button
+                class="text-xs px-3 py-1 rounded-full border"
+                [class.border-honey]="selectedMaterials.includes(mat)"
+                [class.bg-honey]="selectedMaterials.includes(mat)"
+                [class.border-gray-200]="!selectedMaterials.includes(mat)"
+                (click)="toggleMaterialRequested.emit(mat)"
+              >
+                {{ mat }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <div>
+          <h4 class="text-sm font-semibold mb-2">Màu sắc</h4>
+          <div class="flex flex-wrap gap-2">
+            @for (col of availableColors; track col) {
+              <button
+                class="w-6 h-6 rounded-full border flex items-center justify-center transition-transform hover:scale-110"
+                [style.backgroundColor]="isValidHex(col) ? col : '#f3f4f6'"
+                [title]="col"
+                [class.ring-2]="selectedColors.includes(col)"
+                [class.ring-honey]="selectedColors.includes(col)"
+                [class.ring-offset-2]="selectedColors.includes(col)"
+                (click)="toggleColorRequested.emit(col)"
+              >
+                @if (!isValidHex(col)) {
+                  <span class="text-[8px] overflow-hidden whitespace-nowrap">{{ col }}</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <div>
           <h4 class="text-sm font-semibold mb-2">Khác</h4>
           <label class="flex items-center gap-2 text-sm mb-2 cursor-pointer">
             <input
@@ -144,9 +182,15 @@ export class SearchFilterPanelComponent {
   @Input({ required: true }) availableCategories: string[] = [];
   @Input({ required: true }) availableBrands: string[] = [];
   @Input({ required: true }) availableStyles: string[] = [];
+  @Input({ required: true }) availableMaterials: string[] = [];
+  @Input({ required: true }) availableColors: string[] = [];
+
   @Input({ required: true }) selectedCategories: string[] = [];
   @Input({ required: true }) selectedBrands: string[] = [];
   @Input({ required: true }) selectedStyles: string[] = [];
+  @Input({ required: true }) selectedMaterials: string[] = [];
+  @Input({ required: true }) selectedColors: string[] = [];
+
   @Input({ required: true }) minPriceInput = '';
   @Input({ required: true }) maxPriceInput = '';
   @Input({ required: true }) quickPriceRanges: SearchQuickPriceRange[] = [];
@@ -157,6 +201,8 @@ export class SearchFilterPanelComponent {
   @Output() readonly toggleCategoryRequested = new EventEmitter<string>();
   @Output() readonly toggleBrandRequested = new EventEmitter<string>();
   @Output() readonly toggleStyleRequested = new EventEmitter<string>();
+  @Output() readonly toggleMaterialRequested = new EventEmitter<string>();
+  @Output() readonly toggleColorRequested = new EventEmitter<string>();
   @Output() readonly priceInputChanged = new EventEmitter<SearchPriceInputChange>();
   @Output() readonly applyPriceRangeRequested = new EventEmitter<void>();
   @Output() readonly applyQuickPriceRequested = new EventEmitter<SearchQuickPriceRange>();
@@ -177,5 +223,9 @@ export class SearchFilterPanelComponent {
 
   emitOnSaleOnlyChange(event: Event): void {
     this.toggleOnSaleOnlyRequested.emit((event.target as HTMLInputElement).checked);
+  }
+
+  isValidHex(color: string): boolean {
+    return /^#[0-9A-F]{6}$/i.test(color);
   }
 }

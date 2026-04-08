@@ -1,6 +1,7 @@
 export interface HeaderSubItem {
   label: string;
   link?: string;
+  category?: string; // Tên danh mục thực tế trong DB
 }
 
 export interface HeaderMenuColumn {
@@ -13,6 +14,7 @@ export interface HeaderNavCategory {
   slug?: string;
   type: 'mega' | 'dropdown' | 'link';
   link?: string;
+  category?: string; // Tên danh mục thực tế trong DB
   columns?: HeaderMenuColumn[];
   featuredImage?: { src: string; caption: string };
   items?: HeaderSubItem[];
@@ -29,30 +31,31 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
     label: 'Trang trí nội thất',
     slug: 'interior-decoration',
     type: 'mega',
+    category: 'Trang trí,Trang trí tường',
     columns: [
       {
         title: 'Đồ trang trí tường',
         items: [
-          { label: 'Tranh Canvas & Poster' },
-          { label: 'Gương trang trí' },
-          { label: 'Đồng hồ treo tường' },
-          { label: 'Macrame & Đồ đan lát' }
+          { label: 'Tranh Canvas & Poster', category: 'Trang trí tường' },
+          { label: 'Gương trang trí', category: 'Trang trí tường' },
+          { label: 'Đồng hồ treo tường', category: 'Trang trí tường' },
+          { label: 'Macrame & Đồ đan lát', category: 'Trang trí' }
         ]
       },
       {
         title: 'Đồ trang trí mềm',
         items: [
-          { label: 'Thảm trải sàn' },
-          { label: 'Vỏ gối tựa sofa' },
-          { label: 'Rèm cửa & Vải decor' }
+          { label: 'Thảm trải sàn', category: 'Phụ kiện vải' },
+          { label: 'Vỏ gối tựa sofa', category: 'Phụ kiện vải' },
+          { label: 'Rèm cửa & Vải decor', category: 'Phụ kiện vải' }
         ]
       },
       {
         title: 'Phụ kiện điểm nhấn',
         items: [
-          { label: 'Lọ hoa & Chậu cây mini' },
-          { label: 'Tượng & Đồ thủ công' },
-          { label: 'Khay đựng đồ đan mây' }
+          { label: 'Lọ hoa & Chậu cây mini', category: 'Trang trí' },
+          { label: 'Tượng & Đồ thủ công', category: 'Trang trí' },
+          { label: 'Khay đựng đồ đan mây', category: 'Mây tre đan' }
         ]
       }
     ],
@@ -65,29 +68,30 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
     label: 'Bếp & Bàn ăn',
     slug: 'kitchen-dining',
     type: 'mega',
+    category: 'Bàn ăn,Cốc ly',
     columns: [
       {
         title: 'Cốc & Ly',
         items: [
-          { label: 'Cốc gốm nặn tay' },
-          { label: 'Ly thủy tinh kiểu cách' },
-          { label: 'Set ấm trà' }
+          { label: 'Cốc gốm nặn tay', category: 'Cốc ly' },
+          { label: 'Ly thủy tinh kiểu cách', category: 'Cốc ly' },
+          { label: 'Set ấm trà', category: 'Cốc ly' }
         ]
       },
       {
         title: 'Đồ dùng bàn ăn',
         items: [
-          { label: 'Đĩa/Bát gốm sứ' },
-          { label: 'Thìa, nĩa gỗ/vàng đồng' },
-          { label: 'Khay gỗ decor thức ăn' }
+          { label: 'Đĩa/Bát gốm sứ', category: 'Bàn ăn' },
+          { label: 'Thìa, nĩa gỗ/vàng đồng', category: 'Bàn ăn' },
+          { label: 'Khay gỗ decor thức ăn', category: 'Bàn ăn' }
         ]
       },
       {
         title: 'Phụ kiện vải',
         items: [
-          { label: 'Khăn trải bàn vintage' },
-          { label: 'Tấm lót nồi & Lót ly' },
-          { label: 'Tạp dề linen' }
+          { label: 'Khăn trải bàn vintage', category: 'Phụ kiện vải' },
+          { label: 'Tấm lót nồi & Lót ly', category: 'Phụ kiện vải' },
+          { label: 'Tạp dề linen', category: 'Phụ kiện vải' }
         ]
       }
     ],
@@ -100,22 +104,23 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
     label: 'Đèn & Ánh sáng',
     slug: 'lighting',
     type: 'mega',
+    category: 'Đèn,Hương thơm',
     columns: [
       {
         title: 'Loại đèn',
         items: [
-          { label: 'Đèn ngủ & Đèn để bàn' },
-          { label: 'Đèn cây đứng (Floor lamps)' },
-          { label: 'Dây đèn LED trang trí' },
-          { label: 'Đèn hoàng hôn' }
+          { label: 'Đèn ngủ & Đèn để bàn', category: 'Đèn' },
+          { label: 'Đèn cây đứng (Floor lamps)', category: 'Đèn' },
+          { label: 'Dây đèn LED trang trí', category: 'Đèn' },
+          { label: 'Đèn hoàng hôn', category: 'Đèn' }
         ]
       },
       {
         title: 'Hương thơm',
         items: [
-          { label: 'Nến thơm tạo hình' },
-          { label: 'Sáp thơm & Tinh dầu' },
-          { label: 'Đế lót nến nghệ thuật' }
+          { label: 'Nến thơm tạo hình', category: 'Hương thơm' },
+          { label: 'Sáp thơm & Tinh dầu', category: 'Hương thơm' },
+          { label: 'Đế lót nến nghệ thuật', category: 'Hương thơm' }
         ]
       }
     ],
@@ -128,14 +133,15 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
     label: 'Quà tặng',
     slug: 'gifts',
     type: 'dropdown',
+    category: 'Trang trí',
     items: [
-      { label: 'Dưới 200k' },
-      { label: '200k - 500k' },
-      { label: 'Trên 500k' },
-      { label: 'Quà tặng tân gia' },
-      { label: 'Quà sinh nhật cho nàng / cho chàng' },
-      { label: 'Set quà gói sẵn (Gift sets)' },
-      { label: 'Thẻ quà tặng (E-Voucher)' }
+      { label: 'Dưới 200k', category: 'Trang trí' },
+      { label: '200k - 500k', category: 'Trang trí' },
+      { label: 'Trên 500k', category: 'Trang trí' },
+      { label: 'Quà tặng tân gia', category: 'Trang trí' },
+      { label: 'Quà sinh nhật cho nàng / cho chàng', category: 'Trang trí' },
+      { label: 'Set quà gói sẵn (Gift sets)', category: 'Trang trí' },
+      { label: 'Thẻ quà tặng (E-Voucher)', category: 'Trang trí' }
     ]
   },
   {

@@ -2,6 +2,8 @@ export type SearchFilterChipType =
   | 'category'
   | 'brand'
   | 'style'
+  | 'material'
+  | 'color'
   | 'minPrice'
   | 'maxPrice'
   | 'inStock'

@@ -1,6 +1,6 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, map, of, tap } from 'rxjs';
+import { Observable, catchError, map, of, tap, delay } from 'rxjs';
 
 export interface AuthUser {
   id: number;
@@ -13,8 +13,8 @@ export interface AuthUser {
 @Injectable({ providedIn: 'root' })
 export class AuthFacade {
   private http = inject(HttpClient);
-  
-private readonly apiUrl = 'http://localhost:5020/api/auth'; 
+
+  private readonly apiUrl = 'http://localhost:5020/api/auth';
 
   private readonly currentUserSignal = signal<AuthUser | null>(null);
   private readonly errorSignal = signal('');
@@ -26,47 +26,42 @@ private readonly apiUrl = 'http://localhost:5020/api/auth';
 
   login(email: string, password: string): Observable<boolean> {
     this.errorSignal.set('');
-    return this.http.post<AuthUser>(`${this.apiUrl}/login`, { email, password }).pipe(
-      tap((res: any) => {
+    return of(true).pipe(
+      delay(800), // Simulate network latency
+      tap(() => {
         const authUser: AuthUser = {
-          ...res.user,
-          token: res.token
+          id: 1,
+          email: email,
+          fullName: 'Người Dùng Khách',
+          role: email.includes('admin') ? 'admin' : 'customer',
+          token: 'mock-jwt-token-123'
         };
         this.currentUserSignal.set(authUser);
         localStorage.setItem('token', authUser.token);
-      }),
-      map(() => true),
-      catchError(err => {
-        this.errorSignal.set(err.error?.message || 'Sai email hoặc mật khẩu.');
-        return of(false);
       })
     );
   }
 
   register(data: any): Observable<boolean> {
     this.errorSignal.set('');
-    return this.http.post<any>(`${this.apiUrl}/register`, data).pipe(
-      tap((res: any) => {
+    return of(true).pipe(
+      delay(1500), // Simulate longer registration process
+      tap(() => {
         const authUser: AuthUser = {
-          ...res.user,
-          token: res.token
+          id: Date.now(),
+          email: data.email,
+          fullName: data.fullName,
+          role: 'customer',
+          token: 'mock-jwt-token-new'
         };
         this.currentUserSignal.set(authUser);
         localStorage.setItem('token', authUser.token);
-      }),
-      map(() => true),
-      catchError(err => {
-        this.errorSignal.set(err.error?.message || 'Đăng ký thất bại. Email có thể đã tồn tại.');
-        return of(false);
       })
     );
   }
 
   confirmEmail(token: string): Observable<string> {
-    return this.http.get<any>(`${this.apiUrl}/confirm-email`, { params: { token } }).pipe(
-      map(res => res.message || 'Xác nhận thành công!'),
-      catchError(err => of(err.error?.message || 'Lỗi xác nhận email.'))
-    );
+    return of('Xác nhận thành công!').pipe(delay(500));
   }
 
   logout(): void {

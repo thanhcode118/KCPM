@@ -7,6 +7,7 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
 import { CheckoutFacade } from '@/features/checkout/data-access/checkout.facade';
 import { SearchFacade } from '@/features/search/data-access/search.facade';
 import { CartDrawerComponent } from './cart-drawer.component';
+import { MobileMenuComponent } from './mobile-menu.component';
 import { HeaderActionsComponent } from './header-actions.component';
 import { HeaderNavigationComponent } from './header-navigation.component';
 import { HeaderSearchComponent } from './header-search.component';
@@ -19,7 +20,8 @@ import { HeaderSearchComponent } from './header-search.component';
     CartDrawerComponent,
     HeaderNavigationComponent,
     HeaderSearchComponent,
-    HeaderActionsComponent
+    HeaderActionsComponent,
+    MobileMenuComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
@@ -86,6 +88,7 @@ import { HeaderSearchComponent } from './header-search.component';
             (goToAdmin)="goToAdmin()"
             (logout)="doLogout()"
             (openCart)="openCartDrawer()"
+            (toggleMobileMenu)="mobileMenuOpen.set(true)"
           />
         </div>
       </div>
@@ -97,11 +100,23 @@ import { HeaderSearchComponent } from './header-search.component';
         [subtotal]="checkoutFacade.subtotal()"
         [shippingFee]="checkoutFacade.shippingFee()"
         [grandTotal]="cartGrandTotal()"
+        [isAllSelected]="checkoutFacade.isAllSelected()"
+        [selectedCount]="checkoutFacade.selectedCount()"
         (close)="closeCartDrawer()"
         (checkout)="goToCheckout()"
         (remove)="checkoutFacade.removeFromCart($event)"
+        (toggleSelection)="checkoutFacade.toggleItemSelection($event)"
+        (toggleSelectAll)="checkoutFacade.toggleSelectAll($event)"
       />
     }
+
+    <app-mobile-menu
+      [isOpen]="mobileMenuOpen()"
+      [navigationStructure]="navigationStructure"
+      (close)="mobileMenuOpen.set(false)"
+      (navigate)="navigateTo($event)"
+      (navigateSub)="navigateToSub($event.category, $event.item)"
+    />
   `,
   styles: [`
     .top-bar {
@@ -151,6 +166,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly isSearchFocused = signal(false);
   readonly userMenuOpen = signal(false);
   readonly cartDrawerOpen = signal(false);
+  readonly mobileMenuOpen = signal(false);
   readonly cartGrandTotal = computed(() => this.checkoutFacade.subtotal() + this.checkoutFacade.shippingFee());
 
   private scrollCleanup: (() => void) | null = null;
@@ -159,7 +175,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   readonly navigationStructure = HEADER_NAVIGATION_STRUCTURE;
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) { }
 
   readonly hostClasses = () => {
     return this.useSolidHeaderStyle()
@@ -206,7 +222,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.closeTransientUi();
 
     if (cat.link) {
-      // Tách đường dẫn và anchor (fragment)
       const [path, fragment] = cat.link.split('#');
       if (fragment) {
         this.router.navigate([path || '/'], { fragment });
@@ -216,18 +231,39 @@ export class HeaderComponent implements OnInit, OnDestroy {
       if (!fragment) {
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    } else if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
+    } else {
+      // Use specific category from Nav Structure if available (e.g. 'Decor,Lighting')
+      const categoryFilter = cat.category;
+
+      if (categoryFilter) {
+        this.router.navigate(['/search'], { queryParams: { category: categoryFilter } });
+      } else if (cat.slug) {
+        this.router.navigate(['/collections', cat.slug]);
+      }
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }
 
   navigateToSub(cat: HeaderNavCategory, item: HeaderSubItem) {
     this.closeTransientUi();
-    if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
+
+    // If sub-item has a specific category, filter by it.
+    // Otherwise, search by its label (text search).
+    if (item.category) {
+      this.router.navigate(['/search'], {
+        queryParams: {
+          category: item.category,
+          q: item.label !== item.category ? item.label : undefined
+        }
+      });
+    } else {
+      this.router.navigate(['/search'], {
+        queryParams: {
+          q: item.label
+        }
+      });
     }
-    void item;
+
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -330,5 +366,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private closeTransientUi() {
     this.userMenuOpen.set(false);
     this.cartDrawerOpen.set(false);
+    this.mobileMenuOpen.set(false);
   }
 }

@@ -19,6 +19,7 @@ export class CommerceStore {
     items: [],
     updatedAt: new Date().toISOString()
   });
+  readonly selectedProductIds = signal<Set<number>>(new Set());
 
   readonly cartCount = computed(() => {
     return this.activeCart().items.reduce((total, item) => total + item.quantity, 0);
@@ -62,6 +63,13 @@ export class CommerceStore {
         updatedAt: new Date().toISOString()
       };
     });
+
+    // Automatically select newly added items
+    this.selectedProductIds.update(set => {
+      const newSet = new Set(set);
+      newSet.add(productId);
+      return newSet;
+    });
   }
 
   removeFromCart(productId: number): void {
@@ -72,6 +80,34 @@ export class CommerceStore {
         updatedAt: new Date().toISOString()
       };
     });
+
+    // Remove from selection if deleted
+    this.selectedProductIds.update(set => {
+      const newSet = new Set(set);
+      newSet.delete(productId);
+      return newSet;
+    });
+  }
+
+  toggleItemSelection(productId: number): void {
+    this.selectedProductIds.update(set => {
+      const newSet = new Set(set);
+      if (newSet.has(productId)) {
+        newSet.delete(productId);
+      } else {
+        newSet.add(productId);
+      }
+      return newSet;
+    });
+  }
+
+  toggleSelectAll(selected: boolean): void {
+    if (selected) {
+      const allIds = this.activeCart().items.map(i => i.productId);
+      this.selectedProductIds.set(new Set(allIds));
+    } else {
+      this.selectedProductIds.set(new Set());
+    }
   }
 
   clearCart(): void {
