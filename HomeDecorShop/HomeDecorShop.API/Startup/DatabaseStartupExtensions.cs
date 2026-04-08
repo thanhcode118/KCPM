@@ -12,18 +12,90 @@ internal static class DatabaseStartupExtensions
         using var scope = app.Services.CreateScope();
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        try
-        {
-            db.Database.Migrate();
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Migration failed: {ex.Message}. Attempting EnsureCreated as fallback...");
-            db.Database.EnsureCreated();
-        }
+        db.Database.SetCommandTimeout(120);
+        db.Database.Migrate();
 
         EnsureCommerceSchema(db);
         SeedAdminAccounts(db);
+        // FixProductImages(db);
+    }
+
+    private static void FixProductImages(AppDbContext db)
+    {
+        // Map sản phẩm 51-100 sang ảnh có sẵn trong assets/images/
+        var imageMap = new Dictionary<int, string>
+        {
+            { 51, "assets/images/lo-hoa-tron.jpg" },
+            { 52, "assets/images/khung-anh-day.jpg" },
+            { 53, "assets/images/den-neon-chu.jpg" },
+            { 54, "assets/images/ke-go-nho.jpg" },
+            { 55, "assets/images/tham-long.jpg" },
+            { 56, "assets/images/nen-lo.jpg" },
+            { 57, "assets/images/hop-go.jpg" },
+            { 58, "assets/images/tranh-abstract.jpg" },
+            { 59, "assets/images/guong-tron.jpg" },
+            { 60, "assets/images/den-tron.jpg" },
+            { 61, "assets/images/lo-mau.jpg" },
+            { 62, "assets/images/ke-treo-nho.jpg" },
+            { 63, "assets/images/khay-nho.jpg" },
+            { 64, "assets/images/dong-ho-mini.jpg" },
+            { 65, "assets/images/chau-gom.jpg" },
+            { 66, "assets/images/den-led-trang-tri.jpg" },
+            { 67, "assets/images/khung-mini.jpg" },
+            { 68, "assets/images/tham-tron.jpg" },
+            { 69, "assets/images/nen-dau.jpg" },
+            { 70, "assets/images/hop-dung.jpg" },
+            { 71, "assets/images/lo-hoa-thuy-tinh.jpg" },
+            { 72, "assets/images/ke-go-2-tang.jpg" },
+            { 73, "assets/images/den-ban.jpg" },
+            { 74, "assets/images/tranh-hoa-la.jpg" },
+            { 75, "assets/images/guong-bo-vien.jpg" },
+            { 76, "assets/images/tham-long.jpg" },
+            { 77, "assets/images/nen-nhai.jpg" },
+            { 78, "assets/images/khay-go.jpg" },
+            { 79, "assets/images/gia-sach-treo.jpg" },
+            { 80, "assets/images/den-go.jpg" },
+            { 81, "assets/images/lo-men-trang.jpg" },
+            { 82, "assets/images/khung-anh-go.jpg" },
+            { 83, "assets/images/tham-mini.jpg" },
+            { 84, "assets/images/den-mini.jpg" },
+            { 85, "assets/images/nen-chanh-sa.jpg" },
+            { 86, "assets/images/hop-go.jpg" },
+            { 87, "assets/images/tranh-phong-ngu.jpg" },
+            { 88, "assets/images/guong-tron.jpg" },
+            { 89, "assets/images/den-ban.jpg" },
+            { 90, "assets/images/gio-cay.jpg" },
+            { 91, "assets/images/tham-mini.jpg" },
+            { 92, "assets/images/nen-lo.jpg" },
+            { 93, "assets/images/khay-nho.jpg" },
+            { 94, "assets/images/gia-sach-treo.jpg" },
+            { 95, "assets/images/den-mini.jpg" },
+            { 96, "assets/images/lo-gom-nham.jpg" },
+            { 97, "assets/images/tranh-cua.jpg" },
+            { 98, "assets/images/guong-bo-vien.jpg" },
+            { 99, "assets/images/den-tron.jpg" },
+            { 100, "assets/images/khay-nho.jpg" },
+        };
+
+        var productIds = imageMap.Keys.ToList();
+        // Chỉ update sản phẩm nào chưa có ảnh hợp lệ (đường dẫn bị thiếu file)
+        var productsToFix = db.Products
+            .Where(p => productIds.Contains(p.ProductId) &&
+                        (p.Image == null || !p.Image.StartsWith("assets/images/")))
+            .ToList();
+
+        if (productsToFix.Count == 0) return;
+
+        foreach (var product in productsToFix)
+        {
+            if (imageMap.TryGetValue(product.ProductId, out var imgPath))
+            {
+                product.Image = imgPath;
+                product.HoverImage = imgPath;
+            }
+        }
+
+        db.SaveChanges();
     }
 
     private static void SeedAdminAccounts(AppDbContext db)

@@ -22,4 +22,5 @@ export interface Product {
   inStock?: boolean;
   isActive: boolean;
   createdAt: string;
+  description?: string;
 }

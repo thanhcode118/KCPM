@@ -95,4 +95,19 @@ public sealed class ProductsController(IProductService productService) : ApiCont
         EnsureResourceExists(productService.Delete(id), $"Product with id {id} was not found.");
         return NoContent();
     }
+
+    [HttpGet("{id:int}/reviews")]
+    [SwaggerOperation(Summary = "Get product reviews")]
+    public ActionResult<IReadOnlyCollection<ProductReviewView>> GetReviews(int id)
+    {
+        return Ok(productService.GetReviews(id));
+    }
+
+    [HttpPost("{id:int}/reviews")]
+    [SwaggerOperation(Summary = "Add a product review")]
+    public ActionResult<ProductReviewView> AddReview(int id, [FromBody] ProductReviewCreateInput input)
+    {
+        if (id != input.ProductId) return BadRequest("Mismatched product id.");
+        return Ok(productService.AddReview(input));
+    }
 }

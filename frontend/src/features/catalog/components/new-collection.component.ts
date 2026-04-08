@@ -73,7 +73,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                 <div class="space-y-4">
                   @for (spot of look.hotspots; track spot.id) {
                     <div class="flex items-center gap-4 group cursor-pointer">
-                      <img [src]="spot.product.image" class="w-20 h-24 object-cover shadow-sm">
+                      <img [src]="spot.product.image" (error)="handleImageError($event)" class="w-20 h-24 object-cover shadow-sm">
                       <div>
                         <h4 class="font-bold text-charcoal group-hover:text-honey transition-colors">{{ spot.product.name }}</h4>
                         <p class="text-honey font-semibold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
@@ -135,6 +135,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                   <!-- Static Image -->
                   <img 
                     [src]="product.image" 
+                    (error)="handleImageError($event)"
                     class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500"
                     [class.opacity-0]="hoveredProduct() === product.id && product.videoUrl"
                   >
@@ -152,6 +153,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                    } @else {
                       <img 
                         [src]="product.hoverImage" 
+                        (error)="handleImageError($event)"
                         class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                       >
                    }
@@ -209,7 +211,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                @if (product.tag === 'Best Seller' || product.rating! >= 4.8) {
                  <div class="min-w-[280px] snap-center bg-white rounded shadow-sm p-4 cursor-pointer hover:shadow-md transition-shadow group">
                     <div class="relative w-full aspect-square mb-4 overflow-hidden rounded bg-gray-100">
-                      <img [src]="product.image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+                      <img [src]="product.image" (error)="handleImageError($event)" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
                       <div class="absolute top-2 left-2 bg-charcoal text-white text-[10px] font-bold px-2 py-1">BEST SELLER</div>
                     </div>
                     <h4 class="font-bold text-charcoal mb-1 truncate">{{ product.name }}</h4>
@@ -267,6 +269,10 @@ export class NewCollectionComponent {
   
   activeHotspot = signal<number | null>(null);
   hoveredProduct = signal<number | null>(null);
+
+  handleImageError(event: any) {
+    event.target.src = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
+  }
 
   toggleHotspot(id: number) {
     if (this.activeHotspot() === id) {

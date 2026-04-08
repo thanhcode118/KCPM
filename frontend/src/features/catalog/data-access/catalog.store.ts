@@ -16,14 +16,27 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 export class CatalogStore {
   private apiService = inject(ApiService);
   
-  readonly categories = signal<Category[]>(MOCK_CATEGORIES);
-  readonly categoryProducts = signal<Product[]>(MOCK_CATEGORY_PRODUCTS);
-  readonly trendingProducts = signal<Product[]>(MOCK_TRENDING_PRODUCTS);
+  readonly categories = signal<Category[]>([]);
+  readonly categoryProducts = signal<Product[]>([]);
+  readonly trendingProducts = signal<Product[]>([]);
   readonly flashSaleProducts = signal<Product[]>([]);
-  readonly newCollectionProducts = signal<Product[]>(MOCK_NEW_COLLECTION_PRODUCTS);
-  readonly newArrivals = signal<Product[]>(MOCK_NEW_ARRIVALS_PRODUCTS);
+  readonly newCollectionProducts = signal<Product[]>([]);
+  readonly newArrivals = signal<Product[]>([]);
 
   constructor() {
+    this.apiService.getCategories()
+      .pipe(takeUntilDestroyed())
+      .subscribe(cats => this.categories.set(cats));
+
+    this.apiService.getProducts()
+      .pipe(takeUntilDestroyed())
+      .subscribe(products => {
+        this.categoryProducts.set(products);
+        this.trendingProducts.set(products.filter(p => p.tag === 'Best Seller' || p.tag === 'HOT'));
+        this.newArrivals.set(products.filter(p => p.tag === 'NEW'));
+        this.newCollectionProducts.set(products.slice(0, 10)); // just fallback logic
+      });
+
     this.apiService.getPromotions()
       .pipe(takeUntilDestroyed())
       .subscribe(products => this.flashSaleProducts.set(products));

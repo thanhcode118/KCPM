@@ -2,11 +2,12 @@ import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { HomeFacade } from '@/features/home/data-access/home.facade';
 import { IconComponent } from '@/shared/components/icon.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-new-arrivals',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="py-16 bg-white overflow-hidden">
@@ -30,7 +31,8 @@ import { IconComponent } from '@/shared/components/icon.component';
             [style.transform]="'translateX(-' + currentIndex() * (100 / itemsPerPage()) + '%)'"
           >
             @for (product of homeFacade.newArrivals(); track product.id) {
-              <div class="min-w-[100%] sm:min-w-[50%] md:min-w-[33.333%] lg:min-w-[25%] flex-shrink-0 px-2">
+              <div class="min-w-[100%] sm:min-w-[50%] md:min-w-[33.333%] lg:min-w-[25%] flex-shrink-0 px-2"
+                   [routerLink]="['/product', product.id]">
                 <div class="group cursor-pointer">
                   <div class="relative overflow-hidden rounded-lg mb-3 aspect-[3/4] bg-gray-50">
                      <!-- Images -->
@@ -46,7 +48,19 @@ import { IconComponent } from '@/shared/components/icon.component';
                   <div class="space-y-1">
                     <p class="text-xs text-gray-500 uppercase">{{ product.category }}</p>
                     <h3 class="font-bold text-charcoal group-hover:text-honey transition-colors">{{ product.name }}</h3>
-                    <p class="text-charcoal font-semibold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+                    
+                    <div class="flex items-center gap-1.5 py-0.5">
+                      <div class="flex text-yellow-400 gap-1 mt-0.5">
+                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                      </div>
+                      <span class="text-[10px] text-gray-400 font-medium">(10)</span>
+                    </div>
+
+                    <p class="text-charcoal font-bold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                   </div>
                 </div>
               </div>

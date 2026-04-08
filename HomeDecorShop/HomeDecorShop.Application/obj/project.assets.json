@@ -117,32 +117,39 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\TUF\\.nuget\\packages\\": {}
+    "C:\\Users\\Dell\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
+      "projectUniqueName": "C:\\Users\\Dell\\OneDrive\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
       "projectName": "HomeDecorShop.Application",
-      "projectPath": "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
-      "packagesPath": "C:\\Users\\TUF\\.nuget\\packages\\",
-      "outputPath": "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\obj\\",
+      "projectPath": "C:\\Users\\Dell\\OneDrive\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\HomeDecorShop.Application.csproj",
+      "packagesPath": "C:\\Users\\Dell\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Dell\\OneDrive\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Application\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\TUF\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Dell\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net9.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
           "projectReferences": {
-            "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
-              "projectPath": "D:\\TMDT_Nhom6\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
+            "C:\\Users\\Dell\\OneDrive\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj": {
+              "projectPath": "C:\\Users\\Dell\\OneDrive\\Desktop\\TMDT_Nhom6\\HomeDecorShop\\HomeDecorShop.Domain\\HomeDecorShop.Domain.csproj"
             }
           }
         }
@@ -157,7 +164,7 @@
         "auditLevel": "low",
         "auditMode": "direct"
       },
-      "SdkAnalysisLevel": "10.0.200"
+      "SdkAnalysisLevel": "9.0.300"
     },
     "frameworks": {
       "net9.0": {
@@ -188,7 +195,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.201/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.308/PortableRuntimeIdentifierGraph.json"
       }
     }
   }

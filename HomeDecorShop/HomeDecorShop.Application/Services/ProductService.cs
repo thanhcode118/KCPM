@@ -2,7 +2,10 @@ using HomeDecorShop.Domain;
 
 namespace HomeDecorShop.Application;
 
-public sealed class ProductService(IProductRepository repository, ICategoryRepository categoryRepository) : IProductService
+public sealed class ProductService(
+    IProductRepository repository, 
+    ICategoryRepository categoryRepository, 
+    IProductReviewRepository reviewRepository) : IProductService
 {
     public ProductView? GetById(int id)
     {
@@ -169,6 +172,57 @@ public sealed class ProductService(IProductRepository repository, ICategoryRepos
     }
 
     public bool Delete(int id) => repository.Delete(id);
+
+    public IReadOnlyCollection<ProductReviewView> GetReviews(int productId)
+    {
+        return reviewRepository.GetByProductId(productId)
+            .Select(r => new ProductReviewView
+            {
+                Id = r.Id,
+                ProductId = r.ProductId,
+                Author = r.Author,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                CreatedAt = r.CreatedAt
+            })
+            .ToList();
+    }
+
+    public ProductReviewView AddReview(ProductReviewCreateInput input)
+    {
+        var product = repository.GetById(input.ProductId);
+        if (product is null)
+        {
+            throw new Exception("Product does not exist.");
+        }
+
+        var review = new ProductReview
+        {
+            ProductId = input.ProductId,
+            Author = input.Author,
+            Rating = Math.Clamp(input.Rating, 1, 5),
+            Comment = input.Comment,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        var created = reviewRepository.Create(review);
+
+        // Update product average rating
+        var allReviews = reviewRepository.GetByProductId(input.ProductId);
+        product.Rating = allReviews.Average(r => r.Rating);
+        product.Reviews = allReviews.Count;
+        repository.Update(product);
+
+        return new ProductReviewView
+        {
+            Id = created.Id,
+            ProductId = created.ProductId,
+            Author = created.Author,
+            Rating = created.Rating,
+            Comment = created.Comment,
+            CreatedAt = created.CreatedAt
+        };
+    }
 
     private static IEnumerable<Product> ApplySorting(
         IEnumerable<Product> query,

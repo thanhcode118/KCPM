@@ -223,50 +223,6 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Categories");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            IsActive = true,
-                            Name = "Phụ kiện bàn",
-                            Slug = "phu-kien-ban"
-                        },
-                        new
-                        {
-                            Id = 2,
-                            IsActive = true,
-                            Name = "Lighting",
-                            Slug = "lighting"
-                        },
-                        new
-                        {
-                            Id = 3,
-                            IsActive = true,
-                            Name = "Decor",
-                            Slug = "decor"
-                        },
-                        new
-                        {
-                            Id = 4,
-                            IsActive = true,
-                            Name = "Furniture",
-                            Slug = "furniture"
-                        },
-                        new
-                        {
-                            Id = 5,
-                            IsActive = true,
-                            Name = "Textile",
-                            Slug = "textile"
-                        },
-                        new
-                        {
-                            Id = 6,
-                            IsActive = true,
-                            Name = "Kitchen",
-                            Slug = "kitchen"
-                        });
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.Coupon", b =>
@@ -596,550 +552,39 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.HasIndex("CategoryId");
 
                     b.ToTable("Products", (string)null);
+                });
 
-                    b.HasData(
-                        new
-                        {
-                            ProductId = 101,
-                            Brand = "BeeShop",
-                            Category = "Phụ kiện bàn",
-                            CategoryId = 1,
-                            Color = "#8B4513",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/102/400/500",
-                            Image = "https://picsum.photos/id/101/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            OldPrice = 180000m,
-                            Price = 150000m,
-                            ProductName = "Khay Cắm Bút Gỗ Sồi",
-                            Rating = 4.7999999999999998,
-                            Reviews = 45,
-                            Sku = "BEE-101",
-                            Slug = "khay-cam-but-go-soi",
-                            StockLeft = 0,
-                            Style = "Minimalist",
-                            Tag = "NEW"
-                        },
-                        new
-                        {
-                            ProductId = 102,
-                            Brand = "BeeShop",
-                            Category = "Lighting",
-                            CategoryId = 2,
-                            Color = "#333333",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/104/400/500",
-                            Image = "https://picsum.photos/id/103/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Kim loại",
-                            Price = 350000m,
-                            ProductName = "Đèn Bàn Pixar",
-                            Rating = 4.9000000000000004,
-                            Reviews = 120,
-                            Sku = "BEE-102",
-                            Slug = "den-ban-pixar",
-                            StockLeft = 0,
-                            Style = "Hiện đại",
-                            Tag = "-20%"
-                        },
-                        new
-                        {
-                            ProductId = 103,
-                            Brand = "BeeShop",
-                            Category = "Phụ kiện bàn",
-                            CategoryId = 1,
-                            Color = "#D2B48C",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/107/400/500",
-                            Image = "https://picsum.photos/id/106/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Vải",
-                            Price = 120000m,
-                            ProductName = "Bảng Ghim Ghi Chú",
-                            Rating = 4.5,
-                            Reviews = 30,
-                            Sku = "BEE-103",
-                            Slug = "bang-ghim-ghi-chu",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 104,
-                            Brand = "BeeShop",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#4CAF50",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/113/400/500",
-                            Image = "https://picsum.photos/id/112/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gốm sứ",
-                            Price = 85000m,
-                            ProductName = "Chậu Cây Mini Để Bàn",
-                            Rating = 5.0,
-                            Reviews = 210,
-                            Sku = "BEE-104",
-                            Slug = "chau-cay-mini-de-ban",
-                            StockLeft = 0,
-                            Style = "Dễ thương",
-                            Tag = "Best Seller"
-                        },
-                        new
-                        {
-                            ProductId = 105,
-                            Brand = "BeeShop",
-                            Category = "Phụ kiện bàn",
-                            CategoryId = 1,
-                            Color = "#8B4513",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/134/400/500",
-                            Image = "https://picsum.photos/id/133/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 190000m,
-                            ProductName = "Lịch Gỗ Để Bàn",
-                            Rating = 4.7000000000000002,
-                            Reviews = 15,
-                            Sku = "BEE-105",
-                            Slug = "lich-go-de-ban",
-                            StockLeft = 0,
-                            Style = "Minimalist"
-                        },
-                        new
-                        {
-                            ProductId = 106,
-                            Brand = "BeeShop",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#FFFFFF",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/146/400/500",
-                            Image = "https://picsum.photos/id/145/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gốm sứ",
-                            OldPrice = 160000m,
-                            Price = 145000m,
-                            ProductName = "Cốc Gốm Handmade",
-                            Rating = 4.5999999999999996,
-                            Reviews = 55,
-                            Sku = "BEE-106",
-                            Slug = "coc-gom-handmade",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 107,
-                            Brand = "BeeShop",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#333333",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/176/400/500",
-                            Image = "https://picsum.photos/id/175/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Nhựa",
-                            Price = 450000m,
-                            ProductName = "Đồng Hồ Lật Số",
-                            Rating = 4.9000000000000004,
-                            Reviews = 80,
-                            Sku = "BEE-107",
-                            Slug = "dong-ho-lat-so",
-                            StockLeft = 0,
-                            Style = "Hiện đại",
-                            Tag = "Sold Out"
-                        },
-                        new
-                        {
-                            ProductId = 108,
-                            Brand = "Nordic Nest",
-                            Category = "Phụ kiện bàn",
-                            CategoryId = 1,
-                            Color = "#8B4513",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/161/400/500",
-                            Image = "https://picsum.photos/id/160/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Da",
-                            Price = 220000m,
-                            ProductName = "Thảm Chuột Da",
-                            Rating = 4.7999999999999998,
-                            Reviews = 90,
-                            Sku = "BEE-108",
-                            Slug = "tham-chuot-da",
-                            StockLeft = 0,
-                            Style = "Minimalist"
-                        },
-                        new
-                        {
-                            ProductId = 109,
-                            Brand = "Moc Decor",
-                            Category = "Kitchen",
-                            CategoryId = 6,
-                            Color = "#B08968",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/141/400/500",
-                            Image = "https://picsum.photos/id/140/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            OldPrice = 690000m,
-                            Price = 520000m,
-                            ProductName = "Bộ Khay Gỗ Trang Trí Bàn Ăn",
-                            Rating = 4.5999999999999996,
-                            Reviews = 66,
-                            Sku = "BEE-109",
-                            Slug = "bo-khay-go-trang-tri-ban-an",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 110,
-                            Brand = "LumiHome",
-                            Category = "Lighting",
-                            CategoryId = 2,
-                            Color = "#222222",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/322/400/500",
-                            Image = "https://picsum.photos/id/321/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Kim loại",
-                            Price = 890000m,
-                            ProductName = "Đèn Thả Trần Cafe Loft",
-                            Rating = 4.9000000000000004,
-                            Reviews = 143,
-                            Sku = "BEE-110",
-                            Slug = "den-tha-tran-cafe-loft",
-                            StockLeft = 0,
-                            Style = "Hiện đại",
-                            Tag = "Best Seller"
-                        },
-                        new
-                        {
-                            ProductId = 111,
-                            Brand = "SoftNest",
-                            Category = "Textile",
-                            CategoryId = 5,
-                            Color = "#E0A96D",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/326/400/500",
-                            Image = "https://picsum.photos/id/325/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Vải",
-                            OldPrice = 240000m,
-                            Price = 180000m,
-                            ProductName = "Gối Tựa Sofa Boho",
-                            Rating = 4.4000000000000004,
-                            Reviews = 38,
-                            Sku = "BEE-111",
-                            Slug = "goi-tua-sofa-boho",
-                            StockLeft = 0,
-                            Style = "Dễ thương"
-                        },
-                        new
-                        {
-                            ProductId = 112,
-                            Brand = "BeeLiving",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#7F5539",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/331/400/500",
-                            Image = "https://picsum.photos/id/330/400/500",
-                            InStock = false,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 430000m,
-                            ProductName = "Kệ Gỗ Treo Tường Hex",
-                            Rating = 4.7000000000000002,
-                            Reviews = 57,
-                            Sku = "BEE-112",
-                            Slug = "ke-go-treo-tuong-hex",
-                            StockLeft = 0,
-                            Style = "Minimalist"
-                        },
-                        new
-                        {
-                            ProductId = 113,
-                            Brand = "SoftNest",
-                            Category = "Textile",
-                            CategoryId = 5,
-                            Color = "#C9ADA7",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/339/400/500",
-                            Image = "https://picsum.photos/id/338/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Vải",
-                            OldPrice = 960000m,
-                            Price = 760000m,
-                            ProductName = "Thảm Lụa Trang Trí Phòng Ngủ",
-                            Rating = 4.9000000000000004,
-                            Reviews = 102,
-                            Sku = "BEE-113",
-                            Slug = "tham-lua-trang-tri-phong-ngu",
-                            StockLeft = 0,
-                            Style = "Hiện đại"
-                        },
-                        new
-                        {
-                            ProductId = 114,
-                            Brand = "Moc Decor",
-                            Category = "Kitchen",
-                            CategoryId = 6,
-                            Color = "#A47148",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/345/400/500",
-                            Image = "https://picsum.photos/id/344/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 250000m,
-                            ProductName = "Set Thìa Nĩa Gỗ 6 Món",
-                            Rating = 4.2999999999999998,
-                            Reviews = 22,
-                            Sku = "BEE-114",
-                            Slug = "set-thia-nia-go-6-mon",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 115,
-                            Brand = "LumiHome",
-                            Category = "Lighting",
-                            CategoryId = 2,
-                            Color = "#2D2D2D",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/351/400/500",
-                            Image = "https://picsum.photos/id/350/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 680000m,
-                            ProductName = "Đèn Ngủ Gỗ Có Dimmer",
-                            Rating = 4.7999999999999998,
-                            Reviews = 41,
-                            Sku = "BEE-115",
-                            Slug = "den-ngu-go-co-dimmer",
-                            StockLeft = 0,
-                            Style = "Minimalist",
-                            Tag = "NEW"
-                        },
-                        new
-                        {
-                            ProductId = 116,
-                            Brand = "Nordic Nest",
-                            Category = "Furniture",
-                            CategoryId = 4,
-                            Color = "#8D6E63",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/356/400/500",
-                            Image = "https://picsum.photos/id/355/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 1490000m,
-                            ProductName = "Tủ Đầu Giường 2 Ngăn Kéo",
-                            Rating = 4.5999999999999996,
-                            Reviews = 29,
-                            Sku = "BEE-116",
-                            Slug = "tu-dau-giuong-2-ngan-keo",
-                            StockLeft = 0,
-                            Style = "Hiện đại"
-                        },
-                        new
-                        {
-                            ProductId = 117,
-                            Brand = "BeeLiving",
-                            Category = "Kitchen",
-                            CategoryId = 6,
-                            Color = "#EDE0D4",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/362/400/500",
-                            Image = "https://picsum.photos/id/361/400/500",
-                            InStock = false,
-                            IsActive = true,
-                            Material = "Vải",
-                            OldPrice = 390000m,
-                            Price = 310000m,
-                            ProductName = "Khăn Trải Bàn Linen Kem",
-                            Rating = 4.5,
-                            Reviews = 36,
-                            Sku = "BEE-117",
-                            Slug = "khan-trai-ban-linen-kem",
-                            StockLeft = 0,
-                            Style = "Minimalist"
-                        },
-                        new
-                        {
-                            ProductId = 118,
-                            Brand = "Artify",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#B0A8B9",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/369/400/500",
-                            Image = "https://picsum.photos/id/368/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Canvas",
-                            Price = 580000m,
-                            ProductName = "Bộ 3 Khung Tranh Trừu Tượng",
-                            Rating = 4.7000000000000002,
-                            Reviews = 73,
-                            Sku = "BEE-118",
-                            Slug = "bo-3-khung-tranh-truu-tuong",
-                            StockLeft = 0,
-                            Style = "Hiện đại"
-                        },
-                        new
-                        {
-                            ProductId = 119,
-                            Brand = "AromaBee",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#FFF4D6",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/376/400/500",
-                            Image = "https://picsum.photos/id/375/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Sáp đậu nành",
-                            OldPrice = 210000m,
-                            Price = 165000m,
-                            ProductName = "Nến Thơm Vani Hũ Thủy Tinh",
-                            Rating = 4.2000000000000002,
-                            Reviews = 64,
-                            Sku = "BEE-119",
-                            Slug = "nen-thom-vani-hu-thuy-tinh",
-                            StockLeft = 0,
-                            Style = "Dễ thương"
-                        },
-                        new
-                        {
-                            ProductId = 120,
-                            Brand = "Artify",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#2A9D8F",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/382/400/500",
-                            Image = "https://picsum.photos/id/381/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Thủy tinh",
-                            Price = 410000m,
-                            ProductName = "Bình Hoa Thủy Tinh Xanh Rêu",
-                            Rating = 4.7999999999999998,
-                            Reviews = 88,
-                            Sku = "BEE-120",
-                            Slug = "binh-hoa-thuy-tinh-xanh-rieu",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 121,
-                            Brand = "Nordic Nest",
-                            Category = "Furniture",
-                            CategoryId = 4,
-                            Color = "#6D597A",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/389/400/500",
-                            Image = "https://picsum.photos/id/388/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Vải",
-                            Price = 980000m,
-                            ProductName = "Ghế Đôn Bọc Vải Nhung",
-                            Rating = 4.5,
-                            Reviews = 27,
-                            Sku = "BEE-121",
-                            Slug = "ghe-don-boc-vai-nhung",
-                            StockLeft = 0,
-                            Style = "Vintage"
-                        },
-                        new
-                        {
-                            ProductId = 122,
-                            Brand = "Moc Decor",
-                            Category = "Kitchen",
-                            CategoryId = 6,
-                            Color = "#F4EBD0",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/395/400/500",
-                            Image = "https://picsum.photos/id/394/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Thủy tinh",
-                            OldPrice = 520000m,
-                            Price = 460000m,
-                            ProductName = "Bộ Ly Thủy Tinh Viền Vàng",
-                            Rating = 4.9000000000000004,
-                            Reviews = 112,
-                            Sku = "BEE-122",
-                            Slug = "bo-ly-thuy-tinh-co-vien-vang",
-                            StockLeft = 0,
-                            Style = "Hiện đại"
-                        },
-                        new
-                        {
-                            ProductId = 123,
-                            Brand = "BeeLiving",
-                            Category = "Decor",
-                            CategoryId = 3,
-                            Color = "#D6CCC2",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/402/400/500",
-                            Image = "https://picsum.photos/id/401/400/500",
-                            InStock = true,
-                            IsActive = true,
-                            Material = "Gỗ",
-                            Price = 1250000m,
-                            ProductName = "Gương Tròn Viền Gỗ Sồi",
-                            Rating = 4.7000000000000002,
-                            Reviews = 46,
-                            Sku = "BEE-123",
-                            Slug = "guong-tron-vien-go-soi",
-                            StockLeft = 0,
-                            Style = "Minimalist"
-                        },
-                        new
-                        {
-                            ProductId = 124,
-                            Brand = "AromaBee",
-                            Category = "Kitchen",
-                            CategoryId = 6,
-                            Color = "#E3D5CA",
-                            CreatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            HoverImage = "https://picsum.photos/id/410/400/500",
-                            Image = "https://picsum.photos/id/409/400/500",
-                            InStock = false,
-                            IsActive = true,
-                            Material = "Gốm sứ",
-                            Price = 340000m,
-                            ProductName = "Set Khay Gốm Breakfast",
-                            Rating = 4.2999999999999998,
-                            Reviews = 18,
-                            Sku = "BEE-124",
-                            Slug = "set-khay-gom-breakfast",
-                            StockLeft = 0,
-                            Style = "Dễ thương"
-                        });
+            modelBuilder.Entity("HomeDecorShop.Domain.ProductReview", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Comment")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("int");
+
+                    b.Property<double>("Rating")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("float(3)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ProductId");
+
+                    b.ToTable("ProductReviews", (string)null);
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.SystemSetting", b =>
@@ -1177,16 +622,6 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SystemSettings");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = 1,
-                            DefaultShippingFee = 30000m,
-                            StoreName = "BeeShop - Phụ Kiện Decor",
-                            UpdatedAt = new DateTime(2026, 3, 13, 0, 0, 0, 0, DateTimeKind.Utc),
-                            VatPercentage = 10m
-                        });
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.User", b =>
@@ -1333,6 +768,17 @@ namespace HomeDecorShop.Infrastructure.Migrations
                         .IsRequired();
 
                     b.Navigation("CategoryNavigation");
+                });
+
+            modelBuilder.Entity("HomeDecorShop.Domain.ProductReview", b =>
+                {
+                    b.HasOne("HomeDecorShop.Domain.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Product");
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.Cart", b =>

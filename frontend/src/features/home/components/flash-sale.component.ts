@@ -1,11 +1,12 @@
 import { Component, ChangeDetectionStrategy, inject, signal, OnInit, OnDestroy, PLATFORM_ID, Inject } from '@angular/core';
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { HomeFacade } from '@/features/home/data-access/home.facade';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-flash-sale',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <section class="py-12 bg-[#FFF9C4]">
@@ -35,7 +36,8 @@ import { HomeFacade } from '@/features/home/data-access/home.facade';
         <!-- Products Slider Area (Simple Grid for this demo) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           @for (product of homeFacade.flashSaleProducts(); track product.id) {
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer"
+                 [routerLink]="['/product', product.id]">
               <!-- Image -->
               <div class="relative aspect-square overflow-hidden">
                  <img [src]="product.image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
@@ -74,14 +76,14 @@ import { HomeFacade } from '@/features/home/data-access/home.facade';
 })
 export class FlashSaleComponent implements OnInit, OnDestroy {
   homeFacade = inject(HomeFacade);
-  
+
   hours = signal('02');
   minutes = signal('45');
   seconds = signal('30');
-  
+
   private timer: any;
 
-  constructor(@Inject(PLATFORM_ID) private platformId: Object) {}
+  constructor(@Inject(PLATFORM_ID) private platformId: Object) { }
 
   ngOnInit() {
     if (isPlatformBrowser(this.platformId)) {

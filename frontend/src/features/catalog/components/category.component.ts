@@ -1,6 +1,6 @@
 import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { CatalogFacade } from '@/features/catalog/data-access/catalog.facade';
 import {
   CategoryFilterType,
@@ -13,7 +13,7 @@ import { IconComponent } from '@/shared/components/icon.component';
 @Component({
   selector: 'app-category',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, RouterModule],
   providers: [CategoryPageFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -170,9 +170,10 @@ import { IconComponent } from '@/shared/components/icon.component';
                 @for (product of visibleProducts(); track product.id) {
                   @if (viewMode() === 'grid') {
                     <div class="group relative bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300">
-                      <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100 cursor-pointer">
-                        <img [src]="product.image" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0">
-                        <img [src]="product.hoverImage" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100 cursor-pointer"
+                           [routerLink]="['/product', product.id]">
+                        <img [src]="product.image" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0">
+                        <img [src]="product.hoverImage" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 
                         <div class="absolute top-2 left-2 flex flex-col gap-1">
                           @if (product.tag) {
@@ -194,21 +195,21 @@ import { IconComponent } from '@/shared/components/icon.component';
                           </button>
                         </div>
 
-                        <button (click)="addToCart(product.id)" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
+                        <button (click)="addToCart(product.id); $event.stopPropagation()" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
                           <app-icon name="plus" class="w-4 h-4"></app-icon> Thêm vào giỏ
                         </button>
                       </div>
 
-                      <div class="p-4">
+                      <div class="p-4" [routerLink]="['/product', product.id]">
                         <h3 class="font-semibold text-charcoal hover:text-honey cursor-pointer line-clamp-2 min-h-[3rem] mb-1">{{ product.name }}</h3>
 
-                        <div class="flex items-center gap-1 mb-2">
-                          <div class="flex text-yellow-400">
+                        <div class="flex items-center gap-2 mb-2">
+                          <div class="flex text-yellow-400 gap-1.5">
                             @for (star of [1,2,3,4,5]; track star) {
-                              <app-icon name="star-filled" class="w-3 h-3"></app-icon>
+                              <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
                             }
                           </div>
-                          <span class="text-xs text-gray-400">({{ product.reviews }})</span>
+                          <span class="text-xs text-gray-400 font-medium">({{ product.reviews || 0 }})</span>
                         </div>
 
                         <div class="flex items-baseline gap-2">
@@ -222,9 +223,10 @@ import { IconComponent } from '@/shared/components/icon.component';
                   }
 
                   @if (viewMode() === 'list') {
-                    <div class="group flex gap-4 bg-white p-4 rounded-lg shadow-sm border border-transparent hover:border-honey transition-all">
+                    <div class="group flex gap-4 bg-white p-4 rounded-lg shadow-sm border border-transparent hover:border-honey transition-all cursor-pointer"
+                         [routerLink]="['/product', product.id]">
                       <div class="w-32 h-32 flex-shrink-0 relative overflow-hidden rounded bg-gray-100">
-                        <img [src]="product.image" class="w-full h-full object-cover">
+                        <img [src]="product.image" (error)="handleImageError($event)" class="w-full h-full object-cover">
                       </div>
                       <div class="flex-grow flex flex-col justify-center">
                         <div class="flex justify-between items-start">
@@ -340,6 +342,10 @@ export class CategoryComponent {
 
   isColorSelected(hex: string) {
     return this.categoryPageFacade.isColorSelected(hex);
+  }
+
+  handleImageError(event: any) {
+    event.target.src = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
   }
 
   resetFilters() {

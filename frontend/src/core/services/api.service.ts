@@ -28,6 +28,7 @@ interface BackendProduct {
   inStock?: boolean;
   isActive: boolean;
   createdAt: string;
+  description?: string;
 }
 
 // Dữ liệu mẫu hiển thị khi Backend chưa chạy
@@ -102,7 +103,20 @@ export class ApiService {
       style: p.style,
       inStock: p.inStock,
       isActive: p.isActive,
-      createdAt: p.createdAt
+      createdAt: p.createdAt,
+      description: p.description
+    };
+  }
+
+  // Chuyển đổi dữ liệu sang review cho frontend
+  private mapReview(r: any) {
+    return {
+      id: r.id,
+      productId: r.productId,
+      author: r.author,
+      rating: r.rating,
+      comment: r.comment,
+      createdAt: r.createdAt
     };
   }
 
@@ -111,6 +125,28 @@ export class ApiService {
     return this.http.get<BackendProduct[]>(`${this.baseUrl}/promotions`).pipe(
       map(products => products.map(p => this.mapProduct(p))),
       catchError(() => of(FALLBACK_FLASH_SALE))
+    );
+  }
+
+  // Lấy tất cả sản phẩm
+  getProducts(): Observable<Product[]> {
+    return this.http.get<{ items: BackendProduct[] }>(`${this.baseUrl}/products?pageSize=200`).pipe(
+      map(result => result.items.map(p => this.mapProduct(p))),
+      catchError(() => of([]))
+    );
+  }
+
+  // Lấy chi tiết sản phẩm
+  getProductById(id: number): Observable<Product> {
+    return this.http.get<BackendProduct>(`${this.baseUrl}/products/${id}`).pipe(
+      map(p => this.mapProduct(p))
+    );
+  }
+
+  // Lấy tất cả danh mục
+  getCategories(): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/categories`).pipe(
+      catchError(() => of([]))
     );
   }
 
@@ -123,6 +159,18 @@ export class ApiService {
 
   postFeedback(feedback: any): Observable<any> {
     return this.http.post<any>(`${this.baseUrl}/feedbacks`, feedback);
+  }
+
+  // --- PRODUCT REVIEWS ---
+  getProductReviews(productId: number): Observable<any[]> {
+    return this.http.get<any[]>(`${this.baseUrl}/products/${productId}/reviews`).pipe(
+      map(reviews => reviews.map(r => this.mapReview(r))),
+      catchError(() => of([]))
+    );
+  }
+
+  postProductReview(productId: number, review: any): Observable<any> {
+    return this.http.post<any>(`${this.baseUrl}/products/${productId}/reviews`, review);
   }
 }
 

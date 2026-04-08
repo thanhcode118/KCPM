@@ -1,0 +1,21 @@
+// Categories Seed
+migrationBuilder.InsertData(
+    table: "Categories",
+    columns: new[] { "Id", "IsActive", "Name", "Slug" },
+    values: new object[,] {
+        { 1, true, "Bàn ăn", "bàn-ăn" },
+        { 2, true, "Cốc ly", "cốc-ly" },
+        { 3, true, "Hương thơm", "hương-thơm" },
+        { 4, true, "Mây tre", "mây-tre" },
+        { 5, true, "Mây tre đan", "mây-tre-đan" },
+        { 6, true, "Nội thất", "nội-thất" },
+        { 7, true, "Phụ kiện", "phụ-kiện" },
+        { 8, true, "Phụ kiện vải", "phụ-kiện-vải" },
+        { 9, true, "Phụ kiện điểm nhấn", "phụ-kiện-điểm-nhấn" },
+        { 10, true, "Thương hiệu gốm bát tràng", "thương-hiệu-gốm-bát-tràng" },
+        { 11, true, "Trang trí", "trang-trí" },
+        { 12, true, "Trang trí tường", "trang-trí-tường" },
+        { 13, true, "Trang điểm", "trang-điểm" },
+        { 14, true, "Đèn", "đèn" },
+        { 15, true, "Đồ trang điểm", "đồ-trang-điểm" },
+    });

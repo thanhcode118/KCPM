@@ -20,7 +20,7 @@ export const routes: Routes = [
     { path: '', component: HomeComponent },
     { path: 'collections/:slug', component: CategoryComponent },
     { path: 'new-collection', component: NewCollectionComponent },
-    { path: 'product/:id', component: ProductDetailComponent, canActivate: [authGuard] },
+    { path: 'product/:id', component: ProductDetailComponent },
     { path: 'search', component: SearchResultsComponent },
     { path: 'checkout', component: CheckoutComponent },
     { path: 'login', component: LoginComponent },

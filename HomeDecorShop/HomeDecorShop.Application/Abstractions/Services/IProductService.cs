@@ -7,4 +7,6 @@ public interface IProductService
     ProductView Create(ProductUpsertInput input);
     ProductView? Update(int id, ProductUpsertInput input);
     bool Delete(int id);
+    IReadOnlyCollection<ProductReviewView> GetReviews(int productId);
+    ProductReviewView AddReview(ProductReviewCreateInput input);
 }
