@@ -43,7 +43,10 @@ import { RouterModule } from '@angular/router';
         <!-- Products Slider Area (Grid) -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           @for (product of homeFacade.flashSaleProducts(); track product.id) {
-            <div class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer">
+            <div 
+              [routerLink]="['/product', product.id]"
+              class="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow duration-300 group cursor-pointer"
+            >
               <!-- Image -->
               <div class="relative aspect-square overflow-hidden">
                  <img [src]="product.image" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">

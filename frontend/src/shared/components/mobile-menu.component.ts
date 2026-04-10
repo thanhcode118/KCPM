@@ -1,5 +1,6 @@
-import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
 import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-navigation.mock';
 import { IconComponent } from './icon.component';
 
@@ -32,6 +33,19 @@ import { IconComponent } from './icon.component';
         >
           <app-icon name="close" class="w-5 h-5"></app-icon>
         </button>
+      </div>
+
+      <!-- Mobile Search -->
+      <div class="px-5 py-3 border-b border-gray-50 bg-gray-50/50">
+        <div class="relative">
+          <app-icon name="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></app-icon>
+          <input 
+            type="text" 
+            placeholder="Tìm sản phẩm..." 
+            class="w-full pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-xl text-sm outline-none focus:border-honey"
+            (keydown.enter)="onSearchEnter($event)"
+          >
+        </div>
       </div>
 
       <!-- Navigation List -->
@@ -121,6 +135,7 @@ import { IconComponent } from './icon.component';
   `
 })
 export class MobileMenuComponent {
+  private readonly router = inject(Router);
   @Input({ required: true }) isOpen = false;
   @Input({ required: true }) navigationStructure: HeaderNavCategory[] = [];
 
@@ -146,5 +161,13 @@ export class MobileMenuComponent {
   onNavigateSub(cat: HeaderNavCategory, item: HeaderSubItem) {
     this.close.emit();
     this.navigateSub.emit({ category: cat, item });
+  }
+
+  onSearchEnter(event: Event) {
+    const query = (event.target as HTMLInputElement).value;
+    if (query.trim()) {
+      this.close.emit();
+      this.router.navigate(['/search'], { queryParams: { q: query.trim() } });
+    }
   }
 }

@@ -305,10 +305,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   selectProduct(product: Product) {
-    this.searchFacade.setQuery(product.name);
     this.isSearchFocused.set(false);
     this.closeTransientUi();
-    this.router.navigate(['/search'], { queryParams: { q: product.name } });
+    this.router.navigate(['/product', product.id]);
   }
 
   selectKeyword(keyword: string) {

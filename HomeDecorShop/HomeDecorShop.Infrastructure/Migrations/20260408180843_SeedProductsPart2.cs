@@ -65,8 +65,15 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     { 97, "BeeShop", "Trang trí tường", 12, "Cozy", DateTime.UtcNow, "Tranh trang trí phòng ngủ ấm cúng.", "assets/images/tranh-phong-ngu.jpg", "assets/images/tranh-phong-ngu.jpg", true, true, "Canvas", null, 210000m, "TRANH PHÒNG NGỦ", 4.5, 10, "BEE-097", "tranh-phòng-ngủ", 0, 50, "Modern", "NEW", null },
                     { 98, "BeeShop", "Trang trí tường", 12, "Typo", DateTime.UtcNow, "Tranh chữ truyền động lực.", "assets/images/tranh-typo.jpg", "assets/images/tranh-typo.jpg", true, true, "Canvas", null, 130000m, "TRANH TYPOGRAPHY", 4.5, 10, "BEE-098", "tranh-typography", 0, 50, "Modern", "NEW", null },
                     { 99, "BeeShop", "Trang trí", 11, "Vàng/Đen", DateTime.UtcNow, "Tượng điêu khắc nghệ thuật trưng kệ sách.", "assets/images/tuong-decor.jpg", "assets/images/tuong-decor.jpg", true, true, "Composite", null, 320000m, "TƯỢNG ART DECOR", 4.5, 10, "BEE-099", "tượng-art-decor", 0, 50, "Luxury", "NEW", null },
-                    { 100, "BeeShop", "Trang trí", 11, "Xám", DateTime.UtcNow, "Tượng mini để bàn làm việc.", "assets/images/tuong-mini.jpg", "assets/images/tuong-mini.jpg", true, true, "Thạch cao", null, 80000m, "TƯỢNG MINI PHI HÀNH GIA", 4.5, 10, "BEE-100", "tượng-mini-phi-hành-gia", 0, 50, "Inspiration", "NEW", null },
+                    { 100, "BeeShop", "Trang trí", 11, "Xám", DateTime.UtcNow, "Tượng mini để bàn làm việc.", "assets/images/tuong-mini.jpg", "assets/images/tuong-mini.jpg", true, true, "Thạch cao", null, 80000m, "Tượng mini để bàn", 4.5, 10, "BEE-100", "tượng-mini-để-bàn", 0, 50, "Inspiration", "NEW", null },
                 });
+
+            migrationBuilder.Sql(@"
+                UPDATE Products 
+                SET Rating = ROUND(4.6 + (RAND(ABS(CHECKSUM(NEWID(), ProductId))) * 0.4), 1),
+                    StockLeft = ABS(CHECKSUM(NEWID(), ProductId)) % 91 + 10,
+                    Reviews = ABS(CHECKSUM(NEWID(), ProductId)) % 46 + 5
+            ");
         }
 
         /// <inheritdoc />

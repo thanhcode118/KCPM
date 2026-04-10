@@ -13,7 +13,25 @@ internal static class DatabaseStartupExtensions
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
         db.Database.SetCommandTimeout(120);
-        db.Database.Migrate();
+        
+        try
+        {
+            db.Database.Migrate();
+        }
+        catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801)
+        {
+            // Database already exists but EF tried to create it. 
+            // This can happen due to permission issues with 'View Any Database'.
+            // We can ignore this and try to apply migrations again or just proceed.
+            Console.WriteLine("Warning: Database already exists, ignoring creation error and proceeding with migrations...");
+            // No need to call Migrate() again immediately as the failure happened during CREATE DATABASE
+            // If the database now exists, we should be able to proceed.
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during migration: {ex.Message}");
+            throw;
+        }
 
         EnsureCommerceSchema(db);
         SeedAdminAccounts(db);

@@ -208,30 +208,19 @@ public sealed class OrderService(
 
     private static void DecreaseStock(Product product, int quantity)
     {
-        if (product.StockLeft > 0)
-        {
-            product.StockLeft = Math.Max(product.StockLeft - quantity, 0);
-            product.InStock = product.StockLeft > 0;
-        }
+        product.StockLeft = Math.Max(product.StockLeft - quantity, 0);
+        product.InStock = product.StockLeft > 0;
     }
 
     private static void RestoreStock(Product product, int quantity)
     {
-        if (product.StockLeft > 0)
-        {
-            product.StockLeft += quantity;
-            product.InStock = true;
-        }
+        product.StockLeft += quantity;
+        product.InStock = true;
     }
 
     private static int GetAvailableStock(Product product)
     {
-        if (product.StockLeft > 0)
-        {
-            return product.StockLeft;
-        }
-
-        return product.InStock ? 999 : 0;
+        return Math.Max(product.StockLeft, 0);
     }
 
     private static (string FullName, string Phone, string Line1, string Ward, string District, string City) ResolveShippingAddress(

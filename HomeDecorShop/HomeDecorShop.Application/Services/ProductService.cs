@@ -116,7 +116,7 @@ public sealed class ProductService(
             Color = input.Color.Trim(),
             Material = input.Material.Trim(),
             Style = input.Style.Trim(),
-            InStock = input.InStock || input.StockLeft > 0,
+            InStock = input.StockLeft > 0,
             IsActive = input.IsActive,
             CreatedAt = now
         };
@@ -159,7 +159,7 @@ public sealed class ProductService(
         existing.Color = input.Color.Trim();
         existing.Material = input.Material.Trim();
         existing.Style = input.Style.Trim();
-        existing.InStock = input.InStock || input.StockLeft > 0;
+        existing.InStock = input.StockLeft > 0;
         existing.IsActive = input.IsActive;
 
         var saved = repository.Update(existing);

@@ -2,11 +2,12 @@ import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/cor
 import { CommonModule } from '@angular/common';
 import { CatalogFacade } from '@/features/catalog/data-access/catalog.facade';
 import { IconComponent } from '@/shared/components/icon.component';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-new-collection',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="bg-white min-h-screen">
@@ -72,12 +73,12 @@ import { IconComponent } from '@/shared/components/icon.component';
                 <!-- Extract Products from Hotspots for display -->
                 <div class="space-y-4">
                   @for (spot of look.hotspots; track spot.id) {
-                    <div class="flex items-center gap-4 group cursor-pointer">
+                    <div class="flex items-center gap-4 group cursor-pointer" [routerLink]="['/product', spot.product.id]">
                       <img [src]="spot.product.image" (error)="handleImageError($event)" class="w-20 h-24 object-cover shadow-sm">
                       <div>
                         <h4 class="font-bold text-charcoal group-hover:text-honey transition-colors">{{ spot.product.name }}</h4>
                         <p class="text-honey font-semibold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
-                        <button (click)="catalogFacade.addToCart(spot.product.id)" class="text-xs underline mt-1 text-gray-500 hover:text-charcoal">Thêm vào giỏ</button>
+                        <button (click)="catalogFacade.addToCart(spot.product.id); $event.stopPropagation()" class="text-xs underline mt-1 text-gray-500 hover:text-charcoal">Thêm vào giỏ</button>
                       </div>
                     </div>
                   }
@@ -102,9 +103,12 @@ import { IconComponent } from '@/shared/components/icon.component';
                     >
                       <app-icon name="plus" class="w-4 h-4"></app-icon>
                     </button>
-                     <!-- Popover -->
+                     <!-- Popover (clickable to go to product) -->
                     @if (activeHotspot() === spot.id) {
-                       <div class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-40 bg-white p-3 shadow-2xl z-20 animate-fade-in origin-bottom text-center">
+                       <div 
+                         [routerLink]="['/product', spot.product.id]"
+                         class="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-40 bg-white p-3 shadow-2xl z-20 animate-fade-in origin-bottom text-center cursor-pointer hover:bg-cream"
+                       >
                           <h4 class="font-bold text-xs text-charcoal mb-1">{{ spot.product.name }}</h4>
                           <p class="text-honey text-xs font-bold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                        </div>
@@ -131,7 +135,10 @@ import { IconComponent } from '@/shared/components/icon.component';
                 (mouseleave)="hoveredProduct.set(null)"
               >
                 <!-- Image/Video Container -->
-                <div class="relative w-full aspect-[4/5] overflow-hidden bg-gray-100 cursor-pointer">
+                <div 
+                  class="relative w-full aspect-[4/5] overflow-hidden bg-gray-100 cursor-pointer"
+                  [routerLink]="['/product', product.id]"
+                >
                   <!-- Static Image -->
                   <img 
                     [src]="product.image" 
@@ -176,15 +183,15 @@ import { IconComponent } from '@/shared/components/icon.component';
 
                   <!-- Quick Add Slide Up -->
                   <div class="absolute bottom-0 left-0 w-full p-4 translate-y-full group-hover:translate-y-0 transition-transform duration-300 z-20">
-                     <button (click)="catalogFacade.addToCart(product.id)" class="w-full bg-white text-charcoal font-bold py-3 hover:bg-honey hover:text-white transition-colors shadow-lg">
+                     <button (click)="catalogFacade.addToCart(product.id); $event.stopPropagation()" class="w-full bg-white text-charcoal font-bold py-3 hover:bg-honey hover:text-white transition-colors shadow-lg">
                        Thêm vào giỏ
                      </button>
                   </div>
                 </div>
 
                 <!-- Info -->
-                <div class="mt-4 text-center">
-                  <h3 class="font-bold text-lg text-charcoal group-hover:text-honey transition-colors cursor-pointer">{{ product.name }}</h3>
+                <div class="mt-4 text-center cursor-pointer" [routerLink]="['/product', product.id]">
+                  <h3 class="font-bold text-lg text-charcoal group-hover:text-honey transition-colors">{{ product.name }}</h3>
                   <p class="text-gray-500 italic mb-1">{{ product.category }}</p>
                   <p class="text-charcoal font-semibold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                 </div>
@@ -266,7 +273,7 @@ import { IconComponent } from '@/shared/components/icon.component';
 })
 export class NewCollectionComponent {
   catalogFacade = inject(CatalogFacade);
-  
+
   activeHotspot = signal<number | null>(null);
   hoveredProduct = signal<number | null>(null);
 

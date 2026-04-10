@@ -50,7 +50,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                 <app-icon [name]="star <= (product.rating || 5) ? 'star-filled' : 'star-outline'" class="w-5 h-5"></app-icon>
               }
             </div>
-            <span class="text-sm text-gray-500 font-medium">({{ product.reviews || 0 }} đánh giá)</span>
+            <span class="text-sm text-gray-500 font-medium">(Còn {{ product.stockLeft || 0 }} sản phẩm)</span>
           </div>
 
           <div class="flex items-center gap-4 mb-8">
@@ -148,7 +148,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                           <app-icon [name]="star <= (product.rating || 5) ? 'star-filled' : 'star-outline'" class="w-5 h-5"></app-icon>
                         }
                      </div>
-                     <div class="text-gray-400 text-sm italic">Trung bình trên {{ product.reviews || 0 }} lượt đánh giá</div>
+                     <div class="text-gray-400 text-sm italic">Giá trị trung bình từ đánh giá khách hàng</div>
                    </div>
                 </div>
               </div>
