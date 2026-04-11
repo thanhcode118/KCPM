@@ -52,5 +52,11 @@ out/
 
 # General
 *.log
+*.out.txt
+*.err.txt
+test-output.txt
+.dotnet-cli/
+.localappdata/
 tmp/
 temp/
+docs/

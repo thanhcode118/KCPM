@@ -1,14 +1,31 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { CategoryPageFacade } from './category-page.facade';
+import { flushCatalogBootstrapRequests, toProductListResultDto } from '@/testing/catalog-test.utils';
+import { apiEndpoints } from '@/core/api/api-endpoints';
+import { MOCK_CATEGORY_PRODUCTS } from '@/core/mock-data/ecommerce.mock';
 
 describe('CategoryPageFacade', () => {
   let facade: CategoryPageFacade;
+  let httpMock: HttpTestingController;
+
+  const decorProducts = MOCK_CATEGORY_PRODUCTS.filter((product) => product.category === 'Decor');
 
   beforeEach(() => {
     TestBed.configureTestingModule({
-      providers: [CategoryPageFacade]
+      providers: [CategoryPageFacade, provideHttpClient(), provideHttpClientTesting()]
     });
     facade = TestBed.inject(CategoryPageFacade);
+    httpMock = TestBed.inject(HttpTestingController);
+    flushCatalogBootstrapRequests(httpMock);
+    facade.loadCategory('decor');
+    httpMock.expectOne(`${apiEndpoints.products.list}?category=decor&pageSize=200`)
+      .flush(toProductListResultDto(decorProducts));
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('filters category products by the selected style', () => {

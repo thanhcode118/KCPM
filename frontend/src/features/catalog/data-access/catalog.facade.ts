@@ -10,7 +10,9 @@ export class CatalogFacade {
   private readonly checkoutFacade = inject(CheckoutFacade);
 
   readonly categoryProducts = this.catalogStore.categoryProducts;
+  readonly categoryProductsState = this.catalogStore.categoryProductsState;
   readonly newCollectionProducts = this.catalogStore.newCollectionProducts;
+  readonly newCollectionProductsState = this.catalogStore.newCollectionProductsState;
   readonly lookbookItems = this.contentStore.lookbookItems;
 
   addToCart(productId: number, quantity = 1): void {

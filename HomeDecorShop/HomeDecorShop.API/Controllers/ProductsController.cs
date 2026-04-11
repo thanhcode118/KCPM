@@ -1,4 +1,5 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -11,6 +12,7 @@ namespace HomeDecorShop.API.Controllers;
 public sealed class ProductsController(IProductService productService) : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Search and list products",
         Description = "Returns a paged product list. Supports filtering by keyword, category, brand, style, price, stock, sale state, rating, sort order and paging.")]
@@ -47,6 +49,7 @@ public sealed class ProductsController(IProductService productService) : ApiCont
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Get a product by id",
         Description = "Returns a single product by numeric identifier.")]
@@ -58,6 +61,7 @@ public sealed class ProductsController(IProductService productService) : ApiCont
     }
 
     [HttpPost]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Create a product",
         Description = "Creates a new product in the catalog. Returns 409 when SKU or slug is already in use, or when the selected category is inactive.")]
@@ -71,6 +75,7 @@ public sealed class ProductsController(IProductService productService) : ApiCont
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Update a product",
         Description = "Updates an existing product by numeric identifier. Returns 409 when SKU or slug is already in use, or when the selected category is inactive.")]
@@ -85,6 +90,7 @@ public sealed class ProductsController(IProductService productService) : ApiCont
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Delete a product",
         Description = "Deletes a product from the catalog by numeric identifier.")]

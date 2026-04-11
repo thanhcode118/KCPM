@@ -27,7 +27,7 @@ public sealed class UserService : IUserService
         var normalizedEmail = Normalize(input.Email);
         if (_repository.GetByEmail(normalizedEmail) is not null)
         {
-            throw new ConflictException("Email đã tồn tại trong hệ thống.");
+            throw new ConflictException("Email already exists in the system.", AppErrorCodes.EmailAlreadyExists);
         }
 
         var token = Guid.NewGuid().ToString("N");
@@ -63,11 +63,12 @@ public sealed class UserService : IUserService
         if (!user.IsEmailConfirmed)
         {
             throw new RequestValidationException(
-                "Vui lòng xác minh email trước khi đăng nhập.",
+                "Please confirm your email before logging in.",
                 new Dictionary<string, string[]>
                 {
-                    ["email"] = ["Tài khoản chưa xác minh email."]
-                });
+                    ["email"] = ["This account has not confirmed its email address yet."]
+                },
+                AppErrorCodes.EmailNotConfirmed);
         }
 
         if (!user.IsActive)

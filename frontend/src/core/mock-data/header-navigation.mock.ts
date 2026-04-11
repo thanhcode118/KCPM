@@ -29,7 +29,7 @@ export const HEADER_NAVIGATION_STRUCTURE: HeaderNavCategory[] = [
   },
   {
     label: 'Trang trí nội thất',
-    slug: 'interior-decoration',
+    slug: 'decor',
     type: 'mega',
     category: 'Trang trí,Trang trí tường',
     columns: [

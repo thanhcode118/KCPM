@@ -1,7 +1,7 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
-import { Product } from '@/core/models';
-import { ApiService } from '@/core/services/api.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Product, ProductViewDto, mapProductViewDtoToProduct } from '@/core/models';
+import { HttpClient } from '@angular/common/http';
+import { apiEndpoints } from '@/core/api/api-endpoints';
 
 interface ProductReview {
   id: number;
@@ -12,65 +12,69 @@ interface ProductReview {
   createdAt: string;
 }
 
+const REVIEWS: ProductReview[] = [
+  { id: 1, productId: 101, author: 'Lan Anh', rating: 5, comment: 'Chất liệu đẹp, đóng gói rất kỹ.', createdAt: '2026-03-09' },
+  { id: 2, productId: 101, author: 'Huy', rating: 4, comment: 'Màu sắc đúng như mô tả.', createdAt: '2026-03-11' }
+];
+
 @Injectable({ providedIn: 'root' })
 export class ProductDetailFacade {
-  private apiService = inject(ApiService);
+  private readonly http = inject(HttpClient);
 
-  private readonly selectedProductSignal = signal<Product | null>(null);
-  private readonly reviewsSignal = signal<ProductReview[]>([]);
-
-  readonly selectedProduct = computed(() => {
-    return this.selectedProductSignal() || {
-      id: 0,
-      name: 'Loading...',
-      price: 0,
-      image: '',
-      hoverImage: '',
-      description: 'Đang tải dữ liệu...',
-      isActive: true,
-      categoryId: 0,
-      category: '',
-      sku: '',
-      slug: '',
-      createdAt: ''
-    } as Product;
-  });
+  readonly selectedProduct = signal<Product | null>(null);
+  readonly isLoading = signal(false);
+  readonly hasError = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+  private readonly reviewsSignal = signal<ProductReview[]>(REVIEWS);
 
   readonly productImages = computed(() => {
     const product = this.selectedProduct();
-    if (!product.image) return [];
-    return [product.image, product.hoverImage, product.image, product.hoverImage].filter(img => !!img);
+    if (!product) return [];
+    return [product.image, product.hoverImage, product.image, product.hoverImage];
   });
 
-  readonly reviews = computed(() => this.reviewsSignal());
+  readonly reviews = computed(() => {
+    const p = this.selectedProduct();
+    if (!p) return [];
+    return this.reviewsSignal().filter((item) => item.productId === p.id);
+  });
 
   selectProductById(id: number): void {
-    this.apiService.getProductById(id).subscribe(product => {
-      this.selectedProductSignal.set(product);
-    });
+    this.selectedProduct.set(null);
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    this.errorMessage.set(null);
 
-    this.apiService.getProductReviews(id).subscribe(reviews => {
-      this.reviewsSignal.set(reviews);
-    });
+    this.http.get<ProductViewDto>(apiEndpoints.products.detail(id))
+      .subscribe({
+        next: (dto) => {
+          this.selectedProduct.set(mapProductViewDtoToProduct(dto));
+          this.isLoading.set(false);
+        },
+        error: (err) => {
+          console.error('Failed to load product', err);
+          this.selectedProduct.set(null);
+          this.isLoading.set(false);
+          this.hasError.set(true);
+          this.errorMessage.set('Khong tai duoc thong tin san pham.');
+        }
+      });
   }
 
   addComment(author: string, rating: number, comment: string): void {
-    const productId = this.selectedProduct().id;
-    if (productId === 0) return;
-
-    const reviewInput = {
-      productId: productId,
-      author,
-      rating,
-      comment
-    };
-
-    this.apiService.postProductReview(productId, reviewInput).subscribe(newReview => {
-      this.reviewsSignal.update(list => [newReview, ...list]);
-      // Re-fetch product to get updated average rating and review count
-      this.apiService.getProductById(productId).subscribe(product => {
-        this.selectedProductSignal.set(product);
-      });
-    });
+    const p = this.selectedProduct();
+    if (!p) return;
+    this.reviewsSignal.update((list) => [
+      {
+        id: Date.now(),
+        productId: p.id,
+        author,
+        rating,
+        comment,
+        createdAt: new Date().toISOString().split('T')[0]
+      },
+      ...list
+    ]);
   }
 }
+

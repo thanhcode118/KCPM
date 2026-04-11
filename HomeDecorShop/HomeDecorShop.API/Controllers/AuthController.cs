@@ -1,10 +1,12 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [Route("api/auth")]
 [SwaggerTag("Authentication and email confirmation endpoints.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -32,7 +34,7 @@ public sealed class AuthController(IUserService userService) : ApiControllerBase
     public ActionResult<AuthResult> Login([FromBody] LoginInput input)
     {
         var auth = userService.Login(input);
-        return Ok(auth ?? throw new UnauthorizedException("Email or password is incorrect."));
+        return Ok(auth ?? throw new UnauthorizedException("Email or password is incorrect.", AppErrorCodes.InvalidCredentials));
     }
 
     [HttpGet("confirm-email")]
@@ -50,7 +52,8 @@ public sealed class AuthController(IUserService userService) : ApiControllerBase
                 new Dictionary<string, string[]>
                 {
                     ["token"] = ["Email confirmation token is invalid or has expired."]
-                });
+                },
+                AppErrorCodes.EmailConfirmationTokenInvalid);
         }
 
         return Ok(new MessageResponse("Xac nhan email thanh cong."));

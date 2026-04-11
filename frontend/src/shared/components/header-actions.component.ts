@@ -20,12 +20,20 @@ import { IconComponent } from './icon.component';
         </button>
 
         @if (userMenuOpen) {
-          <div class="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-dropdown origin-top-right">
+          <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-dropdown origin-top-right">
             @if (isAuthenticated) {
               <div class="px-4 py-3 border-b border-gray-100 bg-cream">
                 <p class="text-sm font-bold text-charcoal truncate">{{ currentUserName }}</p>
                 <p class="text-xs text-gray-500">{{ currentUserEmail }}</p>
               </div>
+
+              <a
+                (click)="goToOrders.emit()"
+                class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
+              >
+                <app-icon name="shopping-bag" class="w-4 h-4"></app-icon>
+                Theo doi don
+              </a>
 
               @if (isAdmin) {
                 <a
@@ -33,25 +41,17 @@ import { IconComponent } from './icon.component';
                   class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
                 >
                   <app-icon name="grid" class="w-4 h-4"></app-icon>
-                  Trang quản trị
+                  Trang quan tri
                 </a>
               }
-
-              <a
-                (click)="goToMyOrders.emit()"
-                class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
-              >
-                <app-icon name="list" class="w-4 h-4"></app-icon>
-                Đơn hàng của tôi
-              </a>
 
               <button
                 type="button"
                 (click)="logout.emit()"
-                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors border-t border-gray-50"
+                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
               >
                 <app-icon name="close" class="w-4 h-4"></app-icon>
-                Đăng xuất
+                Dang xuat
               </button>
             } @else {
               <a
@@ -59,7 +59,7 @@ import { IconComponent } from './icon.component';
                 class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
               >
                 <app-icon name="user" class="w-4 h-4"></app-icon>
-                Đăng nhập
+                Dang nhap
               </a>
             }
           </div>
@@ -82,7 +82,6 @@ import { IconComponent } from './icon.component';
 
       <button
         type="button"
-        (click)="toggleMobileMenu.emit()"
         class="xl:hidden action-btn header-icon transition-all duration-300 hover:text-honey group-hover/header:text-[#333]"
         [ngClass]="solidStyle ? 'text-[#333]' : 'text-white'"
       >
@@ -136,9 +135,8 @@ export class HeaderActionsComponent {
 
   @Output() readonly toggleUserMenu = new EventEmitter<void>();
   @Output() readonly goToLogin = new EventEmitter<void>();
-  @Output() readonly goToMyOrders = new EventEmitter<void>();
+  @Output() readonly goToOrders = new EventEmitter<void>();
   @Output() readonly goToAdmin = new EventEmitter<void>();
   @Output() readonly logout = new EventEmitter<void>();
   @Output() readonly openCart = new EventEmitter<void>();
-  @Output() readonly toggleMobileMenu = new EventEmitter<void>();
 }

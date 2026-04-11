@@ -1,6 +1,6 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogFacade } from '@/features/catalog/data-access/catalog.facade';
 import {
   CategoryFilterType,
@@ -13,7 +13,7 @@ import { IconComponent } from '@/shared/components/icon.component';
 @Component({
   selector: 'app-category',
   standalone: true,
-  imports: [CommonModule, IconComponent, RouterModule],
+  imports: [CommonModule, IconComponent, RouterLink],
   providers: [CategoryPageFacade],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
@@ -27,13 +27,12 @@ import { IconComponent } from '@/shared/components/icon.component';
           <nav class="text-xs text-gray-500 mb-4 flex gap-2">
             <span class="hover:text-honey cursor-pointer" (click)="goHome()">Trang chủ</span>
             <span>></span>
-            <span class="font-bold text-charcoal">Phụ kiện bàn làm việc</span>
+            <span class="font-bold text-charcoal">{{ currentCategoryName() }}</span>
           </nav>
 
-          <h1 class="text-3xl md:text-4xl font-extrabold text-charcoal mb-3">Phụ kiện bàn làm việc</h1>
+          <h1 class="text-3xl md:text-4xl font-extrabold text-charcoal mb-3">{{ currentCategoryName() }}</h1>
           <p class="text-gray-600 max-w-2xl leading-relaxed">
-            Góc làm việc gọn gàng, tạo cảm hứng với các mẫu khay cắm bút, bảng ghim, đồng hồ để bàn...
-            Thiết kế tối giản, phong cách Aesthetic hiện đại giúp bạn tập trung sáng tạo.
+            Khám phá các sản phẩm nổi bật thuộc danh mục {{ currentCategoryName() | lowercase }} chất lượng, giá ưu đãi.
           </p>
         </div>
       </div>
@@ -155,7 +154,23 @@ import { IconComponent } from '@/shared/components/icon.component';
               </div>
             </div>
 
-            @if (filteredProducts().length > 0) {
+            @if (isLoading()) {
+              <div class="rounded-xl bg-white px-6 py-20 text-center shadow-sm">
+                <app-icon name="loader" class="w-8 h-8 animate-spin mx-auto mb-4 text-honey"></app-icon>
+                <p class="text-lg text-gray-600">Dang tai san pham...</p>
+              </div>
+            } @else if (hasError()) {
+              <div class="rounded-xl border border-red-200 bg-red-50 px-6 py-20 text-center">
+                <h2 class="text-2xl font-bold text-charcoal mb-3">Khong the tai danh muc</h2>
+                <p class="text-gray-600 mb-6">{{ errorMessage() ?? 'Da xay ra loi khi tai danh sach san pham.' }}</p>
+                <button
+                  class="px-6 py-3 rounded-full bg-charcoal text-white font-bold hover:bg-honey hover:text-charcoal transition-colors"
+                  (click)="reloadCategory()"
+                >
+                  Thu lai
+                </button>
+              </div>
+            } @else if (filteredProducts().length > 0) {
               <div
                 [class.grid]="viewMode() === 'grid'"
                 [class.grid-cols-2]="viewMode() === 'grid'"
@@ -170,10 +185,9 @@ import { IconComponent } from '@/shared/components/icon.component';
                 @for (product of visibleProducts(); track product.id) {
                   @if (viewMode() === 'grid') {
                     <div class="group relative bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300">
-                      <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100 cursor-pointer"
-                           [routerLink]="['/product', product.id]">
-                        <img [src]="product.image" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0">
-                        <img [src]="product.hoverImage" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+                      <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100 cursor-pointer" [routerLink]="['/product', product.id]">
+                        <img [src]="product.image" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0">
+                        <img [src]="product.hoverImage" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 
                         <div class="absolute top-2 left-2 flex flex-col gap-1">
                           @if (product.tag) {
@@ -195,21 +209,21 @@ import { IconComponent } from '@/shared/components/icon.component';
                           </button>
                         </div>
 
-                        <button (click)="addToCart(product.id); $event.stopPropagation()" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
+                        <button (click)="addToCart(product.id)" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
                           <app-icon name="plus" class="w-4 h-4"></app-icon> Thêm vào giỏ
                         </button>
                       </div>
 
-                      <div class="p-4" [routerLink]="['/product', product.id]">
-                        <h3 class="font-semibold text-charcoal hover:text-honey cursor-pointer line-clamp-2 min-h-[3rem] mb-1">{{ product.name }}</h3>
+                      <div class="p-4">
+                        <h3 class="font-semibold text-charcoal hover:text-honey cursor-pointer line-clamp-2 min-h-[3rem] mb-1" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
 
-                        <div class="flex items-center gap-2 mb-2">
-                          <div class="flex text-yellow-400 gap-1.5">
+                        <div class="flex items-center gap-1 mb-2">
+                          <div class="flex text-yellow-400">
                             @for (star of [1,2,3,4,5]; track star) {
-                              <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
+                              <app-icon name="star-filled" class="w-3 h-3"></app-icon>
                             }
                           </div>
-                          <span class="text-xs text-gray-400 font-medium">({{ product.reviews || 0 }})</span>
+                          <span class="text-xs text-gray-400">({{ product.reviews }})</span>
                         </div>
 
                         <div class="flex items-baseline gap-2">
@@ -223,15 +237,14 @@ import { IconComponent } from '@/shared/components/icon.component';
                   }
 
                   @if (viewMode() === 'list') {
-                    <div class="group flex gap-4 bg-white p-4 rounded-lg shadow-sm border border-transparent hover:border-honey transition-all cursor-pointer"
-                         [routerLink]="['/product', product.id]">
-                      <div class="w-32 h-32 flex-shrink-0 relative overflow-hidden rounded bg-gray-100">
-                        <img [src]="product.image" (error)="handleImageError($event)" class="w-full h-full object-cover">
+                    <div class="group flex gap-4 bg-white p-4 rounded-lg shadow-sm border border-transparent hover:border-honey transition-all">
+                      <div class="w-32 h-32 flex-shrink-0 relative overflow-hidden rounded bg-gray-100 cursor-pointer" [routerLink]="['/product', product.id]">
+                        <img [src]="product.image" class="w-full h-full object-cover">
                       </div>
                       <div class="flex-grow flex flex-col justify-center">
                         <div class="flex justify-between items-start">
                           <div>
-                            <h3 class="font-bold text-lg text-charcoal mb-1">{{ product.name }}</h3>
+                            <h3 class="font-bold text-lg text-charcoal mb-1 cursor-pointer hover:text-honey" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
                             <div class="flex items-center gap-1 mb-2 text-yellow-400">
                               <app-icon name="star-filled" class="w-3 h-3"></app-icon>
                               <span class="text-xs text-charcoal font-semibold">{{ product.rating }}</span>
@@ -302,19 +315,33 @@ import { IconComponent } from '@/shared/components/icon.component';
     }
   `]
 })
-export class CategoryComponent {
+export class CategoryComponent implements OnInit {
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
   private readonly categoryPageFacade = inject(CategoryPageFacade);
   readonly catalogFacade = inject(CatalogFacade);
 
+  readonly currentCategoryName = this.categoryPageFacade.currentCategoryName;
   readonly viewMode = this.categoryPageFacade.viewMode;
   readonly displayCount = this.categoryPageFacade.displayCount;
   readonly currentSortLabel = this.categoryPageFacade.currentSortLabel;
   readonly styles = this.categoryPageFacade.styles;
   readonly materials = this.categoryPageFacade.materials;
   readonly colors = this.categoryPageFacade.colors;
+  readonly isLoading = this.categoryPageFacade.isLoading;
+  readonly hasError = this.categoryPageFacade.hasError;
+  readonly errorMessage = this.categoryPageFacade.errorMessage;
   readonly filteredProducts = this.categoryPageFacade.filteredProducts;
   readonly visibleProducts = this.categoryPageFacade.visibleProducts;
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      const slug = params.get('slug');
+      if (slug) {
+        this.categoryPageFacade.currentSlug.set(slug);
+      }
+    });
+  }
 
   goHome() {
     this.router.navigate(['/']);
@@ -344,11 +371,14 @@ export class CategoryComponent {
     return this.categoryPageFacade.isColorSelected(hex);
   }
 
-  handleImageError(event: any) {
-    event.target.src = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
-  }
-
   resetFilters() {
     this.categoryPageFacade.resetFilters();
+  }
+
+  reloadCategory() {
+    const slug = this.route.snapshot.paramMap.get('slug');
+    if (slug) {
+      this.categoryPageFacade.loadCategory(slug);
+    }
   }
 }

@@ -2,6 +2,13 @@
 
 ## 1. Ket noi DB
 
+Khoi dong SQL Server bang Docker Compose (tu root repo):
+
+```powershell
+cd d:\2026\TMDT_Nhom6_latest\TMDT_Nhom6
+docker compose -f docker-compose.sql.yml up -d
+```
+
 Backend doc connection string trong:
 
 - [appsettings.json](/d:/2026/TMDT_Nhom6_latest/TMDT_Nhom6/HomeDecorShop/HomeDecorShop.API/appsettings.json)

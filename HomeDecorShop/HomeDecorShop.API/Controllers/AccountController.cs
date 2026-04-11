@@ -1,10 +1,12 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/account")]
 [SwaggerTag("Operations for the currently authenticated user.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -31,19 +33,19 @@ public sealed class AccountController(IUserService userService) : ApiControllerB
     public ActionResult<UserView> UpdateProfile([FromBody] UpdateProfileInput input)
     {
         var user = userService.UpdateProfile(ReadAuthenticatedToken(), input);
-        return Ok(user ?? throw new UnauthorizedException("Authentication token is invalid or has expired."));
+        return Ok(user ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid));
     }
 
     private UserView GetCurrentUser()
     {
         var user = userService.GetByToken(ReadRequiredToken());
-        return user ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+        return user ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
     }
 
     private string ReadAuthenticatedToken()
     {
         var token = ReadRequiredToken();
-        _ = userService.GetByToken(token) ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+        _ = userService.GetByToken(token) ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
         return token;
     }
 }

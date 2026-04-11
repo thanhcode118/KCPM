@@ -1,4 +1,5 @@
-export type OrderStatus = 'pending' | 'paid' | 'shipping' | 'completed' | 'cancelled';
+export type OrderStatus = 'pending' | 'processing' | 'shipping' | 'completed' | 'cancelled';
+export type OrderPaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
 
 export interface OrderItem {
   id: number;
@@ -6,6 +7,9 @@ export interface OrderItem {
   productName: string;
   quantity: number;
   unitPrice: number;
+  productSku?: string;
+  productImage?: string;
+  lineTotal?: number;
 }
 
 export interface Order {
@@ -17,5 +21,14 @@ export interface Order {
   shippingFee: number;
   totalAmount: number;
   status: OrderStatus;
+  paymentStatus?: OrderPaymentStatus;
+  fullName?: string;
+  phone?: string;
+  line1?: string;
+  ward?: string;
+  district?: string;
+  city?: string;
+  notes?: string;
   createdAt: string;
+  updatedAt?: string;
 }

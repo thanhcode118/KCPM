@@ -1,25 +1,29 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Cart, Order, User } from '@/core/models';
-import { MOCK_CARTS, MOCK_ORDERS, MOCK_USERS } from '@/core/mock-data/ecommerce.mock';
+import { MOCK_USERS } from '@/core/mock-data/ecommerce.mock';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
-import { CommerceOrderService, PlaceOrderInput } from './order.service';
-import { OrderView } from '@/features/admin/data-access/admin-order.service';
-import { Observable, tap } from 'rxjs';
+
+const guestCartStorageKey = 'guest-cart';
+
+const createEmptyCart = (): Cart => ({
+  id: 0,
+  userId: 0,
+  items: [],
+  subtotal: 0,
+  updatedAt: new Date().toISOString()
+});
 
 @Injectable({ providedIn: 'root' })
 export class CommerceStore {
   private readonly catalogStore = inject(CatalogStore);
-  private readonly orderService = inject(CommerceOrderService);
 
   readonly users = signal<User[]>(MOCK_USERS);
-  readonly orders = signal<OrderView[]>([]);
-  readonly activeCart = signal<Cart>({
-    id: 0,
-    userId: 0,
-    items: [],
-    updatedAt: new Date().toISOString()
-  });
-  readonly selectedProductIds = signal<Set<number>>(new Set());
+  readonly orders = signal<Order[]>([]);
+  readonly activeCart = signal<Cart>(this.readPersistedGuestCart());
+
+  constructor() {
+    this.persistGuestCart(this.activeCart());
+  }
 
   readonly cartCount = computed(() => {
     return this.activeCart().items.reduce((total, item) => total + item.quantity, 0);
@@ -38,7 +42,7 @@ export class CommerceStore {
     this.activeCart.update((cart) => {
       const existingItem = cart.items.find((item) => item.productId === productId);
       if (existingItem) {
-        return {
+        const nextCart = {
           ...cart,
           items: cart.items.map((item) =>
             item.productId === productId
@@ -47,88 +51,133 @@ export class CommerceStore {
           ),
           updatedAt: new Date().toISOString()
         };
+        this.persistGuestCart(nextCart);
+        return nextCart;
       }
 
-      return {
+      const nextCart = {
         ...cart,
         items: [
           ...cart.items,
           {
             id: Date.now(),
             productId,
+            productName: product.name,
+            productImage: product.image,
             quantity,
             unitPrice: product.price
           }
         ],
         updatedAt: new Date().toISOString()
       };
-    });
-
-    // Automatically select newly added items
-    this.selectedProductIds.update(set => {
-      const newSet = new Set(set);
-      newSet.add(productId);
-      return newSet;
+      this.persistGuestCart(nextCart);
+      return nextCart;
     });
   }
 
   removeFromCart(productId: number): void {
     this.activeCart.update((cart) => {
-      return {
+      const nextCart = {
         ...cart,
         items: cart.items.filter((item) => item.productId !== productId),
         updatedAt: new Date().toISOString()
       };
+      this.persistGuestCart(nextCart);
+      return nextCart;
     });
-
-    // Remove from selection if deleted
-    this.selectedProductIds.update(set => {
-      const newSet = new Set(set);
-      newSet.delete(productId);
-      return newSet;
-    });
-  }
-
-  toggleItemSelection(productId: number): void {
-    this.selectedProductIds.update(set => {
-      const newSet = new Set(set);
-      if (newSet.has(productId)) {
-        newSet.delete(productId);
-      } else {
-        newSet.add(productId);
-      }
-      return newSet;
-    });
-  }
-
-  toggleSelectAll(selected: boolean): void {
-    if (selected) {
-      const allIds = this.activeCart().items.map(i => i.productId);
-      this.selectedProductIds.set(new Set(allIds));
-    } else {
-      this.selectedProductIds.set(new Set());
-    }
   }
 
   clearCart(): void {
-    this.activeCart.update((cart) => ({
-      ...cart,
+    const nextCart = {
+      ...this.activeCart(),
       items: [],
+      subtotal: 0,
       updatedAt: new Date().toISOString()
-    }));
+    };
+    this.activeCart.set(nextCart);
+    this.persistGuestCart(nextCart);
   }
 
-  fetchMyOrders(): void {
-    this.orderService.getMyOrders().subscribe((orders) => this.orders.set(orders));
+  replaceCart(cart: Cart): void {
+    this.activeCart.set(cart);
+    this.persistGuestCart(cart);
   }
 
-  placeOrder(input: PlaceOrderInput): Observable<OrderView> {
-    return this.orderService.placeOrder(input).pipe(
-      tap((newOrder) => {
-        this.orders.update((list) => [newOrder, ...list]);
-        this.clearCart();
-      })
+  replaceOrders(orders: Order[]): void {
+    this.orders.set(orders);
+  }
+
+  recordOrder(order: Order): void {
+    this.orders.update((orders) => [
+      order,
+      ...orders.filter((existing) => existing.id !== order.id)
+    ]);
+  }
+
+  markOrderAsProcessing(orderId: number): void {
+    this.orders.update((orders) =>
+      orders.map((order) =>
+        order.id === orderId
+          ? { ...order, status: 'processing', paymentStatus: 'paid' }
+          : order
+      )
     );
   }
-}
 
+  replaceOrder(order: Order): void {
+    this.orders.update((orders) => [
+      order,
+      ...orders.filter((existing) => existing.id !== order.id)
+    ]);
+  }
+
+  resetForGuest(): void {
+    this.orders.set([]);
+    this.activeCart.set(this.readPersistedGuestCart());
+  }
+
+  clearGuestCart(): void {
+    const nextCart = createEmptyCart();
+    this.activeCart.set(nextCart);
+    this.persistGuestCart(nextCart);
+  }
+
+  private readPersistedGuestCart(): Cart {
+    try {
+      const serialized = globalThis.localStorage?.getItem(guestCartStorageKey);
+      if (!serialized) {
+        return createEmptyCart();
+      }
+
+      const parsed = JSON.parse(serialized) as Partial<Cart>;
+      if (!Array.isArray(parsed.items)) {
+        return createEmptyCart();
+      }
+
+      return {
+        id: parsed.id ?? 0,
+        userId: parsed.userId ?? 0,
+        items: parsed.items,
+        subtotal: parsed.subtotal ?? 0,
+        updatedAt: parsed.updatedAt ?? new Date().toISOString()
+      };
+    }
+    catch {
+      return createEmptyCart();
+    }
+  }
+
+  private persistGuestCart(cart: Cart): void {
+    try {
+      if (cart.id !== 0 || cart.userId !== 0) {
+        globalThis.localStorage?.removeItem(guestCartStorageKey);
+        return;
+      }
+
+      globalThis.localStorage?.setItem(guestCartStorageKey, JSON.stringify(cart));
+    }
+    catch {
+      // Ignore storage failures and keep the in-memory cart usable.
+    }
+  }
+}

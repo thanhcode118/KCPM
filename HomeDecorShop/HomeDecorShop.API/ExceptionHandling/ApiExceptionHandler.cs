@@ -12,9 +12,10 @@ internal sealed class ApiExceptionHandler(
         Exception exception,
         CancellationToken cancellationToken)
     {
-        var problemDetails = CreateProblemDetails(httpContext, exception);
+        var (problemDetails, code) = CreateProblemDetails(httpContext, exception);
         httpContext.Response.StatusCode = problemDetails.Status ?? StatusCodes.Status500InternalServerError;
         httpContext.Response.ContentType = "application/problem+json; charset=utf-8";
+        problemDetails.Extensions["code"] = code;
         problemDetails.Extensions["traceId"] = httpContext.TraceIdentifier;
 
         if (problemDetails.Status >= 500)
@@ -40,39 +41,39 @@ internal sealed class ApiExceptionHandler(
         return true;
     }
 
-    private static ProblemDetails CreateProblemDetails(HttpContext httpContext, Exception exception)
+    private static (ProblemDetails ProblemDetails, string Code) CreateProblemDetails(HttpContext httpContext, Exception exception)
     {
         if (exception is RequestValidationException validationException)
         {
-            return new HttpValidationProblemDetails(validationException.Errors)
+            return (new HttpValidationProblemDetails(validationException.Errors)
             {
                 Title = validationException.Title,
                 Detail = validationException.Message,
                 Status = validationException.StatusCode,
                 Type = validationException.Type,
                 Instance = httpContext.Request.Path
-            };
+            }, validationException.Code);
         }
 
         if (exception is AppException appException)
         {
-            return new ProblemDetails
+            return (new ProblemDetails
             {
                 Title = appException.Title,
                 Detail = appException.Message,
                 Status = appException.StatusCode,
                 Type = appException.Type,
                 Instance = httpContext.Request.Path
-            };
+            }, appException.Code);
         }
 
-        return new ProblemDetails
+        return (new ProblemDetails
         {
             Title = "Internal server error",
             Detail = "An unexpected error occurred while processing the request.",
             Status = StatusCodes.Status500InternalServerError,
             Type = "https://httpstatuses.com/500",
             Instance = httpContext.Request.Path
-        };
+        }, AppErrorCodes.InternalServerError);
     }
 }

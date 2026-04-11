@@ -1,20 +1,25 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
-import { Category, Product } from '@/core/models';
-import {
-  MOCK_CATEGORIES,
-  MOCK_CATEGORY_PRODUCTS,
-  MOCK_FLASH_SALE_PRODUCTS,
-  MOCK_NEW_ARRIVALS_PRODUCTS,
-  MOCK_NEW_COLLECTION_PRODUCTS,
-  MOCK_TRENDING_PRODUCTS
-} from '@/core/mock-data/ecommerce.mock';
+import { Injectable, computed, inject, signal, type WritableSignal } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Category, Product, CategoryViewDto, ProductListResultDto, mapProductViewDtoToProduct } from '@/core/models';
+import { apiEndpoints } from '@/core/api/api-endpoints';
 
-import { ApiService } from '@/core/services/api.service';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+interface LoadState {
+  isLoading: boolean;
+  hasError: boolean;
+  errorMessage: string | null;
+  isLoaded: boolean;
+}
+
+const createIdleState = (): LoadState => ({
+  isLoading: false,
+  hasError: false,
+  errorMessage: null,
+  isLoaded: false
+});
 
 @Injectable({ providedIn: 'root' })
 export class CatalogStore {
-  private apiService = inject(ApiService);
+  private readonly http = inject(HttpClient);
 
   readonly categories = signal<Category[]>([]);
   readonly categoryProducts = signal<Product[]>([]);
@@ -22,42 +27,12 @@ export class CatalogStore {
   readonly flashSaleProducts = signal<Product[]>([]);
   readonly newCollectionProducts = signal<Product[]>([]);
   readonly newArrivals = signal<Product[]>([]);
-
-  constructor() {
-    // Pre-populate with mock data so the UI isn't empty if the API hangs
-    this.categoryProducts.set(MOCK_CATEGORY_PRODUCTS);
-    this.trendingProducts.set(MOCK_TRENDING_PRODUCTS);
-    this.flashSaleProducts.set(MOCK_FLASH_SALE_PRODUCTS);
-    this.newCollectionProducts.set(MOCK_NEW_COLLECTION_PRODUCTS);
-    this.newArrivals.set(MOCK_NEW_ARRIVALS_PRODUCTS);
-
-    this.apiService.getCategories()
-      .pipe(takeUntilDestroyed())
-      .subscribe(cats => {
-        if (cats && cats.length > 0) {
-          this.categories.set(cats);
-        }
-      });
-
-    this.apiService.getProducts()
-      .pipe(takeUntilDestroyed())
-      .subscribe(products => {
-        if (products && products.length > 0) {
-          this.categoryProducts.set(products);
-          this.trendingProducts.set(products.filter(p => p.tag === 'Best Seller' || p.tag === 'HOT'));
-          this.newArrivals.set(products.filter(p => p.tag === 'NEW'));
-          this.newCollectionProducts.set(products.slice(0, 10));
-        }
-      });
-
-    this.apiService.getPromotions()
-      .pipe(takeUntilDestroyed())
-      .subscribe(products => {
-        if (products && products.length > 0) {
-          this.flashSaleProducts.set(products);
-        }
-      });
-  }
+  readonly categoriesState = signal<LoadState>(createIdleState());
+  readonly categoryProductsState = signal<LoadState>(createIdleState());
+  readonly trendingProductsState = signal<LoadState>(createIdleState());
+  readonly flashSaleProductsState = signal<LoadState>(createIdleState());
+  readonly newCollectionProductsState = signal<LoadState>(createIdleState());
+  readonly newArrivalsState = signal<LoadState>(createIdleState());
 
   readonly allProducts = computed(() => {
     const uniqueById = new Map<number, Product>();
@@ -77,7 +52,115 @@ export class CatalogStore {
     return Array.from(uniqueById.values()).sort((a, b) => a.id - b.id);
   });
 
+  constructor() {
+    this.loadInitialData();
+  }
+
   findProductById(productId: number): Product | undefined {
     return this.allProducts().find((product) => product.id === productId);
+  }
+
+  private loadInitialData(): void {
+    this.loadCategories();
+    this.loadProducts(
+      `${apiEndpoints.products.list}?sort=best_selling&pageSize=12`,
+      this.categoryProducts,
+      this.categoryProductsState,
+      'Khong tai duoc danh sach best seller.'
+    );
+    this.loadProducts(
+      `${apiEndpoints.products.list}?sort=best_selling&pageSize=8`,
+      this.trendingProducts,
+      this.trendingProductsState,
+      'Khong tai duoc danh sach trending.'
+    );
+    this.loadProducts(
+      `${apiEndpoints.products.list}?onSale=true&pageSize=8`,
+      this.flashSaleProducts,
+      this.flashSaleProductsState,
+      'Khong tai duoc danh sach flash sale.'
+    );
+    this.loadProducts(
+      `${apiEndpoints.products.list}?sort=newest&pageSize=12`,
+      this.newCollectionProducts,
+      this.newCollectionProductsState,
+      'Khong tai duoc bo suu tap moi.'
+    );
+    this.loadProducts(
+      `${apiEndpoints.products.list}?sort=newest&pageSize=8`,
+      this.newArrivals,
+      this.newArrivalsState,
+      'Khong tai duoc danh sach san pham moi.'
+    );
+  }
+
+  private loadCategories(): void {
+    this.startLoading(this.categoriesState);
+
+    this.http.get<CategoryViewDto[]>(apiEndpoints.categories.list).subscribe({
+      next: (dtos) => {
+        this.categories.set(
+          dtos.map((dto) => ({
+            id: dto.id,
+            name: dto.name,
+            slug: dto.slug,
+            isActive: dto.isActive,
+            image: ''
+          }))
+        );
+        this.finishLoading(this.categoriesState);
+      },
+      error: () => {
+        this.categories.set([]);
+        this.failLoading(this.categoriesState, 'Khong tai duoc danh muc san pham.');
+      }
+    });
+  }
+
+  private loadProducts(
+    url: string,
+    target: WritableSignal<Product[]>,
+    state: WritableSignal<LoadState>,
+    errorMessage: string
+  ): void {
+    this.startLoading(state);
+
+    this.http.get<ProductListResultDto>(url).subscribe({
+      next: (result) => {
+        target.set(result.items.map(mapProductViewDtoToProduct));
+        this.finishLoading(state);
+      },
+      error: () => {
+        target.set([]);
+        this.failLoading(state, errorMessage);
+      }
+    });
+  }
+
+  private startLoading(state: WritableSignal<LoadState>): void {
+    state.set({
+      isLoading: true,
+      hasError: false,
+      errorMessage: null,
+      isLoaded: false
+    });
+  }
+
+  private finishLoading(state: WritableSignal<LoadState>): void {
+    state.set({
+      isLoading: false,
+      hasError: false,
+      errorMessage: null,
+      isLoaded: true
+    });
+  }
+
+  private failLoading(state: WritableSignal<LoadState>, errorMessage: string): void {
+    state.set({
+      isLoading: false,
+      hasError: true,
+      errorMessage,
+      isLoaded: true
+    });
   }
 }

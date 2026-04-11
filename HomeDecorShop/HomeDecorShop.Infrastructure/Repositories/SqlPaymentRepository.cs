@@ -28,6 +28,13 @@ public sealed class SqlPaymentRepository(AppDbContext context) : IPaymentReposit
             .FirstOrDefault(payment => payment.Id == paymentId);
     }
 
+    public Payment? GetByTransactionCode(string transactionCode)
+    {
+        var normalized = transactionCode.Trim();
+        return Query()
+            .FirstOrDefault(payment => payment.TransactionCode == normalized);
+    }
+
     public Payment Create(Payment payment)
     {
         context.Payments.Add(payment);

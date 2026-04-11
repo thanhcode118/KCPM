@@ -33,7 +33,7 @@ public sealed class ProductService(
 
         if (categories.Count > 0)
         {
-            query = query.Where(product => categories.Contains(Normalize(GetCategoryName(product))));
+            query = query.Where(product => MatchesCategory(product, categories));
         }
 
         if (brands.Count > 0)
@@ -264,6 +264,14 @@ public sealed class ProductService(
         return terms.Any(term => Normalize(term).Contains(query, StringComparison.Ordinal));
     }
 
+    private static bool MatchesCategory(Product product, IReadOnlyCollection<string> categories)
+    {
+        var categoryName = Normalize(GetCategoryName(product));
+        var categorySlug = Normalize(GetCategorySlug(product));
+
+        return categories.Contains(categoryName) || categories.Contains(categorySlug);
+    }
+
     private static bool IsInStock(Product product) =>
         product.InStock || product.StockLeft > 0;
 
@@ -315,6 +323,9 @@ public sealed class ProductService(
     private static string GetCategoryName(Product product) =>
         product.CategoryNavigation?.Name ?? product.Category;
 
+    private static string GetCategorySlug(Product product) =>
+        product.CategoryNavigation?.Slug ?? string.Empty;
+
     private void ValidatePricing(decimal price, decimal? originalPrice)
     {
         if (originalPrice is null || originalPrice.Value >= price)
@@ -327,7 +338,8 @@ public sealed class ProductService(
             new Dictionary<string, string[]>
             {
                 ["originalPrice"] = ["Original price must be greater than or equal to price."]
-            });
+            },
+            AppErrorCodes.ProductOriginalPriceInvalid);
     }
 
     private Category RequireActiveCategory(int categoryId)
@@ -340,12 +352,13 @@ public sealed class ProductService(
                 new Dictionary<string, string[]>
                 {
                     ["categoryId"] = ["Selected category does not exist."]
-                });
+                },
+                AppErrorCodes.CategoryInvalid);
         }
 
         if (!category.IsActive)
         {
-            throw new ConflictException("Selected category is inactive and cannot be assigned to a product.");
+            throw new ConflictException("Selected category is inactive and cannot be assigned to a product.", AppErrorCodes.CategoryInactive);
         }
 
         return category;
@@ -356,7 +369,7 @@ public sealed class ProductService(
         var existing = repository.GetBySku(sku);
         if (existing is not null && existing.ProductId != excludedProductId)
         {
-            throw new ConflictException("Product SKU is already in use.");
+            throw new ConflictException("Product SKU is already in use.", AppErrorCodes.ProductSkuAlreadyExists);
         }
     }
 
@@ -365,7 +378,7 @@ public sealed class ProductService(
         var existing = repository.GetBySlug(slug);
         if (existing is not null && existing.ProductId != excludedProductId)
         {
-            throw new ConflictException("Product slug is already in use.");
+            throw new ConflictException("Product slug is already in use.", AppErrorCodes.ProductSlugAlreadyExists);
         }
     }
 

@@ -1,155 +1,99 @@
 using System.Data;
 using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
+using HomeDecorShop.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace HomeDecorShop.API;
 
 internal static class DatabaseStartupExtensions
 {
+    private const string AdminEmail = "admin1@homedecorshop.local";
+    private const string LegacyAdminEmail = "admin1";
+    private const string AdminPassword = "admin123";
+
     public static void InitializeDatabase(this WebApplication app)
     {
         using var scope = app.Services.CreateScope();
 
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-        db.Database.SetCommandTimeout(120);
-        
-        try
+        var userRepository = scope.ServiceProvider.GetRequiredService<IUserRepository>();
+        var canConnect = db.Database.CanConnect();
+        var pendingMigrations = db.Database.GetPendingMigrations().ToArray();
+
+        if (pendingMigrations.Length > 0)
         {
-            db.Database.Migrate();
-        }
-        catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 1801)
-        {
-            // Database already exists but EF tried to create it. 
-            // This can happen due to permission issues with 'View Any Database'.
-            // We can ignore this and try to apply migrations again or just proceed.
-            Console.WriteLine("Warning: Database already exists, ignoring creation error and proceeding with migrations...");
-            // No need to call Migrate() again immediately as the failure happened during CREATE DATABASE
-            // If the database now exists, we should be able to proceed.
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Error during migration: {ex.Message}");
-            throw;
+            if (canConnect && HasExistingApplicationSchema(db))
+            {
+                Console.WriteLine(
+                    "Skipping auto-migration because the application schema already exists but the EF migration history is empty or out of sync.");
+            }
+            else
+            {
+                db.Database.EnsureCreated();
+            }
         }
 
         EnsureCommerceSchema(db);
-        SeedAdminAccounts(db);
-        // FixProductImages(db);
+        EnsureAdminUser(userRepository);
     }
 
-    private static void FixProductImages(AppDbContext db)
+    private static void EnsureAdminUser(IUserRepository userRepository)
     {
-        // Map sản phẩm 51-100 sang ảnh có sẵn trong assets/images/
-        var imageMap = new Dictionary<int, string>
+        var admin = userRepository.GetByEmail(AdminEmail);
+        if (admin is not null)
         {
-            { 51, "assets/images/lo-hoa-tron.jpg" },
-            { 52, "assets/images/khung-anh-day.jpg" },
-            { 53, "assets/images/den-neon-chu.jpg" },
-            { 54, "assets/images/ke-go-nho.jpg" },
-            { 55, "assets/images/tham-long.jpg" },
-            { 56, "assets/images/nen-lo.jpg" },
-            { 57, "assets/images/hop-go.jpg" },
-            { 58, "assets/images/tranh-abstract.jpg" },
-            { 59, "assets/images/guong-tron.jpg" },
-            { 60, "assets/images/den-tron.jpg" },
-            { 61, "assets/images/lo-mau.jpg" },
-            { 62, "assets/images/ke-treo-nho.jpg" },
-            { 63, "assets/images/khay-nho.jpg" },
-            { 64, "assets/images/dong-ho-mini.jpg" },
-            { 65, "assets/images/chau-gom.jpg" },
-            { 66, "assets/images/den-led-trang-tri.jpg" },
-            { 67, "assets/images/khung-mini.jpg" },
-            { 68, "assets/images/tham-tron.jpg" },
-            { 69, "assets/images/nen-dau.jpg" },
-            { 70, "assets/images/hop-dung.jpg" },
-            { 71, "assets/images/lo-hoa-thuy-tinh.jpg" },
-            { 72, "assets/images/ke-go-2-tang.jpg" },
-            { 73, "assets/images/den-ban.jpg" },
-            { 74, "assets/images/tranh-hoa-la.jpg" },
-            { 75, "assets/images/guong-bo-vien.jpg" },
-            { 76, "assets/images/tham-long.jpg" },
-            { 77, "assets/images/nen-nhai.jpg" },
-            { 78, "assets/images/khay-go.jpg" },
-            { 79, "assets/images/gia-sach-treo.jpg" },
-            { 80, "assets/images/den-go.jpg" },
-            { 81, "assets/images/lo-men-trang.jpg" },
-            { 82, "assets/images/khung-anh-go.jpg" },
-            { 83, "assets/images/tham-mini.jpg" },
-            { 84, "assets/images/den-mini.jpg" },
-            { 85, "assets/images/nen-chanh-sa.jpg" },
-            { 86, "assets/images/hop-go.jpg" },
-            { 87, "assets/images/tranh-phong-ngu.jpg" },
-            { 88, "assets/images/guong-tron.jpg" },
-            { 89, "assets/images/den-ban.jpg" },
-            { 90, "assets/images/gio-cay.jpg" },
-            { 91, "assets/images/tham-mini.jpg" },
-            { 92, "assets/images/nen-lo.jpg" },
-            { 93, "assets/images/khay-nho.jpg" },
-            { 94, "assets/images/gia-sach-treo.jpg" },
-            { 95, "assets/images/den-mini.jpg" },
-            { 96, "assets/images/lo-gom-nham.jpg" },
-            { 97, "assets/images/tranh-cua.jpg" },
-            { 98, "assets/images/guong-bo-vien.jpg" },
-            { 99, "assets/images/den-tron.jpg" },
-            { 100, "assets/images/khay-nho.jpg" },
-        };
+            var shouldUpdate = false;
 
-        var productIds = imageMap.Keys.ToList();
-        // Chỉ update sản phẩm nào chưa có ảnh hợp lệ (đường dẫn bị thiếu file)
-        var productsToFix = db.Products
-            .Where(p => productIds.Contains(p.ProductId) &&
-                        (p.Image == null || !p.Image.StartsWith("assets/images/")))
-            .ToList();
-
-        if (productsToFix.Count == 0) return;
-
-        foreach (var product in productsToFix)
-        {
-            if (imageMap.TryGetValue(product.ProductId, out var imgPath))
+            if (admin.Role != UserRole.Admin)
             {
-                product.Image = imgPath;
-                product.HoverImage = imgPath;
-            }
-        }
-
-        db.SaveChanges();
-    }
-
-    private static void SeedAdminAccounts(AppDbContext db)
-    {
-        var admins = new[]
-        {
-            new { Email = "admin1", FullName = "Administrator 1", Phone = "0900000001", Password = "admin123" },
-            new { Email = "admin2", FullName = "Administrator 2", Phone = "0900000002", Password = "admin123" },
-        };
-
-        foreach (var admin in admins)
-        {
-            var normalizedEmail = admin.Email.Trim().ToLowerInvariant();
-            if (db.Users.Any(u => u.Email == normalizedEmail))
-            {
-                continue;
+                admin.Role = UserRole.Admin;
+                shouldUpdate = true;
             }
 
-            var user = new HomeDecorShop.Domain.User
+            if (!admin.IsEmailConfirmed)
             {
-                Email = normalizedEmail,
-                FullName = admin.FullName,
-                Phone = admin.Phone,
-                Role = HomeDecorShop.Domain.UserRole.Admin,
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword(admin.Password),
-                CreatedAt = DateTime.UtcNow,
-                CurrentToken = Guid.NewGuid().ToString("N"),
-                Addresses = new List<HomeDecorShop.Domain.Address>(),
-                IsEmailConfirmed = true,
-                EmailConfirmationToken = null
-            };
+                admin.IsEmailConfirmed = true;
+                shouldUpdate = true;
+            }
 
-            db.Users.Add(user);
+            if (string.IsNullOrWhiteSpace(admin.CurrentToken))
+            {
+                admin.CurrentToken = Guid.NewGuid().ToString("N");
+                shouldUpdate = true;
+            }
+
+            if (shouldUpdate)
+            {
+                userRepository.Update(admin);
+            }
+
+            return;
         }
 
-        db.SaveChanges();
+        var legacyAdmin = userRepository.GetByEmail(LegacyAdminEmail);
+        if (legacyAdmin is not null)
+        {
+            legacyAdmin.Email = AdminEmail;
+            legacyAdmin.Role = UserRole.Admin;
+            legacyAdmin.IsEmailConfirmed = true;
+            legacyAdmin.CurrentToken ??= Guid.NewGuid().ToString("N");
+            userRepository.Update(legacyAdmin);
+            return;
+        }
+
+        userRepository.Create(new User
+        {
+            Email = AdminEmail,
+            FullName = "Administrator",
+            Phone = "0123456789",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(AdminPassword),
+            Role = UserRole.Admin,
+            CreatedAt = DateTime.UtcNow,
+            CurrentToken = Guid.NewGuid().ToString("N"),
+            IsEmailConfirmed = true,
+            Addresses = new List<Address>()
+        });
     }
 
     private static bool HasExistingApplicationSchema(AppDbContext db)

@@ -1,4 +1,5 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeDecorShop.API.Controllers;
@@ -10,12 +11,14 @@ namespace HomeDecorShop.API.Controllers;
 public sealed class LegacyFeedbackController(IFeedbackService feedbackService) : ControllerBase
 {
     [HttpGet]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     public IActionResult GetAll()
     {
         return Ok(feedbackService.GetAll());
     }
 
     [HttpPost]
+    [AllowAnonymous]
     public IActionResult Create([FromBody] FeedbackUpsertInput input)
     {
         var created = feedbackService.Create(input);

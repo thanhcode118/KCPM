@@ -10,9 +10,13 @@ export class HomeFacade {
   private readonly checkoutFacade = inject(CheckoutFacade);
 
   readonly trendingProducts = this.catalogStore.trendingProducts;
+  readonly trendingProductsState = this.catalogStore.trendingProductsState;
   readonly flashSaleProducts = this.catalogStore.flashSaleProducts;
+  readonly flashSaleProductsState = this.catalogStore.flashSaleProductsState;
   readonly newArrivals = this.catalogStore.newArrivals;
+  readonly newArrivalsState = this.catalogStore.newArrivalsState;
   readonly categoryProducts = this.catalogStore.categoryProducts;
+  readonly categoryProductsState = this.catalogStore.categoryProductsState;
 
   readonly blogPosts = this.contentStore.blogPosts;
   readonly shopLooks = this.contentStore.shopLooks;

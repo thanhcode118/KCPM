@@ -1,11 +1,13 @@
 using HomeDecorShop.Application;
 using HomeDecorShop.Domain;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
 [Route("api/users")]
 [SwaggerTag("Administrative operations for users.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

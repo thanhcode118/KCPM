@@ -2,18 +2,19 @@
 
 ## Goals
 
-- Keep the frontend consistent with the current mock-first product scope.
-- Separate route shells, feature state, and reusable UI without introducing unnecessary layers.
-- Preserve contracts so mock data can be replaced later with API-backed data with minimal UI churn.
+- Keep a feature-first structure while the app moves from prototype screens to backend-driven flows.
+- Separate route orchestration, feature state, and reusable UI without adding heavyweight layers.
+- Make the current hybrid state explicit: shopper flows are mostly API-backed, while some admin/content areas still use mocks or static content.
 
 ## Runtime Baseline
 
 - Angular `21.1.x`
 - `bootstrapApplication(...)`
-- `provideRouter(routes)`
 - `provideZonelessChangeDetection()`
+- `provideRouter(routes)`
+- `provideHttpClient()`
 - Standalone components only
-- Signals / computed for most state
+- Signals / computed for most local and feature state
 - Template-driven forms
 - Tailwind utility classes
 
@@ -24,109 +25,88 @@ src/
   app.component.ts
   app.routes.ts
   core/
+    api/
+      api.config.ts
+      api-endpoints.ts
+    guards/
+      admin.guard.ts
+      auth.guard.ts
     models/
-      product.model.ts
-      category.model.ts
-      user.model.ts
-      cart.model.ts
-      order.model.ts
-      content.model.ts
-      index.ts
     mock-data/
-      ecommerce.mock.ts
-      header-navigation.mock.ts
   features/
-    auth/
-      data-access/
-        auth.facade.ts
-    home/
+    admin/
       components/
-        home.component.ts
-        hero.component.ts
-        trust-bar.component.ts
-        categories.component.ts
-        shop-look.component.ts
-        flash-sale.component.ts
-        trending.component.ts
-        brand-story.component.ts
-        new-arrivals.component.ts
-        social-proof.component.ts
       data-access/
-        home.facade.ts
+    auth/
+      components/
+      data-access/
     catalog/
       components/
-        category.component.ts
-        new-collection.component.ts
       data-access/
-        catalog.store.ts
-        catalog.facade.ts
-        category-page.facade.ts
-    search/
-      components/
-        search-results.component.ts
-        search-active-chips.component.ts
-        search-filter-panel.component.ts
-        search-results-content.component.ts
-        search-results.types.ts
-      data-access/
-        search.facade.ts
-        search-query-state.ts
     checkout/
       components/
-        checkout.component.ts
       data-access/
-        checkout.facade.ts
-    content/
-      data-access/
-        content.store.ts
     commerce/
       data-access/
-        commerce.store.ts
+    content/
+      data-access/
+    home/
+      components/
+      data-access/
+    orders/
+      components/
+    product/
+      components/
+      data-access/
+    search/
+      components/
+      data-access/
   shared/
     components/
-      header.component.ts
-      header-navigation.component.ts
-      header-search.component.ts
-      header-actions.component.ts
-      footer.component.ts
-      floating-actions.component.ts
-      icon.component.ts
+  testing/
 ```
 
 ## Responsibility Split
 
-- `core/models`: shared domain types used by feature state and UI.
-- `core/mock-data`: typed mock sources and static app configuration.
-- `features/*/components`: route shells and domain UI.
-- `features/*/data-access`: feature state, filtering, lookup, facade/store orchestration.
-- `shared/components`: app shell and reusable UI shared across multiple screens.
+- `core/api`: base URL config and typed endpoint builders.
+- `core/guards`: route access decisions that depend on auth/session state.
+- `core/models`: shared frontend domain types and DTO mapping helpers.
+- `core/mock-data`: seeded static data still used by non-integrated or prototype-heavy areas.
+- `features/*/components`: route shells and feature-specific UI.
+- `features/*/data-access`: signals, computed state, HTTP calls, and feature orchestration.
+- `shared/components`: cross-route shell and reusable UI.
+- `testing`: shared test helpers for repeated HTTP/bootstrap flows.
 
 ## Dominant Patterns
 
 ### Feature-first structure
 
-- New feature code lives under `features/<domain>`.
-- Shared shell/UI lives under `shared/components`.
-- Shared domain types and mock/config data live under `core`.
+- New code lives under `features/<domain>`.
+- Shared shell/UI stays under `shared/components`.
+- Cross-cutting config and domain helpers stay in `core`.
 
-### Store + facade for shared feature state
+### API-backed facades and stores
 
-- `catalog.store.ts` and `catalog.facade.ts` are the clearest example of the main pattern.
-- `category-page.facade.ts` keeps page-local category state out of the component.
-- Smaller features may still use facade signal-only state when the scope is limited.
+- `auth.facade.ts` handles session restore, login, register, and email confirmation through real API endpoints.
+- `catalog.store.ts`, `category-page.facade.ts`, `product-detail.facade.ts`, and `checkout.facade.ts` are HTTP-backed and expose signal state to components.
+- `api-endpoints.ts` is the single place that assembles frontend endpoint URLs.
+
+### Hybrid state during migration
+
+- Search derives from the catalog store and filters client-side.
+- Some admin/dashboard data still comes from `core/mock-data`.
+- Static content and layout sections are still embedded directly in components where the backend contract is not finalized yet.
 
 ### Route shell + presentational children
 
-- `search-results.component.ts` is the route shell.
-- Search filter chips, filter panel, and results content are split into child components.
-- `header.component.ts` is the shell; navigation, search, and actions are split into child components.
+- `search-results.component.ts` is the route shell, with chips/filter/content split into smaller children.
+- `header.component.ts` is the app-shell entry point, with navigation, search, actions, and cart split into child components.
+- `app.component.ts` is responsible for cross-app bootstrapping such as session restore and cart bootstrap after authentication.
 
-### Mock-first data access
+### Routing status
 
-- Product data and supporting collections come from `core/mock-data/ecommerce.mock.ts`.
-- Header navigation data comes from `core/mock-data/header-navigation.mock.ts`.
-- There is no runtime `core/services/data.service.ts`.
-- There is no repository/API layer in the current frontend.
+- Routes are currently declared directly in `app.routes.ts` and use eager component imports.
+- This is acceptable for the current size, but admin/policies/search are candidates for future lazy loading if bundle size or startup cost grows.
 
 ## Import Convention
 
@@ -135,20 +115,23 @@ src/
 
 ## Testing Strategy
 
-- Test scope is intentionally lightweight.
-- Route shells have smoke/behavior tests where risk is higher.
-- Stores/facades have contract tests for filtering, lookup, cart, and query-state behavior.
+- Test scope stays intentionally lightweight and behavior-focused.
+- Route shells get smoke tests and targeted interaction coverage where regressions are likely.
+- Stores/facades get contract tests for query, filtering, cart, checkout, and bootstrap flows.
+- HTTP-backed units use `HttpTestingController`.
 - Tests run through `ng test`.
 
 ## What This Architecture Is Not
 
-- It is not a clean-architecture layering exercise.
+- It is not a clean-architecture or use-case/repository layering exercise.
 - It is not NgRx-based global state management.
-- It is not API-first yet.
-- It does not currently include guards, interceptors, or repository abstractions as standard building blocks.
+- It is not fully API-complete end to end yet because admin still contains mock-backed areas.
+- It is not lazy-loaded by default today.
 
-## Near-term Migration Guidance
+## Near-term Guidance
 
-1. Keep strengthening behavior-preserving tests before large refactors.
-2. Keep route-level orchestration in shells and extract reusable/presentational parts only when the boundary is already clear.
-3. Introduce API-backed data access only after backend contracts are real and stable.
+1. Keep extracting oversized inline templates into companion HTML files before adding more behavior.
+2. Prefer fixing async/change-detection boundaries over disabling `OnPush` as a default response.
+3. Continue replacing admin mock state with real API-backed data access behind the existing feature folders.
+4. Add coverage first around auth and admin before larger refactors in those areas.
+5. Introduce lazy loading only after the route boundaries are stable enough to make chunking worthwhile.

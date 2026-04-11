@@ -1,30 +1,25 @@
 using HomeDecorShop.API;
+using HomeDecorShop.API.Payments;
 using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.AspNetCore.Mvc;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Cấu hình Logging
 builder.Logging.ClearProviders();
 builder.Logging.AddConsole();
 builder.Logging.AddDebug();
 
-// Cửa ngõ kết nối Database
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Đăng ký các lớp (Layers)
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
+builder.Services.AddApiControllers();
+builder.Services.AddApiExceptionHandling();
+builder.Services.AddApiAuthentication();
+builder.Services.Configure<VnPayOptions>(builder.Configuration.GetSection(VnPayOptions.SectionName));
 
-// Dự phòng nếu nhóm chưa định nghĩa các hàm trên
-builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-// Cấu hình CORS (Cho phép Frontend truy cập)
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("Frontend", policy =>
@@ -38,13 +33,17 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddApiSwagger();
+
 var app = builder.Build();
 
-// Khởi tạo Database (tự động tạo schema + seed dữ liệu)
 app.InitializeDatabase();
 
+app.UseExceptionHandler();
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
+app.UseAuthentication();
+app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
@@ -53,19 +52,5 @@ if (app.Environment.IsDevelopment())
 }
 
 app.MapControllers();
-
-// =====================================================
-// PHẦN CỦA BẠN: Endpoint Khuyến mại (Giá mới / Giá cũ)
-// Trả về danh sách sản phẩm đang có OnSaleOnly = true
-// Được gọi bởi Frontend tại: GET /api/promotions
-// =====================================================
-app.MapGet("/api/promotions", ([FromServices] IProductService productService) =>
-{
-    var result = productService.Search(new ProductQuery(
-        Query: null, Category: null, Brand: null, Style: null,
-        MinPrice: null, MaxPrice: null, InStockOnly: false, OnSaleOnly: true,
-        RatingGte: null, SortBy: null, Page: 1, PageSize: 20));
-    return Results.Ok(result.Items);
-});
 
 app.Run();

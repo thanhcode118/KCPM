@@ -1,4 +1,5 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
@@ -11,6 +12,7 @@ namespace HomeDecorShop.API.Controllers;
 public sealed class CategoriesController(ICategoryService categoryService) : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "List categories",
         Description = "Returns all product categories.")]
@@ -21,6 +23,7 @@ public sealed class CategoriesController(ICategoryService categoryService) : Api
     }
 
     [HttpGet("{id:int}")]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Get a category by id",
         Description = "Returns a single category by numeric identifier.")]
@@ -28,10 +31,11 @@ public sealed class CategoriesController(ICategoryService categoryService) : Api
     [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
     public ActionResult<CategoryView> GetById(int id)
     {
-        return Ok(RequireResource(categoryService.GetById(id), $"Category with id {id} was not found."));
+        return Ok(RequireResource(categoryService.GetById(id), $"Category with id {id} was not found.", AppErrorCodes.CategoryNotFound));
     }
 
     [HttpPost]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Create a category",
         Description = "Creates a new category. Returns 409 when the category name or slug is already in use.")]
@@ -45,6 +49,7 @@ public sealed class CategoriesController(ICategoryService categoryService) : Api
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Update a category",
         Description = "Updates an existing category. Returns 404 when the category does not exist and 409 when the category name or slug is already in use, or when deactivation would leave active products assigned to that category.")]
@@ -55,10 +60,11 @@ public sealed class CategoriesController(ICategoryService categoryService) : Api
     public ActionResult<CategoryView> Update(int id, [FromBody] CategoryUpsertInput input)
     {
         var updated = categoryService.Update(id, input);
-        return Ok(RequireResource(updated, $"Category with id {id} was not found."));
+        return Ok(RequireResource(updated, $"Category with id {id} was not found.", AppErrorCodes.CategoryNotFound));
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Delete a category",
         Description = "Deletes a category. Returns 409 when the category is still referenced by products.")]
@@ -72,9 +78,9 @@ public sealed class CategoriesController(ICategoryService categoryService) : Api
             case CategoryDeleteResult.Deleted:
                 return NoContent();
             case CategoryDeleteResult.HasProducts:
-                throw new ConflictException("Category is referenced by one or more products and cannot be deleted.");
+                throw new ConflictException("Category is referenced by one or more products and cannot be deleted.", AppErrorCodes.CategoryHasProducts);
             default:
-                throw new NotFoundException($"Category with id {id} was not found.");
+                throw new NotFoundException($"Category with id {id} was not found.", AppErrorCodes.CategoryNotFound);
         }
     }
 }

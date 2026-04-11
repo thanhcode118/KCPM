@@ -1,10 +1,12 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/account/addresses")]
 [SwaggerTag("CRUD operations for addresses of the currently authenticated user.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -46,7 +48,7 @@ public sealed class AddressesController(IUserService userService) : ApiControlle
     public ActionResult<AddressView> Create([FromBody] UpsertAddressInput input)
     {
         var address = userService.AddAddress(ReadAuthenticatedToken(), input)
-            ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+            ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
         return CreatedAtAction(nameof(GetById), new { id = address.Id }, address);
     }
 
@@ -82,7 +84,7 @@ public sealed class AddressesController(IUserService userService) : ApiControlle
     private string ReadAuthenticatedToken()
     {
         var token = ReadRequiredToken();
-        _ = userService.GetByToken(token) ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+        _ = userService.GetByToken(token) ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
         return token;
     }
 }

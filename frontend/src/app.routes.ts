@@ -11,10 +11,9 @@ import { ProductDetailComponent } from '@/features/product/components/product-de
 import { RegisterComponent } from '@/features/auth/components/register.component';
 import { ConfirmEmailComponent } from '@/features/auth/components/confirm-email.component';
 import { AdminDashboardComponent } from '@/features/admin/components/admin-dashboard.component';
-import { MyOrdersComponent } from '@/features/commerce/components/my-orders.component';
+import { OrdersComponent } from '@/features/orders/components/orders.component';
 
 import { adminGuard } from '@/core/guards/admin.guard';
-import { authGuard } from '@/core/guards/auth.guard';
 
 export const routes: Routes = [
     { path: '', component: HomeComponent },
@@ -22,13 +21,13 @@ export const routes: Routes = [
     { path: 'new-collection', component: NewCollectionComponent },
     { path: 'product/:id', component: ProductDetailComponent },
     { path: 'search', component: SearchResultsComponent },
-    { path: 'checkout', component: CheckoutComponent, canActivate: [authGuard] },
+    { path: 'checkout', component: CheckoutComponent },
+    { path: 'orders', component: OrdersComponent },
     { path: 'login', component: LoginComponent },
     { path: 'register', component: RegisterComponent },
     { path: 'confirm-email', component: ConfirmEmailComponent },
     { path: 'contact', component: ContactComponent },
     { path: 'policies', component: PoliciesComponent },
-    { path: 'my-orders', component: MyOrdersComponent, canActivate: [authGuard] },
     { path: 'admin', component: AdminDashboardComponent, canActivate: [adminGuard] },
     { path: '**', redirectTo: '' }
 ];

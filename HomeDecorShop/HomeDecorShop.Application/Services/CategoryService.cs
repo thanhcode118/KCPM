@@ -74,7 +74,7 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
         var existing = repository.GetBySlug(slug);
         if (existing is not null && existing.Id != excludedCategoryId)
         {
-            throw new ConflictException("Category slug is already in use.");
+            throw new ConflictException("Category slug is already in use.", AppErrorCodes.CategorySlugAlreadyExists);
         }
     }
 
@@ -88,7 +88,7 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
 
         if (existing is not null)
         {
-            throw new ConflictException("Category name is already in use.");
+            throw new ConflictException("Category name is already in use.", AppErrorCodes.CategoryNameAlreadyExists);
         }
     }
 
@@ -96,7 +96,7 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
     {
         if (category.IsActive && !isActive && repository.HasActiveProducts(category.Id))
         {
-            throw new ConflictException("Category cannot be deactivated while it still has active products.");
+            throw new ConflictException("Category cannot be deactivated while it still has active products.", AppErrorCodes.CategoryHasActiveProducts);
         }
     }
 

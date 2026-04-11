@@ -75,7 +75,7 @@ public sealed class CartService(
         var cart = cartRepository.GetByUserId(user.UserId)
             ?? throw CreateEmptyCartException();
         var item = cart.Items.FirstOrDefault(current => current.Id == itemId)
-            ?? throw new NotFoundException($"Cart item with id {itemId} was not found.");
+            ?? throw new NotFoundException($"Cart item with id {itemId} was not found.", AppErrorCodes.CartItemNotFound);
         var product = RequirePurchasableProduct(item.ProductId);
 
         EnsureStockAvailable(product, input.Quantity);
@@ -126,21 +126,21 @@ public sealed class CartService(
 
     private User RequireUser(string token) =>
         userRepository.GetByToken(token.Trim())
-        ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+        ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
 
     private Product RequirePurchasableProduct(int productId)
     {
         var product = productRepository.GetById(productId)
-            ?? throw new NotFoundException($"Product with id {productId} was not found.");
+            ?? throw new NotFoundException($"Product with id {productId} was not found.", AppErrorCodes.ProductNotFound);
 
         if (!product.IsActive || product.CategoryNavigation is { IsActive: false })
         {
-            throw new ConflictException("Selected product is inactive and cannot be added to cart.");
+            throw new ConflictException("Selected product is inactive and cannot be added to cart.", AppErrorCodes.ProductInactive);
         }
 
         if (GetAvailableStock(product) <= 0)
         {
-            throw new ConflictException("Selected product is out of stock.");
+            throw new ConflictException("Selected product is out of stock.", AppErrorCodes.ProductOutOfStock);
         }
 
         return product;
@@ -154,7 +154,7 @@ public sealed class CartService(
             return;
         }
 
-        throw new ConflictException($"Selected quantity exceeds available stock for product {product.ProductId}.");
+        throw new ConflictException($"Selected quantity exceeds available stock for product {product.ProductId}.", AppErrorCodes.ProductStockExceeded);
     }
 
     private static int GetAvailableStock(Product product)
@@ -210,5 +210,6 @@ public sealed class CartService(
             new Dictionary<string, string[]>
             {
                 ["cart"] = ["Cart does not contain any items."]
-            });
+            },
+            AppErrorCodes.CartEmpty);
 }

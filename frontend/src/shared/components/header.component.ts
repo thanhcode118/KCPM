@@ -7,7 +7,6 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
 import { CheckoutFacade } from '@/features/checkout/data-access/checkout.facade';
 import { SearchFacade } from '@/features/search/data-access/search.facade';
 import { CartDrawerComponent } from './cart-drawer.component';
-import { MobileMenuComponent } from './mobile-menu.component';
 import { HeaderActionsComponent } from './header-actions.component';
 import { HeaderNavigationComponent } from './header-navigation.component';
 import { HeaderSearchComponent } from './header-search.component';
@@ -20,8 +19,7 @@ import { HeaderSearchComponent } from './header-search.component';
     CartDrawerComponent,
     HeaderNavigationComponent,
     HeaderSearchComponent,
-    HeaderActionsComponent,
-    MobileMenuComponent
+    HeaderActionsComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
@@ -84,11 +82,10 @@ import { HeaderSearchComponent } from './header-search.component';
             [cartCount]="checkoutFacade.cartCount()"
             (toggleUserMenu)="toggleUserMenu()"
             (goToLogin)="goToLogin()"
-            (goToMyOrders)="goToMyOrders()"
+            (goToOrders)="goToOrders()"
             (goToAdmin)="goToAdmin()"
             (logout)="doLogout()"
             (openCart)="openCartDrawer()"
-            (toggleMobileMenu)="mobileMenuOpen.set(true)"
           />
         </div>
       </div>
@@ -100,23 +97,11 @@ import { HeaderSearchComponent } from './header-search.component';
         [subtotal]="checkoutFacade.subtotal()"
         [shippingFee]="checkoutFacade.shippingFee()"
         [grandTotal]="cartGrandTotal()"
-        [isAllSelected]="checkoutFacade.isAllSelected()"
-        [selectedCount]="checkoutFacade.selectedCount()"
         (close)="closeCartDrawer()"
         (checkout)="goToCheckout()"
         (remove)="checkoutFacade.removeFromCart($event)"
-        (toggleSelection)="checkoutFacade.toggleItemSelection($event)"
-        (toggleSelectAll)="checkoutFacade.toggleSelectAll($event)"
       />
     }
-
-    <app-mobile-menu
-      [isOpen]="mobileMenuOpen()"
-      [navigationStructure]="navigationStructure"
-      (close)="mobileMenuOpen.set(false)"
-      (navigate)="navigateTo($event)"
-      (navigateSub)="navigateToSub($event.category, $event.item)"
-    />
   `,
   styles: [`
     .top-bar {
@@ -166,7 +151,6 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly isSearchFocused = signal(false);
   readonly userMenuOpen = signal(false);
   readonly cartDrawerOpen = signal(false);
-  readonly mobileMenuOpen = signal(false);
   readonly cartGrandTotal = computed(() => this.checkoutFacade.subtotal() + this.checkoutFacade.shippingFee());
 
   private scrollCleanup: (() => void) | null = null;
@@ -175,7 +159,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   readonly navigationStructure = HEADER_NAVIGATION_STRUCTURE;
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) { }
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
 
   readonly hostClasses = () => {
     return this.useSolidHeaderStyle()
@@ -213,57 +197,26 @@ export class HeaderComponent implements OnInit, OnDestroy {
     }
   }
 
-  // =====================================================
-  // PHẦN CỦA BẠN: Hỗ trợ điều hướng menu Khuyến mại & Liên hệ
-  // Ưu tiên dùng cat.link nếu có (type: 'link')
-  // Hỗ trợ anchor fragment ví dụ: '/#flash-sale'
-  // =====================================================
   navigateTo(cat: HeaderNavCategory) {
     this.closeTransientUi();
-
-    if (cat.link) {
-      const [path, fragment] = cat.link.split('#');
-      if (fragment) {
-        this.router.navigate([path || '/'], { fragment });
-      } else {
-        this.router.navigate([path]);
-      }
-      if (!fragment) {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else {
-      // Use specific category from Nav Structure if available (e.g. 'Decor,Lighting')
-      const categoryFilter = cat.category;
-
-      if (categoryFilter) {
-        this.router.navigate(['/search'], { queryParams: { category: categoryFilter } });
-      } else if (cat.slug) {
-        this.router.navigate(['/collections', cat.slug]);
-      }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (cat.slug) {
+      this.router.navigate(['/collections', cat.slug]);
+    } else if (cat.link === 'home') {
+      this.router.navigate(['/']);
+    } else if (cat.link === 'new-collection') {
+      this.router.navigate(['/new-collection']);
+    } else if (cat.slug) {
+      this.router.navigate(['/collections', cat.slug]);
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   navigateToSub(cat: HeaderNavCategory, item: HeaderSubItem) {
     this.closeTransientUi();
-
-    // If sub-item has a specific category, filter by it.
-    // Otherwise, search by its label (text search).
-    if (item.category) {
-      this.router.navigate(['/search'], {
-        queryParams: {
-          category: item.category,
-          q: item.label !== item.category ? item.label : undefined
-        }
-      });
-    } else {
-      this.router.navigate(['/search'], {
-        queryParams: {
-          q: item.label
-        }
-      });
+    if (cat.slug) {
+      this.router.navigate(['/collections', cat.slug]);
     }
-
+    void item;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -305,9 +258,10 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   selectProduct(product: Product) {
+    this.searchFacade.setQuery(product.name);
     this.isSearchFocused.set(false);
     this.closeTransientUi();
-    this.router.navigate(['/product', product.id]);
+    this.router.navigate(['/search'], { queryParams: { q: product.name } });
   }
 
   selectKeyword(keyword: string) {
@@ -336,18 +290,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/login']);
   }
 
-  goToMyOrders() {
-    this.closeTransientUi();
-    this.router.navigate(['/my-orders']);
-  }
-
   goToAdmin() {
     this.closeTransientUi();
     this.router.navigate(['/admin']);
   }
 
+  goToOrders() {
+    this.closeTransientUi();
+    this.router.navigate(['/orders']);
+  }
+
   doLogout() {
     this.authFacade.logout();
+    this.checkoutFacade.resetForGuest();
     this.closeTransientUi();
     this.router.navigate(['/']);
   }
@@ -365,6 +320,5 @@ export class HeaderComponent implements OnInit, OnDestroy {
   private closeTransientUi() {
     this.userMenuOpen.set(false);
     this.cartDrawerOpen.set(false);
-    this.mobileMenuOpen.set(false);
   }
 }

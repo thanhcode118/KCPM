@@ -1,10 +1,12 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[Authorize]
 [Route("api/orders")]
 [SwaggerTag("Order placement and management for the currently authenticated user.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]

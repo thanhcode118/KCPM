@@ -7,7 +7,8 @@ public sealed class OrderService(
     IOrderRepository orderRepository,
     ICartRepository cartRepository,
     IUserRepository userRepository,
-    IProductRepository productRepository) : IOrderService
+    IProductRepository productRepository,
+    IPaymentRepository paymentRepository) : IOrderService
 {
     private const decimal FlatShippingFee = 30000m;
 
@@ -59,7 +60,7 @@ public sealed class OrderService(
         foreach (var cartItem in cartItems)
         {
             var product = productRepository.GetById(cartItem.ProductId)
-                ?? throw new NotFoundException($"Product with id {cartItem.ProductId} was not found.");
+                ?? throw new NotFoundException($"Product with id {cartItem.ProductId} was not found.", AppErrorCodes.ProductNotFound);
             ValidateProductForOrder(product, cartItem.Quantity);
         }
 
@@ -136,7 +137,20 @@ public sealed class OrderService(
 
         if (order.Status != OrderStatus.PendingPayment)
         {
-            throw new ConflictException("Only unpaid orders can be cancelled.");
+            throw new ConflictException("Only unpaid orders can be cancelled.", AppErrorCodes.OrderCannotBeCancelled);
+        }
+
+        var hasPendingVnPayPayment = paymentRepository
+            .GetByOrderId(order.Id)
+            .Any(payment =>
+                string.Equals(payment.Method, "vnpay", StringComparison.OrdinalIgnoreCase) &&
+                payment.Status == PaymentStatus.Pending);
+
+        if (hasPendingVnPayPayment)
+        {
+            throw new ConflictException(
+                "Orders with a pending VNPay transaction cannot be cancelled.",
+                AppErrorCodes.OrderCannotBeCancelled);
         }
 
         using var scope = CreateTransactionScope();
@@ -191,18 +205,18 @@ public sealed class OrderService(
 
     private User RequireUser(string token) =>
         userRepository.GetByToken(token.Trim())
-        ?? throw new UnauthorizedException("Authentication token is invalid or has expired.");
+        ?? throw new UnauthorizedException("Authentication token is invalid or has expired.", AppErrorCodes.AuthTokenInvalid);
 
     private static void ValidateProductForOrder(Product product, int quantity)
     {
         if (!product.IsActive || product.CategoryNavigation is { IsActive: false })
         {
-            throw new ConflictException($"Product {product.ProductId} is inactive and cannot be ordered.");
+            throw new ConflictException($"Product {product.ProductId} is inactive and cannot be ordered.", AppErrorCodes.ProductInactive);
         }
 
         if (GetAvailableStock(product) < quantity)
         {
-            throw new ConflictException($"Product {product.ProductId} does not have enough stock.");
+            throw new ConflictException($"Product {product.ProductId} does not have enough stock.", AppErrorCodes.ProductStockExceeded);
         }
     }
 
@@ -237,7 +251,8 @@ public sealed class OrderService(
                     new Dictionary<string, string[]>
                     {
                         ["addressId"] = ["Selected address was not found for the current user."]
-                    });
+                    },
+                    AppErrorCodes.ShippingAddressInvalid);
             }
 
             return (address.FullName, address.Phone, address.Line1, address.Ward, address.District, address.City);
@@ -280,7 +295,8 @@ public sealed class OrderService(
             new Dictionary<string, string[]>
             {
                 ["address"] = ["Provide addressId or full shipping address fields."]
-            });
+            },
+            AppErrorCodes.ShippingInfoRequired);
     }
 
     private static OrderView MapOrder(Order order) =>
@@ -343,5 +359,6 @@ public sealed class OrderService(
             new Dictionary<string, string[]>
             {
                 ["cart"] = ["Cart does not contain any items."]
-            });
+            },
+            AppErrorCodes.CartEmpty);
 }

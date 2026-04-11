@@ -1,9 +1,11 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[AllowAnonymous]
 [ApiExplorerSettings(IgnoreApi = true)]
 [Route("api/users")]
 [Produces("application/json")]
@@ -19,7 +21,7 @@ public sealed class LegacyAuthController(IUserService userService) : ControllerB
     public IActionResult Login([FromBody] LoginInput input)
     {
         var auth = userService.Login(input);
-        return Ok(auth ?? throw new UnauthorizedException("Email or password is incorrect."));
+        return Ok(auth ?? throw new UnauthorizedException("Email or password is incorrect.", AppErrorCodes.InvalidCredentials));
     }
 
     [HttpGet("confirm-email")]
@@ -32,7 +34,8 @@ public sealed class LegacyAuthController(IUserService userService) : ControllerB
                 new Dictionary<string, string[]>
                 {
                     ["token"] = ["Email confirmation token is invalid or has expired."]
-                });
+                },
+                AppErrorCodes.EmailConfirmationTokenInvalid);
         }
 
         return Ok(new MessageResponse("Xac nhan email thanh cong."));

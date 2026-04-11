@@ -1,10 +1,12 @@
 using HomeDecorShop.Application;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
+[Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
 [Route("api/feedbacks")]
 [SwaggerTag("Feedback CRUD endpoints.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
@@ -32,6 +34,7 @@ public sealed class FeedbacksController(IFeedbackService feedbackService) : ApiC
     }
 
     [HttpPost]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "Create feedback",
         Description = "Creates a new feedback entry.")]

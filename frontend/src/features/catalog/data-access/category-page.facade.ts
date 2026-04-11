@@ -1,6 +1,8 @@
-import { Injectable, computed, inject, signal } from '@angular/core';
-import { Product } from '@/core/models';
+import { Injectable, computed, inject, signal, effect } from '@angular/core';
+import { Product, mapProductViewDtoToProduct, ProductListResultDto } from '@/core/models';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
+import { HttpClient } from '@angular/common/http';
+import { apiEndpoints } from '@/core/api/api-endpoints';
 
 export type CategoryViewMode = 'grid' | 'list';
 export type CategorySort = 'newest' | 'best_selling' | 'price_asc' | 'price_desc';
@@ -11,6 +13,20 @@ export type CategoryColorOption = { name: string; hex: string };
 @Injectable()
 export class CategoryPageFacade {
   private readonly catalogStore = inject(CatalogStore);
+  private readonly http = inject(HttpClient);
+
+  readonly currentSlug = signal<string | null>(null);
+  private readonly loadedCategoryProducts = signal<Product[]>([]);
+  readonly isLoading = signal(false);
+  readonly hasError = signal(false);
+  readonly errorMessage = signal<string | null>(null);
+
+  readonly currentCategoryName = computed(() => {
+    const slug = this.currentSlug();
+    if (!slug) return 'Danh mục';
+    const cat = this.catalogStore.categories().find((c) => c.slug === slug);
+    return cat ? cat.name : 'Danh mục sản phẩm';
+  });
 
   readonly viewMode = signal<CategoryViewMode>('grid');
   readonly displayCount = signal(8);
@@ -32,8 +48,44 @@ export class CategoryPageFacade {
     { name: 'Be', hex: '#D2B48C' }
   ];
 
+  constructor() {
+    effect(() => {
+      const slug = this.currentSlug();
+      if (!slug) {
+        this.loadedCategoryProducts.set([]);
+        this.isLoading.set(false);
+        this.hasError.set(false);
+        this.errorMessage.set(null);
+        return;
+      }
+      this.loadCategory(slug);
+    });
+  }
+
+  loadCategory(slug: string): void {
+    this.isLoading.set(true);
+    this.hasError.set(false);
+    this.errorMessage.set(null);
+
+    this.http.get<ProductListResultDto>(`${apiEndpoints.products.list}?category=${encodeURIComponent(slug)}&pageSize=200`)
+      .subscribe({
+        next: (res) => {
+          this.loadedCategoryProducts.set(res.items.map(mapProductViewDtoToProduct));
+          this.displayCount.set(8);
+          this.isLoading.set(false);
+        },
+        error: () => {
+          this.loadedCategoryProducts.set([]);
+          this.displayCount.set(8);
+          this.isLoading.set(false);
+          this.hasError.set(true);
+          this.errorMessage.set('Khong tai duoc danh sach san pham cho danh muc nay.');
+        }
+      });
+  }
+
   readonly filteredProducts = computed(() => {
-    let products = this.catalogStore.categoryProducts();
+    let products = this.loadedCategoryProducts();
 
     if (this.selectedStyles().length > 0) {
       products = products.filter((product) => product.style && this.selectedStyles().includes(product.style));

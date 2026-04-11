@@ -1,12 +1,24 @@
 import { TestBed } from '@angular/core/testing';
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting, HttpTestingController } from '@angular/common/http/testing';
 import { SearchFacade } from './search.facade';
+import { flushCatalogBootstrapRequests } from '@/testing/catalog-test.utils';
 
 describe('SearchFacade', () => {
   let facade: SearchFacade;
+  let httpMock: HttpTestingController;
 
   beforeEach(() => {
-    TestBed.configureTestingModule({});
+    TestBed.configureTestingModule({
+      providers: [provideHttpClient(), provideHttpClientTesting()]
+    });
     facade = TestBed.inject(SearchFacade);
+    httpMock = TestBed.inject(HttpTestingController);
+    flushCatalogBootstrapRequests(httpMock);
+  });
+
+  afterEach(() => {
+    httpMock.verify();
   });
 
   it('matches accented product names when the query omits accents', () => {
