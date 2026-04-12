@@ -17,6 +17,7 @@ export class CategoryPageFacade {
 
   readonly currentSlug = signal<string | null>(null);
   private readonly loadedCategoryProducts = signal<Product[]>([]);
+  readonly totalFromApi = signal<number>(0);
   readonly isLoading = signal(false);
   readonly hasError = signal(false);
   readonly errorMessage = signal<string | null>(null);
@@ -71,6 +72,7 @@ export class CategoryPageFacade {
       .subscribe({
         next: (res) => {
           this.loadedCategoryProducts.set(res.items.map(mapProductViewDtoToProduct));
+          this.totalFromApi.set(res.total);
           this.displayCount.set(8);
           this.isLoading.set(false);
         },

@@ -1,7 +1,7 @@
 import { Component, ChangeDetectionStrategy, Input, Output, EventEmitter, signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-navigation.mock';
+import { HeaderNavCategory, HeaderSubItem } from './header-navigation.types';
 import { IconComponent } from './icon.component';
 
 @Component({

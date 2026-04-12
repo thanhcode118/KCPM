@@ -11,6 +11,7 @@ import { HeaderActionsComponent } from './header-actions.component';
 import { HeaderNavigationComponent } from './header-navigation.component';
 import { HeaderSearchComponent } from './header-search.component';
 import { HeaderNavCategory, HeaderSubItem } from './header-navigation.types';
+import { MobileMenuComponent } from './mobile-menu.component';
 
 type ResolvedCategoryGroup = {
   id: number;
@@ -28,7 +29,8 @@ type ResolvedCategoryGroup = {
     CartDrawerComponent,
     HeaderNavigationComponent,
     HeaderSearchComponent,
-    HeaderActionsComponent
+    HeaderActionsComponent,
+    MobileMenuComponent
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { '[class]': 'hostClasses()' },
@@ -57,6 +59,18 @@ type ResolvedCategoryGroup = {
            [class.gap-0]="isScrolled()">
           <img src="/assets/images/logo.png" alt="BeeShop - Phụ kiện decor" class="logo-img h-16 w-auto object-contain transition-all duration-300 group-hover:scale-105 drop-shadow-md mt-1">
         </a>
+
+        <!-- Hamburger Button (mobile only) -->
+        <button
+          class="xl:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors z-[101] flex-shrink-0"
+          [ngClass]="useSolidHeaderStyle() ? 'text-charcoal hover:bg-gray-100' : 'text-white hover:bg-white/10'"
+          (click)="mobileMenuOpen.set(true)"
+          aria-label="Mở menu"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+          </svg>
+        </button>
 
         <app-header-navigation
           [navigationStructure]="navigationStructure()"
@@ -99,6 +113,16 @@ type ResolvedCategoryGroup = {
         </div>
       </div>
     </nav>
+
+    @if (mobileMenuOpen()) {
+      <app-mobile-menu
+        [isOpen]="mobileMenuOpen()"
+        [navigationStructure]="navigationStructure()"
+        (close)="mobileMenuOpen.set(false)"
+        (navigate)="navigateTo($event); mobileMenuOpen.set(false)"
+        (navigateSub)="navigateToSub($event.category, $event.item); mobileMenuOpen.set(false)"
+      />
+    }
 
     @if (cartDrawerOpen()) {
       <app-cart-drawer
@@ -216,6 +240,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly isSearchFocused = signal(false);
   readonly userMenuOpen = signal(false);
   readonly cartDrawerOpen = signal(false);
+  readonly mobileMenuOpen = signal(false);
   readonly selectedCartProductIds = signal<number[]>([]);
   readonly cartDrawerItems = computed(() => {
     const selectedProductIds = new Set(this.selectedCartProductIds());
@@ -243,7 +268,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   readonly navigationStructure = computed(() => this.buildNavigation(this.catalogStore.categories()));
 
-  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
+  constructor(@Inject(PLATFORM_ID) private readonly platformId: object) { }
 
   readonly hostClasses = () => {
     return this.useSolidHeaderStyle()
@@ -508,12 +533,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
     const fallbackGroup = HeaderComponent.fallbackGroups.find((group) => group.categorySlugs.includes(category.slug));
     return fallbackGroup
       ? {
-          id: fallbackGroup.id,
-          name: fallbackGroup.name,
-          slug: fallbackGroup.slug,
-          isActive: fallbackGroup.isActive,
-          displayOrder: fallbackGroup.displayOrder
-        }
+        id: fallbackGroup.id,
+        name: fallbackGroup.name,
+        slug: fallbackGroup.slug,
+        isActive: fallbackGroup.isActive,
+        displayOrder: fallbackGroup.displayOrder
+      }
       : null;
   }
 

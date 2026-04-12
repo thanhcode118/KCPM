@@ -105,7 +105,7 @@ export class CatalogStore {
 
   ensureNewArrivalsLoaded(): void {
     this.loadProductCollectionIfNeeded(
-      `${apiEndpoints.products.list}?sort=newest&pageSize=8`,
+      `${apiEndpoints.products.list}?sort=newest&pageSize=100`,
       this.newArrivals,
       this.newArrivalsState,
       'Khong tai duoc danh sach san pham moi.'
@@ -136,12 +136,12 @@ export class CatalogStore {
               image: '',
               group: dto.group
                 ? {
-                    id: dto.group.id,
-                    name: dto.group.name,
-                    slug: dto.group.slug,
-                    isActive: dto.group.isActive,
-                    displayOrder: dto.group.displayOrder
-                  }
+                  id: dto.group.id,
+                  name: dto.group.name,
+                  slug: dto.group.slug,
+                  isActive: dto.group.isActive,
+                  displayOrder: dto.group.displayOrder
+                }
                 : undefined
             }))
             .sort((left, right) => {

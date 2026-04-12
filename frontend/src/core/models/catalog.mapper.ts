@@ -25,6 +25,7 @@ export function mapProductViewDtoToProduct(dto: ProductViewDto): Product {
     style: dto.style,
     inStock: dto.inStock,
     isActive: dto.isActive,
-    createdAt: dto.createdAt
+    createdAt: dto.createdAt,
+    description: dto.description
   };
 }

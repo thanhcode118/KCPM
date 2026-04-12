@@ -37,7 +37,11 @@ import { RouterModule } from '@angular/router';
         <div class="relative -mx-4 px-4 md:mx-0 md:px-0">
           <div 
             #scrollContainer
-            class="flex gap-4 md:gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar scroll-smooth"
+            class="flex gap-4 md:gap-6 overflow-x-auto pb-6 pt-2 snap-x snap-mandatory hide-scrollbar scroll-smooth select-none cursor-grab active:cursor-grabbing"
+            (mousedown)="startDrag($event)"
+            (mousemove)="doDrag($event)"
+            (mouseup)="stopDrag()"
+            (mouseleave)="stopDrag()"
           >
             @for (product of homeFacade.newArrivals(); track product.id) {
               <div 
@@ -46,8 +50,8 @@ import { RouterModule } from '@angular/router';
               >
                   <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/5] bg-gray-50 shadow-sm border border-gray-100 group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
                      <!-- Images -->
-                     <img [src]="product.image" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0">
-                     <img [src]="product.hoverImage" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:scale-105">
+                     <img [src]="product.image" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 pointer-events-none">
+                     <img [src]="product.hoverImage" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:scale-105 pointer-events-none">
                      
                      <!-- New Tag -->
                      <div class="absolute top-3 left-3 bg-[#E8F5E9]/90 backdrop-blur-sm text-[#2E7D32] text-xs font-black px-3 py-1.5 rounded-lg shadow-sm tracking-wider">
@@ -85,6 +89,14 @@ export class NewArrivalsComponent {
   homeFacade = inject(HomeFacade);
   @ViewChild('scrollContainer') scrollContainer!: ElementRef<HTMLDivElement>;
 
+  isDragging = false;
+  startX = 0;
+  scrollLeftPos = 0;
+
+  handleImageError(event: any) {
+    event.target.src = 'https://images.unsplash.com/photo-1513519245088-0e12902e5a38?q=80&w=600&auto=format&fit=crop';
+  }
+
   scrollLeft() {
     if (this.scrollContainer) {
       this.scrollContainer.nativeElement.scrollBy({ left: -300, behavior: 'smooth' });
@@ -95,5 +107,25 @@ export class NewArrivalsComponent {
     if (this.scrollContainer) {
       this.scrollContainer.nativeElement.scrollBy({ left: 300, behavior: 'smooth' });
     }
+  }
+
+  startDrag(e: MouseEvent) {
+    this.isDragging = true;
+    this.scrollContainer.nativeElement.classList.remove('scroll-smooth', 'snap-x', 'snap-mandatory');
+    this.startX = e.pageX - this.scrollContainer.nativeElement.offsetLeft;
+    this.scrollLeftPos = this.scrollContainer.nativeElement.scrollLeft;
+  }
+
+  stopDrag() {
+    this.isDragging = false;
+    this.scrollContainer.nativeElement.classList.add('scroll-smooth', 'snap-x', 'snap-mandatory');
+  }
+
+  doDrag(e: MouseEvent) {
+    if (!this.isDragging) return;
+    e.preventDefault();
+    const x = e.pageX - this.scrollContainer.nativeElement.offsetLeft;
+    const walk = (x - this.startX) * 1.5;
+    this.scrollContainer.nativeElement.scrollLeft = this.scrollLeftPos - walk;
   }
 }

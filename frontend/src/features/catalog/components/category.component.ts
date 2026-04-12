@@ -112,7 +112,7 @@ import { IconComponent } from '@/shared/components/icon.component';
           <main class="flex-grow">
             <div class="bg-white p-4 rounded shadow-sm mb-6 flex flex-col sm:flex-row justify-between items-center gap-4">
               <span class="text-sm text-gray-500">
-                Hiển thị <span class="font-bold text-charcoal">1 - {{ displayCount() }}</span> trên {{ filteredProducts().length }} sản phẩm
+                Hiển thị <span class="font-bold text-charcoal">1 - {{ displayCount() > filteredProducts().length ? filteredProducts().length : displayCount() }}</span> trên <span class="font-bold text-charcoal">{{ totalFromApi() }}</span> sản phẩm
               </span>
 
               <div class="flex items-center gap-4">
@@ -273,7 +273,7 @@ import { IconComponent } from '@/shared/components/icon.component';
 
               @if (displayCount() < filteredProducts().length) {
                 <div class="mt-12 text-center">
-                  <p class="text-sm text-gray-500 mb-4">Đã hiển thị {{ displayCount() }} trên {{ filteredProducts().length }} sản phẩm</p>
+                  <p class="text-sm text-gray-500 mb-4">Đã hiển thị {{ displayCount() > filteredProducts().length ? filteredProducts().length : displayCount() }} trên {{ totalFromApi() }} sản phẩm</p>
                   <div class="w-64 h-1 bg-gray-200 rounded-full mx-auto mb-6 overflow-hidden">
                     <div class="h-full bg-honey" [style.width.%]="(displayCount() / filteredProducts().length) * 100"></div>
                   </div>
@@ -349,6 +349,7 @@ export class CategoryComponent implements OnInit {
   readonly errorMessage = this.categoryPageFacade.errorMessage;
   readonly filteredProducts = this.categoryPageFacade.filteredProducts;
   readonly visibleProducts = this.categoryPageFacade.visibleProducts;
+  readonly totalFromApi = this.categoryPageFacade.totalFromApi;
 
   ngOnInit() {
     this.route.paramMap.subscribe(params => {
