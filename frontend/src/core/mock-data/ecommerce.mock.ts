@@ -2,13 +2,19 @@ import { BlogPost, Cart, Category, Order, Product, ShopLook, User } from '@/core
 
 const now = '2026-03-13T00:00:00.000Z';
 
+const MOCK_GROUPS = {
+  tabletop: { id: 1, name: 'Bàn ăn & Bếp', slug: 'ban-an-bep', isActive: true, displayOrder: 1 },
+  decor: { id: 2, name: 'Trang trí & Sắp đặt', slug: 'trang-tri-sap-dat', isActive: true, displayOrder: 2 },
+  lighting: { id: 3, name: 'Ánh sáng & Hương thơm', slug: 'anh-sang-huong-thom', isActive: true, displayOrder: 3 }
+} as const;
+
 export const MOCK_CATEGORIES: Category[] = [
-  { id: 1, slug: 'phu-kien-ban', name: 'Phụ kiện bàn', isActive: true },
-  { id: 2, slug: 'lighting', name: 'Lighting', isActive: true },
-  { id: 3, slug: 'decor', name: 'Decor', isActive: true },
-  { id: 4, slug: 'furniture', name: 'Furniture', isActive: true },
-  { id: 5, slug: 'textile', name: 'Textile', isActive: true },
-  { id: 6, slug: 'kitchen', name: 'Kitchen', isActive: true }
+  { id: 1, slug: 'phu-kien-ban', name: 'Phụ kiện bàn', isActive: true, group: { ...MOCK_GROUPS.tabletop } },
+  { id: 2, slug: 'lighting', name: 'Lighting', isActive: true, group: { ...MOCK_GROUPS.lighting } },
+  { id: 3, slug: 'decor', name: 'Decor', isActive: true, group: { ...MOCK_GROUPS.decor } },
+  { id: 4, slug: 'furniture', name: 'Furniture', isActive: true, group: { ...MOCK_GROUPS.decor } },
+  { id: 5, slug: 'textile', name: 'Textile', isActive: true, group: { ...MOCK_GROUPS.decor } },
+  { id: 6, slug: 'kitchen', name: 'Kitchen', isActive: true, group: { ...MOCK_GROUPS.tabletop } }
 ];
 
 export const MOCK_CATEGORY_PRODUCTS: Product[] = [

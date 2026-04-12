@@ -325,6 +325,10 @@ export class SearchFacade {
       .slice(0, 12);
   });
 
+  ensureSearchIndexLoaded(): void {
+    this.catalogStore.ensureProductIndexLoaded();
+  }
+
   setQuery(query: string): void {
     this.query.set(query);
   }

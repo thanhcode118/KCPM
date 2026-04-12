@@ -3,6 +3,7 @@ using HomeDecorShop.API.Payments;
 using HomeDecorShop.Application;
 using HomeDecorShop.Infrastructure;
 using Microsoft.EntityFrameworkCore;
+using Swashbuckle.AspNetCore.SwaggerUI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -45,11 +46,17 @@ app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment())
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+    options.DisplayRequestDuration();
+    options.EnableTryItOutByDefault();
+    options.DefaultModelsExpandDepth(-1);
+    options.DocExpansion(DocExpansion.List);
+});
+
+app.MapGet("/", () => Results.Redirect("/swagger"));
+app.MapGet("/docs", () => Results.Redirect("/swagger"));
 
 app.MapControllers();
 

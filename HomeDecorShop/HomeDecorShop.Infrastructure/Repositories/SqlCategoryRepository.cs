@@ -1,5 +1,6 @@
 using HomeDecorShop.Application;
 using HomeDecorShop.Domain;
+using Microsoft.EntityFrameworkCore;
 
 namespace HomeDecorShop.Infrastructure;
 
@@ -7,20 +8,29 @@ public sealed class SqlCategoryRepository(AppDbContext context) : ICategoryRepos
 {
     public IReadOnlyCollection<Category> GetAll() =>
         context.Categories
-            .OrderBy(category => category.Name)
+            .Include(category => category.GroupNavigation)
+            .OrderBy(category => category.GroupNavigation.DisplayOrder)
+            .ThenBy(category => category.Name)
             .ToList();
 
     public Category? GetById(int categoryId) =>
-        context.Categories.FirstOrDefault(category => category.Id == categoryId);
+        context.Categories
+            .Include(category => category.GroupNavigation)
+            .FirstOrDefault(category => category.Id == categoryId);
 
     public Category? GetBySlug(string slug) =>
-        context.Categories.FirstOrDefault(category => category.Slug == slug);
+        context.Categories
+            .Include(category => category.GroupNavigation)
+            .FirstOrDefault(category => category.Slug == slug);
+
+    public CategoryGroup? GetGroupById(int groupId) =>
+        context.CategoryGroups.FirstOrDefault(group => group.Id == groupId);
 
     public Category Create(Category category)
     {
         context.Categories.Add(category);
         context.SaveChanges();
-        return category;
+        return GetById(category.Id)!;
     }
 
     public Category? Update(Category category)
@@ -32,7 +42,7 @@ public sealed class SqlCategoryRepository(AppDbContext context) : ICategoryRepos
 
         context.Categories.Update(category);
         context.SaveChanges();
-        return category;
+        return GetById(category.Id);
     }
 
     public bool Delete(int categoryId)

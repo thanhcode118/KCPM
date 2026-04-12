@@ -14,6 +14,7 @@ public class AppDbContext : DbContext
     public DbSet<Address> Addresses => Set<Address>();
     public DbSet<Product> Products => Set<Product>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<CategoryGroup> CategoryGroups => Set<CategoryGroup>();
     public DbSet<Feedback> Feedbacks => Set<Feedback>();
     public DbSet<Cart> Carts => Set<Cart>();
     public DbSet<CartItem> CartItems => Set<CartItem>();
@@ -62,6 +63,19 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired();
             entity.Property(e => e.Slug).IsRequired();
+
+            entity.HasOne(e => e.GroupNavigation)
+                .WithMany(group => group.Categories)
+                .HasForeignKey(e => e.GroupId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<CategoryGroup>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Name).IsRequired();
+            entity.Property(e => e.Slug).IsRequired();
+            entity.HasIndex(e => e.Slug).IsUnique();
         });
 
         modelBuilder.Entity<Product>(entity =>

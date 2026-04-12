@@ -3,6 +3,7 @@ import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { catchError, concatMap, forkJoin, from, map, Observable, of, switchMap, tap, toArray } from 'rxjs';
 import { apiConfig } from '@/core/api/api.config';
 import { apiEndpoints } from '@/core/api/api-endpoints';
+import { Product } from '@/core/models';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
 import { CommerceStore } from '@/features/commerce/data-access/commerce.store';
 import { mapCartDto, mapOrderDto } from '@/features/commerce/data-access/commerce.mapper';
@@ -46,6 +47,8 @@ interface ProblemDetailsPayload {
 
 @Injectable({ providedIn: 'root' })
 export class CheckoutFacade {
+  private static readonly fallbackCartImage = '/assets/images/logo.png';
+
   private readonly http = inject(HttpClient);
   private readonly commerceStore = inject(CommerceStore);
   private readonly catalogStore = inject(CatalogStore);
@@ -58,11 +61,16 @@ export class CheckoutFacade {
     return this.activeCart().items.map((item) => {
       const product = this.catalogStore.findProductById(item.productId);
       const unitPrice = product?.price ?? item.unitPrice;
+      const image = product?.image?.trim()
+        || product?.hoverImage?.trim()
+        || item.productImage?.trim()
+        || CheckoutFacade.fallbackCartImage;
 
       return {
         id: item.id,
         productId: item.productId,
         name: product?.name ?? item.productName ?? `San pham #${item.productId}`,
+        image,
         quantity: item.quantity,
         unitPrice,
         lineTotal: unitPrice * item.quantity
@@ -99,6 +107,16 @@ export class CheckoutFacade {
     this.commerceStore.addToCart(productId, quantity);
   }
 
+  addProductToCart(product: Product, quantity = 1): void {
+    const token = this.readToken();
+    if (token) {
+      this.addToCart(product.id, quantity);
+      return;
+    }
+
+    this.commerceStore.addProductToCart(product, quantity);
+  }
+
   removeFromCart(productId: number): void {
     const token = this.readToken();
     const cartItem = this.activeCart().items.find((item) => item.productId === productId);
@@ -126,7 +144,10 @@ export class CheckoutFacade {
     }
 
     const headers = this.createAuthHeaders(token);
-    const guestItems = [...this.activeCart().items];
+    const currentCart = this.activeCart();
+    const guestItems = currentCart.id === 0 && currentCart.userId === 0
+      ? [...currentCart.items]
+      : [];
     const mergeGuestCart = options.mergeGuestCart ?? true;
     const syncSource = mergeGuestCart && guestItems.length > 0
       ? this.syncCartToServer(headers, guestItems)

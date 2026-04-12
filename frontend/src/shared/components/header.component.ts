@@ -1,15 +1,24 @@
 import { CommonModule, isPlatformBrowser } from '@angular/common';
 import { ChangeDetectionStrategy, Component, Inject, OnDestroy, OnInit, PLATFORM_ID, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
-import { Product } from '@/core/models';
-import { HEADER_NAVIGATION_STRUCTURE, HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-navigation.mock';
+import { Category, Product } from '@/core/models';
 import { AuthFacade } from '@/features/auth/data-access/auth.facade';
+import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
 import { CheckoutFacade } from '@/features/checkout/data-access/checkout.facade';
 import { SearchFacade } from '@/features/search/data-access/search.facade';
 import { CartDrawerComponent } from './cart-drawer.component';
 import { HeaderActionsComponent } from './header-actions.component';
 import { HeaderNavigationComponent } from './header-navigation.component';
 import { HeaderSearchComponent } from './header-search.component';
+import { HeaderNavCategory, HeaderSubItem } from './header-navigation.types';
+
+type ResolvedCategoryGroup = {
+  id: number;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  displayOrder: number;
+};
 
 @Component({
   selector: 'app-header',
@@ -50,7 +59,7 @@ import { HeaderSearchComponent } from './header-search.component';
         </a>
 
         <app-header-navigation
-          [navigationStructure]="navigationStructure"
+          [navigationStructure]="navigationStructure()"
           [solidStyle]="useSolidHeaderStyle()"
           (navigate)="navigateTo($event)"
           (navigateSub)="navigateToSub($event.category, $event.item)"
@@ -93,13 +102,17 @@ import { HeaderSearchComponent } from './header-search.component';
 
     @if (cartDrawerOpen()) {
       <app-cart-drawer
-        [items]="checkoutFacade.cartItemsDetailed()"
-        [subtotal]="checkoutFacade.subtotal()"
-        [shippingFee]="checkoutFacade.shippingFee()"
+        [items]="cartDrawerItems()"
+        [subtotal]="selectedCartSubtotal()"
+        [shippingFee]="selectedCartShippingFee()"
         [grandTotal]="cartGrandTotal()"
+        [isAllSelected]="isAllCartItemsSelected()"
+        [selectedCount]="selectedCartCount()"
         (close)="closeCartDrawer()"
         (checkout)="goToCheckout()"
-        (remove)="checkoutFacade.removeFromCart($event)"
+        (remove)="removeFromCart($event)"
+        (toggleSelection)="toggleCartSelection($event)"
+        (toggleSelectAll)="toggleSelectAllInCart($event)"
       />
     }
   `,
@@ -140,9 +153,61 @@ import { HeaderSearchComponent } from './header-search.component';
   `]
 })
 export class HeaderComponent implements OnInit, OnDestroy {
+  private static readonly fallbackGroups: Array<ResolvedCategoryGroup & { categorySlugs: string[] }> = [
+    {
+      id: -1,
+      name: 'Bàn ăn & Bếp',
+      slug: 'ban-an-bep',
+      isActive: true,
+      displayOrder: 1,
+      categorySlugs: [
+        'ly-gom-coc-decor',
+        'khan-ban-nhieu-chat-lieu',
+        'tam-lot-ban-lot-ly',
+        'phu-kien-ban-an-bep-decor'
+      ]
+    },
+    {
+      id: -2,
+      name: 'Trang trí & Sắp đặt',
+      slug: 'trang-tri-sap-dat',
+      isActive: true,
+      displayOrder: 2,
+      categorySlugs: [
+        'binh-hoa-lo-hoa-decor',
+        'khay-decor-khay-dung-do',
+        'gio-do-may-tre-decor',
+        'guong-tranh-do-treo-tuong'
+      ]
+    },
+    {
+      id: -3,
+      name: 'Vải & Phụ kiện mềm',
+      slug: 'vai-phu-kien-mem',
+      isActive: true,
+      displayOrder: 3,
+      categorySlugs: [
+        'goi-tua-vo-goi-decor',
+        'rem-vai-decor'
+      ]
+    },
+    {
+      id: -4,
+      name: 'Ánh sáng & Hương thơm',
+      slug: 'anh-sang-huong-thom',
+      isActive: true,
+      displayOrder: 4,
+      categorySlugs: [
+        'nen-thom-phu-kien-nen',
+        'den-decor'
+      ]
+    }
+  ];
+
   readonly searchFacade = inject(SearchFacade);
   readonly checkoutFacade = inject(CheckoutFacade);
   readonly authFacade = inject(AuthFacade);
+  private readonly catalogStore = inject(CatalogStore);
 
   private readonly router = inject(Router);
 
@@ -151,13 +216,32 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly isSearchFocused = signal(false);
   readonly userMenuOpen = signal(false);
   readonly cartDrawerOpen = signal(false);
-  readonly cartGrandTotal = computed(() => this.checkoutFacade.subtotal() + this.checkoutFacade.shippingFee());
+  readonly selectedCartProductIds = signal<number[]>([]);
+  readonly cartDrawerItems = computed(() => {
+    const selectedProductIds = new Set(this.selectedCartProductIds());
+
+    return this.checkoutFacade.cartItemsDetailed().map((item) => ({
+      ...item,
+      isSelected: selectedProductIds.has(item.productId)
+    }));
+  });
+  readonly selectedCartItems = computed(() => this.cartDrawerItems().filter((item) => item.isSelected));
+  readonly selectedCartSubtotal = computed(() =>
+    this.selectedCartItems().reduce((sum, item) => sum + item.lineTotal, 0)
+  );
+  readonly selectedCartShippingFee = computed(() => this.selectedCartItems().length > 0 ? this.checkoutFacade.shippingFee() : 0);
+  readonly selectedCartCount = computed(() => this.selectedCartItems().length);
+  readonly isAllCartItemsSelected = computed(() => {
+    const items = this.cartDrawerItems();
+    return items.length > 0 && items.every((item) => item.isSelected);
+  });
+  readonly cartGrandTotal = computed(() => this.selectedCartSubtotal() + this.selectedCartShippingFee());
 
   private scrollCleanup: (() => void) | null = null;
   private routeCleanup: (() => void) | null = null;
   private searchBlurTimer: ReturnType<typeof setTimeout> | null = null;
 
-  readonly navigationStructure = HEADER_NAVIGATION_STRUCTURE;
+  readonly navigationStructure = computed(() => this.buildNavigation(this.catalogStore.categories()));
 
   constructor(@Inject(PLATFORM_ID) private readonly platformId: object) {}
 
@@ -171,6 +255,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   readonly useSolidHeaderStyle = () => !this.isHomeRoute() || this.isScrolled();
 
   ngOnInit() {
+    this.catalogStore.ensureCategoriesLoaded();
     this.updateRouteState();
     const routeSub = this.router.events.subscribe((event) => {
       if (event instanceof NavigationEnd) {
@@ -199,32 +284,35 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   navigateTo(cat: HeaderNavCategory) {
     this.closeTransientUi();
-    if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
-    } else if (cat.link === 'home') {
-      this.router.navigate(['/']);
-    } else if (cat.link === 'new-collection') {
-      this.router.navigate(['/new-collection']);
-    } else if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
+    if (cat.link) {
+      this.router.navigateByUrl(cat.link);
+    } else if (cat.categoryNames?.length) {
+      this.router.navigate(['/search'], { queryParams: { category: cat.categoryNames.join(',') } });
     }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    this.scrollToTop();
   }
 
   navigateToSub(cat: HeaderNavCategory, item: HeaderSubItem) {
     this.closeTransientUi();
-    if (cat.slug) {
-      this.router.navigate(['/collections', cat.slug]);
+    if (item.link) {
+      this.router.navigateByUrl(item.link);
+    } else if (item.slug) {
+      this.router.navigate(['/collections', item.slug]);
+    } else if (item.categoryName) {
+      this.router.navigate(['/search'], { queryParams: { category: item.categoryName } });
+    } else if (cat.categoryNames?.length) {
+      this.router.navigate(['/search'], { queryParams: { category: cat.categoryNames.join(',') } });
     }
-    void item;
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+
+    this.scrollToTop();
   }
 
   goHome(event: Event) {
     event.preventDefault();
     this.closeTransientUi();
     this.router.navigate(['/']);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    this.scrollToTop();
   }
 
   onSearchQueryChange(query: string) {
@@ -232,6 +320,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
   }
 
   onSearchFocus() {
+    this.searchFacade.ensureSearchIndexLoaded();
     if (this.searchBlurTimer) {
       clearTimeout(this.searchBlurTimer);
       this.searchBlurTimer = null;
@@ -278,6 +367,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   openCartDrawer() {
     this.userMenuOpen.set(false);
+    this.selectedCartProductIds.set(this.checkoutFacade.cartItemsDetailed().map((item) => item.productId));
     this.cartDrawerOpen.set(true);
   }
 
@@ -312,13 +402,129 @@ export class HeaderComponent implements OnInit, OnDestroy {
     this.router.navigate(['/checkout']);
   }
 
+  toggleCartSelection(productId: number) {
+    const availableProductIds = new Set(this.checkoutFacade.cartItemsDetailed().map((item) => item.productId));
+    if (!availableProductIds.has(productId)) {
+      return;
+    }
+
+    this.selectedCartProductIds.update((selectedIds) => {
+      const normalizedSelection = selectedIds.filter((id) => availableProductIds.has(id));
+      return normalizedSelection.includes(productId)
+        ? normalizedSelection.filter((id) => id !== productId)
+        : [...normalizedSelection, productId];
+    });
+  }
+
+  toggleSelectAllInCart(selectAll: boolean) {
+    this.selectedCartProductIds.set(
+      selectAll
+        ? this.checkoutFacade.cartItemsDetailed().map((item) => item.productId)
+        : []
+    );
+  }
+
+  removeFromCart(productId: number) {
+    this.selectedCartProductIds.update((selectedIds) => selectedIds.filter((id) => id !== productId));
+    this.checkoutFacade.removeFromCart(productId);
+  }
+
+  private buildNavigation(categories: Category[]): HeaderNavCategory[] {
+    const groupedCategories = new Map<string, {
+      label: string;
+      slug: string;
+      displayOrder: number;
+      items: HeaderSubItem[];
+      categoryNames: string[];
+    }>();
+
+    categories
+      .map((category) => ({ category, group: this.resolveCategoryGroup(category) }))
+      .filter((entry): entry is { category: Category; group: ResolvedCategoryGroup } =>
+        entry.category.isActive && !!entry.group && entry.group.isActive)
+      .sort((left, right) => left.category.name.localeCompare(right.category.name, 'vi'))
+      .forEach(({ category, group }) => {
+        const existingGroup = groupedCategories.get(group.slug);
+        if (existingGroup) {
+          existingGroup.items.push({
+            label: category.name,
+            slug: category.slug,
+            categoryName: category.name
+          });
+          existingGroup.categoryNames.push(category.name);
+          return;
+        }
+
+        groupedCategories.set(group.slug, {
+          label: group.name,
+          slug: group.slug,
+          displayOrder: group.displayOrder,
+          items: [
+            {
+              label: category.name,
+              slug: category.slug,
+              categoryName: category.name
+            }
+          ],
+          categoryNames: [category.name]
+        });
+      });
+
+    const categoryMenus = Array.from(groupedCategories.values())
+      .sort((left, right) => left.displayOrder - right.displayOrder || left.label.localeCompare(right.label, 'vi'))
+      .map<HeaderNavCategory>((group) => ({
+        label: group.label,
+        slug: group.slug,
+        type: 'dropdown',
+        categoryNames: group.categoryNames,
+        items: group.items
+      }));
+
+    return [
+      {
+        label: 'Mới nhất',
+        type: 'link',
+        link: '/new-collection'
+      },
+      ...categoryMenus,
+      {
+        label: 'Liên hệ',
+        type: 'link',
+        link: '/contact'
+      }
+    ];
+  }
+
   private updateRouteState() {
     const currentPath = this.router.url.split('?')[0];
     this.isHomeRoute.set(currentPath === '' || currentPath === '/' || currentPath === '/home');
   }
 
+  private resolveCategoryGroup(category: Category): ResolvedCategoryGroup | null {
+    if (category.group) {
+      return category.group;
+    }
+
+    const fallbackGroup = HeaderComponent.fallbackGroups.find((group) => group.categorySlugs.includes(category.slug));
+    return fallbackGroup
+      ? {
+          id: fallbackGroup.id,
+          name: fallbackGroup.name,
+          slug: fallbackGroup.slug,
+          isActive: fallbackGroup.isActive,
+          displayOrder: fallbackGroup.displayOrder
+        }
+      : null;
+  }
+
   private closeTransientUi() {
     this.userMenuOpen.set(false);
     this.cartDrawerOpen.set(false);
+  }
+
+  private scrollToTop() {
+    if (isPlatformBrowser(this.platformId)) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   }
 }

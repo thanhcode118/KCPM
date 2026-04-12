@@ -193,7 +193,7 @@ export class ShopLookComponent {
 
     look.hotspots.forEach(spot => {
       if (placedIds.has(spot.id)) {
-        this.homeFacade.addToCart(spot.product.id, 1);
+        this.homeFacade.addProductToCart(spot.product, 1);
       }
     });
 

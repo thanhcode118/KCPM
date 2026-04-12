@@ -66,7 +66,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                 }
               </div>
               <div class="mt-1 text-xs text-gray-500">
-                ⭐ {{ product.rating ?? 0 }} • {{ product.reviews ?? 0 }} đánh giá
+                ⭐ {{ (product.rating ?? 0) | number:'1.1-1' }} • {{ product.reviews ?? 0 }} đánh giá
               </div>
             </div>
           </article>

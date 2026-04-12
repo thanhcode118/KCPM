@@ -1,59 +1,52 @@
-# Huong Dan Chay Backend
+# Huong Dan Chay
 
-## 1. Ket noi DB
-
-Khoi dong SQL Server bang Docker Compose (tu root repo):
+## Terminal 1 - Clone source
 
 ```powershell
-cd d:\2026\TMDT_Nhom6_latest\TMDT_Nhom6
-docker compose -f docker-compose.sql.yml up -d
+git clone 
+cd TMDT_Nhom6
 ```
 
-Backend doc connection string trong:
+## Terminal 2 - Start SQL Server
 
-- [appsettings.json](/d:/2026/TMDT_Nhom6_latest/TMDT_Nhom6/HomeDecorShop/HomeDecorShop.API/appsettings.json)
+```powershell
+docker compose -f docker-compose.sql.yml up -d
+docker compose -f docker-compose.sql.yml ps
+```
 
-Gia tri hien tai:
+## Terminal 3 - Start Backend
+
+```powershell
+dotnet restore HomeDecorShop\HomeDecorShop.sln
+cd HomeDecorShop\HomeDecorShop.API
+dotnet run --launch-profile http
+```
+
+## Terminal 4 - Seed du lieu
+
+```powershell
+Invoke-RestMethod -Method Post http://localhost:5020/api/Maintenance/seed/all
+```
+
+## Terminal 5 - Start Frontend
+
+```powershell
+cd frontend
+npm install
+npm run dev -- --host 127.0.0.1
+```
+
+## Terminal 6 - Start ngrok
+
+```powershell
+ngrok config add-authtoken <NGROK_TOKEN_CUA_BAN>
+ngrok http 5020
+```
+
+## URL
 
 ```text
-Server=localhost,1433;Database=BeeShopDB;User Id=sa;Password=BeeShop@2026!;TrustServerCertificate=True;Encrypt=False;MultipleActiveResultSets=true
+Frontend: http://127.0.0.1:3000
+Backend: http://localhost:5020
+Swagger: http://localhost:5020/swagger
 ```
-
-Can dam bao:
-
-- SQL Server dang chay
-- dung port `1433`
-- dung tai khoan `sa`
-- database `BeeShopDB` truy cap duoc
-
-Neu can doi connection string, sua truc tiep file tren.
-
-## 2. Start BE
-
-Chay cac lenh sau tu root repo:
-
-```powershell
-cd d:\2026\TMDT_Nhom6_latest\TMDT_Nhom6
-dotnet restore HomeDecorShop\HomeDecorShop.sln
-dotnet run --project HomeDecorShop\HomeDecorShop.API\HomeDecorShop.API.csproj --launch-profile http
-```
-
-Backend se len tai:
-
-- `http://localhost:5020`
-- Swagger: `http://localhost:5020/swagger`
-
-## 3. Ghi chu
-
-- Luc app start, backend se tu kiem tra/khoi tao schema co ban trong DB neu can.
-- Tai khoan seed mac dinh:
-  - `admin1`
-  - `admin123`
-
-## 4. Loi thuong gap
-
-Neu backend khong len:
-
-- kiem tra SQL Server da chay chua
-- kiem tra lai connection string
-- neu bi loi khoa file DLL khi build/run, tat process `HomeDecorShop.API` dang chay roi thu lai

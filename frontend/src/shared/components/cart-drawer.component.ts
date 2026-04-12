@@ -100,7 +100,12 @@ export interface CartDrawerItem {
 
                   <!-- Product Image -->
                   <div class="w-20 h-20 rounded-xl overflow-hidden bg-gray-50 flex-shrink-0 border border-gray-100">
-                    <img [src]="item.image" [alt]="item.name" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500">
+                    <img
+                      [src]="item.image || '/assets/images/logo.png'"
+                      [alt]="item.name"
+                      class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      (error)="onImageError($event)"
+                    >
                   </div>
 
                   <!-- Product Info -->
@@ -216,4 +221,13 @@ export class CartDrawerComponent {
   @Output() readonly remove = new EventEmitter<number>();
   @Output() readonly toggleSelection = new EventEmitter<number>();
   @Output() readonly toggleSelectAll = new EventEmitter<boolean>();
+
+  onImageError(event: Event): void {
+    const image = event.target as HTMLImageElement | null;
+    if (!image || image.src.endsWith('/assets/images/logo.png')) {
+      return;
+    }
+
+    image.src = '/assets/images/logo.png';
+  }
 }

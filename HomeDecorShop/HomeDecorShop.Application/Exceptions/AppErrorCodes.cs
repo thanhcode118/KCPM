@@ -31,6 +31,8 @@ public static class AppErrorCodes
     public const string CategorySlugAlreadyExists = "category_slug_already_exists";
     public const string CategoryHasProducts = "category_has_products";
     public const string CategoryHasActiveProducts = "category_has_active_products";
+    public const string CategoryGroupInvalid = "category_group_invalid";
+    public const string CategoryGroupInactive = "category_group_inactive";
 
     public const string CartEmpty = "cart_empty";
     public const string CartItemNotFound = "cart_item_not_found";

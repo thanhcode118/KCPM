@@ -6,8 +6,6 @@ import { provideHttpClient } from '@angular/common/http';
 import { AppComponent } from './src/app.component';
 import { routes } from './src/app.routes';
 
-import { provideHttpClient } from '@angular/common/http';
-
 bootstrapApplication(AppComponent, {
   providers: [
     provideZonelessChangeDetection(),

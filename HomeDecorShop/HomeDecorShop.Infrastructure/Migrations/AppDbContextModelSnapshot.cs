@@ -209,6 +209,9 @@ namespace HomeDecorShop.Infrastructure.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("GroupId")
+                        .HasColumnType("int");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
@@ -222,7 +225,39 @@ namespace HomeDecorShop.Infrastructure.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GroupId");
+
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("HomeDecorShop.Domain.CategoryGroup", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Slug")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Slug")
+                        .IsUnique();
+
+                    b.ToTable("CategoryGroups");
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.Coupon", b =>
@@ -719,6 +754,17 @@ namespace HomeDecorShop.Infrastructure.Migrations
                     b.Navigation("Product");
                 });
 
+            modelBuilder.Entity("HomeDecorShop.Domain.Category", b =>
+                {
+                    b.HasOne("HomeDecorShop.Domain.CategoryGroup", "GroupNavigation")
+                        .WithMany("Categories")
+                        .HasForeignKey("GroupId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("GroupNavigation");
+                });
+
             modelBuilder.Entity("HomeDecorShop.Domain.Order", b =>
                 {
                     b.HasOne("HomeDecorShop.Domain.User", "User")
@@ -789,6 +835,11 @@ namespace HomeDecorShop.Infrastructure.Migrations
             modelBuilder.Entity("HomeDecorShop.Domain.Category", b =>
                 {
                     b.Navigation("Products");
+                });
+
+            modelBuilder.Entity("HomeDecorShop.Domain.CategoryGroup", b =>
+                {
+                    b.Navigation("Categories");
                 });
 
             modelBuilder.Entity("HomeDecorShop.Domain.Order", b =>

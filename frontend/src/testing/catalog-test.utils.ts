@@ -25,7 +25,16 @@ export const toCategoryViewDto = (category: Category): CategoryViewDto => ({
   id: category.id,
   name: category.name,
   slug: category.slug,
-  isActive: category.isActive
+  isActive: category.isActive,
+  group: category.group
+    ? {
+        id: category.group.id,
+        name: category.group.name,
+        slug: category.group.slug,
+        isActive: category.group.isActive,
+        displayOrder: category.group.displayOrder
+      }
+    : undefined
 });
 
 export const toProductViewDto = (product: Product): ProductViewDto => ({

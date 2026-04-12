@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-navigation.mock';
+import { HeaderNavCategory, HeaderSubItem } from './header-navigation.types';
 
 @Component({
   selector: 'app-header-navigation',
@@ -12,18 +12,19 @@ import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-naviga
       <ul class="flex items-center gap-0 h-full">
         @for (cat of navigationStructure; track cat.label) {
           <li 
-            (click)="navigate.emit(cat)"
             class="nav-item group h-full flex items-center px-2 xl:px-2.5 2xl:px-3 cursor-pointer whitespace-nowrap" 
             [class.relative]="cat.type === 'dropdown'" 
             [class.static]="cat.type === 'mega'"
           >
-            <a
-              class="nav-link relative py-4 text-xs xl:text-[13px] 2xl:text-sm font-semibold tracking-wide transition-colors duration-300 cursor-pointer hover:text-honey group-hover/header:text-black"
+            <button
+              type="button"
+              (click)="navigate.emit(cat)"
+              class="nav-link relative py-4 text-xs xl:text-[13px] 2xl:text-sm font-semibold tracking-wide transition-colors duration-300 cursor-pointer hover:text-honey group-hover/header:text-black bg-transparent border-0"
               [ngClass]="solidStyle ? 'text-black' : 'text-white'"
             >
               {{ cat.label }}
               <span class="nav-underline"></span>
-            </a>
+            </button>
 
             @if (cat.type === 'mega') {
               <div class="mega-menu absolute top-full left-0 w-full bg-white shadow-2xl border-t-2 border-honey/30 opacity-0 invisible group-hover:opacity-100 group-hover:visible rounded-b-2xl overflow-hidden z-[102]">
@@ -37,7 +38,7 @@ import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-naviga
                       <ul class="space-y-1">
                         @for (item of col.items; track item.label; let itemIdx = $index) {
                           <li [style.--item-index]="itemIdx">
-                            <a (click)="navigateSub.emit({ category: cat, item })" class="mega-item text-sm text-gray-700 hover:text-honey transition-all duration-300 block py-1.5 pl-3 border-l-2 border-transparent hover:border-honey hover:pl-4 hover:bg-honey/5 rounded-r cursor-pointer">
+                            <a (click)="$event.stopPropagation(); navigateSub.emit({ category: cat, item })" class="mega-item text-sm text-gray-700 hover:text-honey transition-all duration-300 block py-1.5 pl-3 border-l-2 border-transparent hover:border-honey hover:pl-4 hover:bg-honey/5 rounded-r cursor-pointer">
                               {{ item.label }}
                             </a>
                           </li>
@@ -66,7 +67,7 @@ import { HeaderNavCategory, HeaderSubItem } from '@/core/mock-data/header-naviga
                 <ul class="py-1">
                   @for (item of cat.items; track item.label; let i = $index) {
                     <li [style.--item-index]="i">
-                      <a (click)="navigateSub.emit({ category: cat, item })" class="dropdown-item flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-800 hover:text-honey hover:bg-honey/5 transition-all duration-300 border-l-3 border-transparent hover:border-honey cursor-pointer">
+                      <a (click)="$event.stopPropagation(); navigateSub.emit({ category: cat, item })" class="dropdown-item flex items-center gap-3 px-5 py-3 text-sm font-medium text-gray-800 hover:text-honey hover:bg-honey/5 transition-all duration-300 border-l-3 border-transparent hover:border-honey cursor-pointer">
                         <span class="w-1 h-1 rounded-full bg-gray-300 group-hover:bg-honey transition-colors duration-300"></span>
                         {{ item.label }}
                       </a>

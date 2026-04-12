@@ -17,6 +17,7 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
     {
         var name = NormalizeName(input.Name);
         var slug = NormalizeSlug(input.Slug);
+        var group = RequireActiveGroup(input.GroupId);
         EnsureUniqueName(name, null);
         EnsureUniqueSlug(slug, null);
 
@@ -24,6 +25,7 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
         {
             Name = name,
             Slug = slug,
+            GroupId = group.Id,
             IsActive = input.IsActive
         });
 
@@ -40,12 +42,14 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
 
         var name = NormalizeName(input.Name);
         var slug = NormalizeSlug(input.Slug);
+        var group = RequireActiveGroup(input.GroupId);
         EnsureUniqueName(name, categoryId);
         EnsureUniqueSlug(slug, categoryId);
         EnsureCanDeactivate(category, input.IsActive);
 
         category.Name = name;
         category.Slug = slug;
+        category.GroupId = group.Id;
         category.IsActive = input.IsActive;
 
         var updated = repository.Update(category);
@@ -100,8 +104,36 @@ public sealed class CategoryService(ICategoryRepository repository) : ICategoryS
         }
     }
 
+    private CategoryGroup RequireActiveGroup(int groupId)
+    {
+        var group = repository.GetGroupById(groupId);
+        if (group is null)
+        {
+            throw new ConflictException("Category group is invalid.", AppErrorCodes.CategoryGroupInvalid);
+        }
+
+        if (!group.IsActive)
+        {
+            throw new ConflictException("Category group is inactive and cannot be assigned.", AppErrorCodes.CategoryGroupInactive);
+        }
+
+        return group;
+    }
+
     private static CategoryView MapCategory(Category category) =>
-        new(category.Id, category.Name, category.Slug, category.IsActive);
+        new(
+            category.Id,
+            category.Name,
+            category.Slug,
+            category.IsActive,
+            category.GroupNavigation is null
+                ? null
+                : new CategoryGroupSummaryView(
+                    category.GroupNavigation.Id,
+                    category.GroupNavigation.Name,
+                    category.GroupNavigation.Slug,
+                    category.GroupNavigation.IsActive,
+                    category.GroupNavigation.DisplayOrder));
 
     private static string NormalizeName(string name) =>
         name.Trim();

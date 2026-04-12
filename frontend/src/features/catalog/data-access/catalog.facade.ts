@@ -1,4 +1,5 @@
 import { Injectable, inject } from '@angular/core';
+import { Product } from '@/core/models';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
 import { ContentStore } from '@/features/content/data-access/content.store';
 import { CheckoutFacade } from '@/features/checkout/data-access/checkout.facade';
@@ -17,5 +18,9 @@ export class CatalogFacade {
 
   addToCart(productId: number, quantity = 1): void {
     this.checkoutFacade.addToCart(productId, quantity);
+  }
+
+  addProductToCart(product: Product, quantity = 1): void {
+    this.checkoutFacade.addProductToCart(product, quantity);
   }
 }

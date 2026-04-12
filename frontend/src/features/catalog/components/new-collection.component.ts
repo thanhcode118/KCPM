@@ -1,6 +1,7 @@
 import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CatalogFacade } from '@/features/catalog/data-access/catalog.facade';
+import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
 import { IconComponent } from '@/shared/components/icon.component';
 
 @Component({
@@ -77,7 +78,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                       <div>
                         <h4 class="font-bold text-charcoal group-hover:text-honey transition-colors">{{ spot.product.name }}</h4>
                         <p class="text-honey font-semibold">{{ spot.product.price | currency:'VND':'symbol':'1.0-0' }}</p>
-                        <button (click)="catalogFacade.addToCart(spot.product.id)" class="text-xs underline mt-1 text-gray-500 hover:text-charcoal">Thêm vào giỏ</button>
+                        <button (click)="catalogFacade.addProductToCart(spot.product)" class="text-xs underline mt-1 text-gray-500 hover:text-charcoal">Thêm vào giỏ</button>
                       </div>
                     </div>
                   }
@@ -294,9 +295,15 @@ import { IconComponent } from '@/shared/components/icon.component';
 })
 export class NewCollectionComponent {
   catalogFacade = inject(CatalogFacade);
+  private readonly catalogStore = inject(CatalogStore);
   
   activeHotspot = signal<number | null>(null);
   hoveredProduct = signal<number | null>(null);
+
+  constructor() {
+    this.catalogStore.ensureNewCollectionProductsLoaded();
+    this.catalogStore.ensureCategoryProductsLoaded();
+  }
 
   toggleHotspot(id: number) {
     if (this.activeHotspot() === id) {

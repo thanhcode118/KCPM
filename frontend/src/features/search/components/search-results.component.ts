@@ -203,6 +203,7 @@ export class SearchResultsComponent implements OnInit, OnDestroy {
   private syncingFromRoute = false;
 
   ngOnInit(): void {
+    this.searchFacade.ensureSearchIndexLoaded();
     this.routeSub = this.route.queryParamMap.subscribe((queryParamMap) => {
       this.syncingFromRoute = true;
       this.searchFacade.hydrateFromQueryParams({

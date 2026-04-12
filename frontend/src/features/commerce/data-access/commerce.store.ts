@@ -1,5 +1,5 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { Cart, Order, User } from '@/core/models';
+import { Cart, Order, Product, User } from '@/core/models';
 import { MOCK_USERS } from '@/core/mock-data/ecommerce.mock';
 import { CatalogStore } from '@/features/catalog/data-access/catalog.store';
 
@@ -39,13 +39,21 @@ export class CommerceStore {
       return;
     }
 
+    this.addProductToCart(product, quantity);
+  }
+
+  addProductToCart(product: Product, quantity = 1): void {
+    if (quantity <= 0) {
+      return;
+    }
+
     this.activeCart.update((cart) => {
-      const existingItem = cart.items.find((item) => item.productId === productId);
+      const existingItem = cart.items.find((item) => item.productId === product.id);
       if (existingItem) {
         const nextCart = {
           ...cart,
           items: cart.items.map((item) =>
-            item.productId === productId
+            item.productId === product.id
               ? { ...item, quantity: item.quantity + quantity }
               : item
           ),
@@ -61,7 +69,7 @@ export class CommerceStore {
           ...cart.items,
           {
             id: Date.now(),
-            productId,
+            productId: product.id,
             productName: product.name,
             productImage: product.image,
             quantity,

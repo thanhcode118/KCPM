@@ -1,8 +1,17 @@
+export interface CategoryGroupSummaryDto {
+  id: number;
+  name: string;
+  slug: string;
+  isActive: boolean;
+  displayOrder: number;
+}
+
 export interface CategoryViewDto {
   id: number;
   name: string;
   slug: string;
   isActive: boolean;
+  group?: CategoryGroupSummaryDto;
 }
 
 export interface ProductCategoryViewDto {

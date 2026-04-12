@@ -27,17 +27,20 @@ export class CatalogStore {
   readonly flashSaleProducts = signal<Product[]>([]);
   readonly newCollectionProducts = signal<Product[]>([]);
   readonly newArrivals = signal<Product[]>([]);
+  readonly productIndex = signal<Product[]>([]);
   readonly categoriesState = signal<LoadState>(createIdleState());
   readonly categoryProductsState = signal<LoadState>(createIdleState());
   readonly trendingProductsState = signal<LoadState>(createIdleState());
   readonly flashSaleProductsState = signal<LoadState>(createIdleState());
   readonly newCollectionProductsState = signal<LoadState>(createIdleState());
   readonly newArrivalsState = signal<LoadState>(createIdleState());
+  readonly productIndexState = signal<LoadState>(createIdleState());
 
   readonly allProducts = computed(() => {
     const uniqueById = new Map<number, Product>();
 
     [
+      ...this.productIndex(),
       ...this.categoryProducts(),
       ...this.newCollectionProducts(),
       ...this.trendingProducts(),
@@ -52,45 +55,69 @@ export class CatalogStore {
     return Array.from(uniqueById.values()).sort((a, b) => a.id - b.id);
   });
 
-  constructor() {
-    this.loadInitialData();
-  }
-
   findProductById(productId: number): Product | undefined {
     return this.allProducts().find((product) => product.id === productId);
   }
 
-  private loadInitialData(): void {
+  ensureCategoriesLoaded(): void {
+    if (!this.shouldLoad(this.categoriesState())) {
+      return;
+    }
+
     this.loadCategories();
-    this.loadProducts(
+  }
+
+  ensureCategoryProductsLoaded(): void {
+    this.loadProductCollectionIfNeeded(
       `${apiEndpoints.products.list}?sort=best_selling&pageSize=12`,
       this.categoryProducts,
       this.categoryProductsState,
       'Khong tai duoc danh sach best seller.'
     );
-    this.loadProducts(
+  }
+
+  ensureTrendingProductsLoaded(): void {
+    this.loadProductCollectionIfNeeded(
       `${apiEndpoints.products.list}?sort=best_selling&pageSize=8`,
       this.trendingProducts,
       this.trendingProductsState,
       'Khong tai duoc danh sach trending.'
     );
-    this.loadProducts(
+  }
+
+  ensureFlashSaleProductsLoaded(): void {
+    this.loadProductCollectionIfNeeded(
       `${apiEndpoints.products.list}?onSale=true&pageSize=8`,
       this.flashSaleProducts,
       this.flashSaleProductsState,
       'Khong tai duoc danh sach flash sale.'
     );
-    this.loadProducts(
+  }
+
+  ensureNewCollectionProductsLoaded(): void {
+    this.loadProductCollectionIfNeeded(
       `${apiEndpoints.products.list}?sort=newest&pageSize=12`,
       this.newCollectionProducts,
       this.newCollectionProductsState,
       'Khong tai duoc bo suu tap moi.'
     );
-    this.loadProducts(
+  }
+
+  ensureNewArrivalsLoaded(): void {
+    this.loadProductCollectionIfNeeded(
       `${apiEndpoints.products.list}?sort=newest&pageSize=8`,
       this.newArrivals,
       this.newArrivalsState,
       'Khong tai duoc danh sach san pham moi.'
+    );
+  }
+
+  ensureProductIndexLoaded(): void {
+    this.loadProductCollectionIfNeeded(
+      `${apiEndpoints.products.list}?pageSize=200`,
+      this.productIndex,
+      this.productIndexState,
+      'Khong tai duoc danh sach san pham.'
     );
   }
 
@@ -100,13 +127,31 @@ export class CatalogStore {
     this.http.get<CategoryViewDto[]>(apiEndpoints.categories.list).subscribe({
       next: (dtos) => {
         this.categories.set(
-          dtos.map((dto) => ({
-            id: dto.id,
-            name: dto.name,
-            slug: dto.slug,
-            isActive: dto.isActive,
-            image: ''
-          }))
+          dtos
+            .map((dto) => ({
+              id: dto.id,
+              name: dto.name,
+              slug: dto.slug,
+              isActive: dto.isActive,
+              image: '',
+              group: dto.group
+                ? {
+                    id: dto.group.id,
+                    name: dto.group.name,
+                    slug: dto.group.slug,
+                    isActive: dto.group.isActive,
+                    displayOrder: dto.group.displayOrder
+                  }
+                : undefined
+            }))
+            .sort((left, right) => {
+              const groupOrder = (left.group?.displayOrder ?? Number.MAX_SAFE_INTEGER)
+                - (right.group?.displayOrder ?? Number.MAX_SAFE_INTEGER);
+
+              return groupOrder !== 0
+                ? groupOrder
+                : left.name.localeCompare(right.name, 'vi');
+            })
         );
         this.finishLoading(this.categoriesState);
       },
@@ -115,6 +160,19 @@ export class CatalogStore {
         this.failLoading(this.categoriesState, 'Khong tai duoc danh muc san pham.');
       }
     });
+  }
+
+  private loadProductCollectionIfNeeded(
+    url: string,
+    target: WritableSignal<Product[]>,
+    state: WritableSignal<LoadState>,
+    errorMessage: string
+  ): void {
+    if (!this.shouldLoad(state())) {
+      return;
+    }
+
+    this.loadProducts(url, target, state, errorMessage);
   }
 
   private loadProducts(
@@ -162,5 +220,9 @@ export class CatalogStore {
       errorMessage,
       isLoaded: true
     });
+  }
+
+  private shouldLoad(state: LoadState): boolean {
+    return !state.isLoading && (!state.isLoaded || state.hasError);
   }
 }

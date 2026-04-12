@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, effect, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, effect, inject, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router, RouterOutlet } from '@angular/router';
 import { HeaderComponent } from '@/shared/components/header.component';
@@ -24,6 +24,7 @@ export class AppComponent {
   private readonly router = inject(Router);
   private readonly authFacade = inject(AuthFacade);
   private readonly checkoutFacade = inject(CheckoutFacade);
+  private bootstrappedToken = '';
 
   constructor() {
     this.authFacade.restoreSession();
@@ -31,10 +32,18 @@ export class AppComponent {
     effect(() => {
       const token = this.authFacade.currentUser()?.token ?? '';
       if (!token) {
+        this.bootstrappedToken = '';
         return;
       }
 
-      this.checkoutFacade.bootstrapAuthenticatedState({ mergeGuestCart: true });
+      if (token === this.bootstrappedToken) {
+        return;
+      }
+
+      this.bootstrappedToken = token;
+      untracked(() => {
+        this.checkoutFacade.bootstrapAuthenticatedState({ mergeGuestCart: true });
+      });
     });
   }
 

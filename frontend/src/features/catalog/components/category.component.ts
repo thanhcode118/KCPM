@@ -1,6 +1,7 @@
-import { Component, ChangeDetectionStrategy, inject, OnInit } from '@angular/core';
+import { Component, ChangeDetectionStrategy, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Product } from '@/core/models';
 import { CatalogFacade } from '@/features/catalog/data-access/catalog.facade';
 import {
   CategoryFilterType,
@@ -209,7 +210,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                           </button>
                         </div>
 
-                        <button (click)="addToCart(product.id)" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
+                        <button (click)="addToCart(product, $event)" class="absolute bottom-0 left-0 w-full bg-charcoal text-white py-3 font-bold text-sm translate-y-full group-hover:translate-y-0 transition-transform duration-300 flex items-center justify-center gap-2 hover:bg-honey hover:text-charcoal">
                           <app-icon name="plus" class="w-4 h-4"></app-icon> Thêm vào giỏ
                         </button>
                       </div>
@@ -217,19 +218,18 @@ import { IconComponent } from '@/shared/components/icon.component';
                       <div class="p-4">
                         <h3 class="font-semibold text-charcoal hover:text-honey cursor-pointer line-clamp-2 min-h-[3rem] mb-1" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
 
-                        <div class="flex items-center gap-1 mb-2">
-                          <div class="flex text-yellow-400">
-                            @for (star of [1,2,3,4,5]; track star) {
-                              <app-icon name="star-filled" class="w-3 h-3"></app-icon>
-                            }
+                        <div class="mb-3 flex items-center gap-2">
+                          <div class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                            <app-icon name="star-filled" class="h-3.5 w-3.5"></app-icon>
+                            <span>{{ product.rating | number:'1.1-1' }}</span>
                           </div>
-                          <span class="text-xs text-gray-400">({{ product.reviews }})</span>
+                          <span class="text-xs font-medium text-gray-500">{{ product.reviews }} đánh giá</span>
                         </div>
 
                         <div class="flex items-baseline gap-2">
-                          <span class="text-honey font-bold text-lg">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
+                          <span class="text-lg font-extrabold tracking-tight text-[var(--catalog-price-color)]">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
                           @if (product.originalPrice) {
-                            <span class="text-xs text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</span>
+                            <span class="text-xs font-medium text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</span>
                           }
                         </div>
                       </div>
@@ -245,10 +245,12 @@ import { IconComponent } from '@/shared/components/icon.component';
                         <div class="flex justify-between items-start">
                           <div>
                             <h3 class="font-bold text-lg text-charcoal mb-1 cursor-pointer hover:text-honey" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
-                            <div class="flex items-center gap-1 mb-2 text-yellow-400">
-                              <app-icon name="star-filled" class="w-3 h-3"></app-icon>
-                              <span class="text-xs text-charcoal font-semibold">{{ product.rating }}</span>
-                              <span class="text-xs text-gray-400">({{ product.reviews }} đánh giá)</span>
+                            <div class="mb-3 flex items-center gap-2">
+                              <div class="inline-flex items-center gap-1 rounded-full border border-amber-200 bg-amber-50 px-2.5 py-1 text-[11px] font-semibold text-amber-700">
+                                <app-icon name="star-filled" class="h-3.5 w-3.5"></app-icon>
+                                <span>{{ product.rating | number:'1.1-1' }}</span>
+                              </div>
+                              <span class="text-xs font-medium text-gray-500">{{ product.reviews }} đánh giá</span>
                             </div>
                           </div>
                           <button class="text-gray-400 hover:text-red-500"><app-icon name="heart" class="w-6 h-6"></app-icon></button>
@@ -256,12 +258,12 @@ import { IconComponent } from '@/shared/components/icon.component';
                         <p class="text-sm text-gray-500 mb-3 line-clamp-2">Sản phẩm decor tinh tế, chất liệu {{ product.material }}, phù hợp phong cách {{ product.style }}.</p>
                         <div class="flex items-center justify-between mt-auto">
                           <div class="flex items-baseline gap-2">
-                            <span class="text-honey font-bold text-xl">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
+                            <span class="text-xl font-extrabold tracking-tight text-[var(--catalog-price-color)]">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
                             @if (product.originalPrice) {
-                              <span class="text-sm text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</span>
+                              <span class="text-sm font-medium text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</span>
                             }
                           </div>
-                          <button (click)="addToCart(product.id)" class="px-6 py-2 bg-charcoal text-white rounded font-bold hover:bg-honey hover:text-charcoal transition-colors">Thêm vào giỏ</button>
+                          <button (click)="addToCart(product, $event)" class="px-6 py-2 bg-charcoal text-white rounded font-bold hover:bg-honey hover:text-charcoal transition-colors">Thêm vào giỏ</button>
                         </div>
                       </div>
                     </div>
@@ -307,9 +309,21 @@ import { IconComponent } from '@/shared/components/icon.component';
           </main>
         </div>
       </div>
+
+      @if (cartNotice()) {
+        <div class="pointer-events-none fixed bottom-6 right-6 z-[120] max-w-sm">
+          <div class="rounded-2xl border border-emerald-200 bg-white/95 px-4 py-3 shadow-2xl backdrop-blur">
+            <p class="text-sm font-semibold text-charcoal">{{ cartNotice() }}</p>
+          </div>
+        </div>
+      }
     </div>
   `,
   styles: [`
+    :host {
+      --catalog-price-color: #9a5a16;
+    }
+
     .accent-honey {
       accent-color: #F6C324;
     }
@@ -319,7 +333,9 @@ export class CategoryComponent implements OnInit {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly categoryPageFacade = inject(CategoryPageFacade);
+  private cartNoticeTimer: ReturnType<typeof setTimeout> | null = null;
   readonly catalogFacade = inject(CatalogFacade);
+  readonly cartNotice = signal<string | null>(null);
 
   readonly currentCategoryName = this.categoryPageFacade.currentCategoryName;
   readonly viewMode = this.categoryPageFacade.viewMode;
@@ -351,8 +367,12 @@ export class CategoryComponent implements OnInit {
     this.categoryPageFacade.loadMore();
   }
 
-  addToCart(productId: number) {
-    this.catalogFacade.addToCart(productId);
+  addToCart(product: Product, event?: Event) {
+    event?.preventDefault();
+    event?.stopPropagation();
+
+    this.catalogFacade.addProductToCart(product);
+    this.showCartNotice(`Đã thêm "${product.name}" vào giỏ hàng.`);
   }
 
   sort(type: CategorySort, label: string) {
@@ -380,5 +400,24 @@ export class CategoryComponent implements OnInit {
     if (slug) {
       this.categoryPageFacade.loadCategory(slug);
     }
+  }
+
+  ngOnDestroy() {
+    if (this.cartNoticeTimer) {
+      clearTimeout(this.cartNoticeTimer);
+    }
+  }
+
+  private showCartNotice(message: string) {
+    this.cartNotice.set(message);
+
+    if (this.cartNoticeTimer) {
+      clearTimeout(this.cartNoticeTimer);
+    }
+
+    this.cartNoticeTimer = setTimeout(() => {
+      this.cartNotice.set(null);
+      this.cartNoticeTimer = null;
+    }, 2200);
   }
 }

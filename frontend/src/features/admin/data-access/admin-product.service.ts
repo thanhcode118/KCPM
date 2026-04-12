@@ -58,6 +58,13 @@ export interface CategoryView {
   name: string;
   slug: string;
   isActive: boolean;
+  group?: {
+    id: number;
+    name: string;
+    slug: string;
+    isActive: boolean;
+    displayOrder: number;
+  };
 }
 
 @Injectable({ providedIn: 'root' })

@@ -60,7 +60,7 @@ import { IconComponent } from '@/shared/components/icon.component';
               }
             </div>
 
-            <button class="bg-charcoal text-white px-5 py-3 rounded-lg font-bold hover:bg-honey hover:text-charcoal transition-colors" (click)="checkoutFacade.addToCart(productFacade.selectedProduct()!.id)">
+            <button class="bg-charcoal text-white px-5 py-3 rounded-lg font-bold hover:bg-honey hover:text-charcoal transition-colors" (click)="checkoutFacade.addProductToCart(productFacade.selectedProduct()!)">
               Thêm vào giỏ
             </button>
 
@@ -80,7 +80,7 @@ import { IconComponent } from '@/shared/components/icon.component';
             <div class="space-y-3 mb-4">
               @for (review of productFacade.reviews(); track review.id) {
                 <div class="bg-white p-3 rounded-lg border">
-                  <p class="font-semibold">{{ review.author }} - {{ review.rating }}/5</p>
+                  <p class="font-semibold">{{ review.author }} - {{ review.rating | number:'1.1-1' }}/5</p>
                   <p class="text-sm text-gray-700">{{ review.comment }}</p>
                   <p class="text-xs text-gray-500">{{ review.createdAt }}</p>
                 </div>
