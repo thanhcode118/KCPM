@@ -65,7 +65,7 @@ import { IconComponent } from './icon.component';
               <div (click)="selectProduct.emit(product)" class="flex items-center gap-3 p-3 hover:bg-cream cursor-pointer transition-all duration-300 border-b border-gray-50 last:border-0 hover:pl-5">
                 <img [src]="product.image" class="w-10 h-10 object-cover rounded-lg bg-gray-100 shadow-sm transition-transform duration-300 hover:scale-110">
                 <div class="flex-grow min-w-0">
-                  <h4 class="text-sm font-bold text-charcoal truncate">{{ product.name }}</h4>
+                  <h4 class="text-sm font-bold text-charcoal truncate">{{ product.name | uppercase }}</h4>
                   <p class="text-xs text-honey font-bold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                 </div>
               </div>

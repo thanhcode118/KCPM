@@ -82,7 +82,7 @@ export class CategoriesComponent {
       ]
     },
     {
-      name: 'Chăn Nhỏ & Gối Đệm',
+      name: 'Hương Thơm Tinh Tế',
       filter: 'Hương thơm',
       images: [
         'https://picsum.photos/id/493/400/600',

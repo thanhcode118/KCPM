@@ -1,13 +1,14 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
-import { RouterLink } from '@angular/router';
 import { Product } from '@/core/models';
 import { IconComponent } from '@/shared/components/icon.component';
+
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-search-results-content',
   standalone: true,
-  imports: [CommonModule, IconComponent, RouterLink],
+  imports: [CommonModule, IconComponent, RouterModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (isSearching) {
@@ -27,13 +28,16 @@ import { IconComponent } from '@/shared/components/icon.component';
         <h3 class="font-bold text-charcoal mb-3">Gợi ý sản phẩm nổi bật</h3>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (product of bestSellers; track product.id) {
-            <div class="border border-gray-100 rounded-lg p-3 bg-white hover:shadow-sm transition-shadow">
+            <div 
+              class="border border-gray-100 rounded-lg p-3 bg-white hover:shadow-sm transition-shadow cursor-pointer"
+              [routerLink]="['/product', product.id]"
+            >
               <img [src]="product.image" class="w-full aspect-[4/5] object-cover rounded mb-2">
               <p class="text-xs text-gray-500 uppercase">{{ product.category }}</p>
-              <h4 class="font-semibold text-charcoal truncate">{{ product.name }}</h4>
+              <h4 class="font-semibold text-charcoal truncate">{{ product.name | uppercase }}</h4>
               <div class="flex items-center justify-between mt-2">
                 <span class="text-honey font-bold text-sm">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
-                <button class="text-xs bg-honey text-charcoal rounded px-2 py-1 font-semibold" (click)="addToCartRequested.emit(product.id)">Thêm</button>
+                <button class="text-xs bg-honey text-charcoal rounded px-2 py-1 font-semibold" (click)="addToCartRequested.emit(product.id); $event.stopPropagation()">Thêm</button>
               </div>
             </div>
           }
@@ -42,15 +46,18 @@ import { IconComponent } from '@/shared/components/icon.component';
     } @else {
       <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-6">
         @for (product of results; track product.id) {
-          <article class="group relative bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300">
-            <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100 cursor-pointer" [routerLink]="['/product', product.id]">
+          <article 
+            [routerLink]="['/product', product.id]"
+            class="group relative bg-white rounded-lg shadow-sm hover:shadow-xl transition-all duration-300 cursor-pointer"
+          >
+            <div class="relative w-full aspect-[4/5] overflow-hidden rounded-t-lg bg-gray-100">
               <img [src]="product.image" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-300 group-hover:opacity-0">
               <img [src]="product.hoverImage" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300 group-hover:opacity-100">
               @if ((product.originalPrice ?? 0) > product.price) {
                 <span class="absolute top-2 left-2 text-[10px] font-bold px-2 py-1 rounded bg-red-500 text-white">SALE</span>
               }
               <button
-                (click)="addToCartRequested.emit(product.id)"
+                (click)="addToCartRequested.emit(product.id); $event.stopPropagation()"
                 class="absolute bottom-2 right-2 w-10 h-10 bg-white rounded-full shadow-md flex items-center justify-center text-charcoal hover:bg-honey hover:text-white transition-colors"
               >
                 <app-icon name="plus" class="w-5 h-5"></app-icon>
@@ -58,7 +65,7 @@ import { IconComponent } from '@/shared/components/icon.component';
             </div>
             <div class="p-4">
               <p class="text-[11px] text-gray-500 uppercase tracking-wide">{{ product.category }} · {{ product.brand ?? 'BeeShop' }}</p>
-              <h3 class="font-bold text-charcoal truncate cursor-pointer hover:text-honey" [routerLink]="['/product', product.id]">{{ product.name }}</h3>
+              <h3 class="font-bold text-charcoal truncate group-hover:text-honey transition-colors">{{ product.name | uppercase }}</h3>
               <div class="flex items-center gap-2 mt-1">
                 <p class="text-honey font-bold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                 @if ((product.originalPrice ?? 0) > product.price) {
@@ -66,7 +73,7 @@ import { IconComponent } from '@/shared/components/icon.component';
                 }
               </div>
               <div class="mt-1 text-xs text-gray-500">
-                ⭐ {{ (product.rating ?? 0) | number:'1.1-1' }} • {{ product.reviews ?? 0 }} đánh giá
+                ⭐ {{ product.rating ?? 0 }} • Còn {{ product.stockLeft ?? 0 }} sp
               </div>
             </div>
           </article>
