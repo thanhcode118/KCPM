@@ -65,15 +65,20 @@ import { RouterModule } from '@angular/router';
             </div>
             <div class="p-4">
               <p class="text-[11px] text-gray-500 uppercase tracking-wide">{{ product.category }} · {{ product.brand ?? 'BeeShop' }}</p>
-              <h3 class="font-bold text-charcoal truncate group-hover:text-honey transition-colors">{{ product.name | uppercase }}</h3>
-              <div class="flex items-center gap-2 mt-1">
-                <p class="text-honey font-bold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+              <h3 class="font-bold text-charcoal truncate group-hover:text-honey transition-colors mb-1">{{ product.name | uppercase }}</h3>
+              
+              <div class="flex items-center gap-2 mb-2">
+                <p class="text-honey font-bold text-lg">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
                 @if ((product.originalPrice ?? 0) > product.price) {
                   <p class="text-xs text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</p>
                 }
               </div>
-              <div class="mt-1 text-xs text-gray-500">
-                ⭐ {{ product.rating ?? 0 }} • Còn {{ product.stockLeft ?? 0 }} sp
+
+              <div class="flex items-center gap-1.5 mt-1">
+                <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 mb-[1px]"></app-icon>
+                <span class="text-[11px] text-gray-500 font-medium leading-none">
+                  {{ product.rating || 4.5 }} • Còn {{ product.stockLeft ?? 0 }} sp
+                </span>
               </div>
             </div>
           </article>
@@ -90,4 +95,10 @@ export class SearchResultsContentComponent {
   @Input({ required: true }) bestSellers: Product[] = [];
 
   @Output() readonly addToCartRequested = new EventEmitter<number>();
+
+  getStarIcon(star: number, rating: number): string {
+    if (star <= rating) return 'star-filled';
+    if (star - 0.5 <= rating) return 'star-half';
+    return 'star-outline';
+  }
 }

@@ -59,18 +59,14 @@ import { RouterModule } from '@angular/router';
                 <p class="text-xs text-gray-500 uppercase tracking-wide">{{ product.category }}</p>
                 <h3 class="text-lg font-semibold text-charcoal group-hover:text-honey transition-colors cursor-pointer">{{ product.name | uppercase }}</h3>
                 
-                <div class="flex items-center gap-1.5 py-0.5">
-                  <div class="flex text-yellow-400 gap-1.5 mt-0.5">
-                    <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                    <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                    <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                    <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                    <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                  </div>
-                  <span class="text-[10px] text-gray-400 font-medium">(25)</span>
-                </div>
+                <p class="text-honey font-bold text-lg pt-1">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
 
-                <p class="text-honey font-bold text-lg">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+                <div class="flex items-center gap-1.5 mt-1">
+                  <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[0.5px]"></app-icon>
+                  <span class="text-[11px] text-gray-500 font-medium leading-none">
+                    {{ product.rating || 4.5 }} • ({{ product.reviews || 0 }} đánh giá)
+                  </span>
+                </div>
               </div>
 
             </div>
@@ -78,7 +74,7 @@ import { RouterModule } from '@angular/router';
         </div>
         
         <div class="text-center mt-12">
-            <a href="#" class="inline-flex items-center gap-2 text-charcoal font-bold border-b-2 border-honey pb-1 hover:text-honey transition-colors">
+            <a [routerLink]="['/search']" class="inline-flex items-center gap-2 text-charcoal font-bold border-b-2 border-honey pb-1 hover:text-honey transition-colors cursor-pointer">
                 Xem tất cả sản phẩm
                 <app-icon name="arrow-right"></app-icon>
             </a>

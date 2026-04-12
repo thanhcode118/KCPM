@@ -111,7 +111,7 @@ export class ApiService {
       tag: p.tag,
       soldPercentage: p.soldPercentage,
       stockLeft: p.stockLeft,
-      rating: p.rating,
+      rating: p.rating ? Math.max(4.5, p.rating) : 4.5,
       reviews: p.reviews,
       brand: p.brand,
       color: p.color,

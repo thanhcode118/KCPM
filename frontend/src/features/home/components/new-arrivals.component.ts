@@ -63,18 +63,14 @@ import { RouterModule } from '@angular/router';
                     <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ product.category }}</p>
                     <h3 class="font-bold text-charcoal group-hover:text-honey transition-colors line-clamp-1 min-h-[1.5rem]">{{ product.name | uppercase }}</h3>
                     
-                    <div class="flex items-center gap-1.5">
-                      <div class="flex text-[#FFC107] gap-1.5">
-                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                        <app-icon name="star-filled" class="w-3.5 h-3.5"></app-icon>
-                      </div>
-                      <span class="text-[10px] text-gray-400 font-medium mt-0.5">(10)</span>
-                    </div>
-
                     <p class="text-honey font-bold text-lg pt-1">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+
+                    <div class="flex items-center gap-1.5 mt-1">
+                      <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[0.5px]"></app-icon>
+                      <span class="text-[11px] text-gray-500 font-medium leading-none">
+                        {{ product.rating || 4.5 }} • ({{ product.reviews || 0 }} đánh giá)
+                      </span>
+                    </div>
                   </div>
               </div>
             }

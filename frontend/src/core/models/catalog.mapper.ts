@@ -17,7 +17,7 @@ export function mapProductViewDtoToProduct(dto: ProductViewDto): Product {
     tag: dto.tag,
     soldPercentage: dto.soldPercentage,
     stockLeft: dto.stockLeft,
-    rating: dto.rating,
+    rating: dto.rating ? Math.max(4.5, dto.rating) : 4.5,
     reviews: dto.reviews,
     brand: dto.brand,
     color: dto.color,
