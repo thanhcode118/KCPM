@@ -8,4 +8,6 @@ public interface IOrderService
     OrderView PlaceOrder(string token, PlaceOrderInput input);
     OrderView? Cancel(string token, int orderId);
     OrderView? UpdateStatus(string token, int orderId, string status);
+    OrderView? RequestRefund(string token, int orderId, string? reason);
+    OrderView? ProcessRefund(string token, int orderId, bool approve);
 }

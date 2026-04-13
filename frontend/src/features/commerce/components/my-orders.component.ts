@@ -39,6 +39,12 @@ import { RouterLink } from '@angular/router';
                       {{ formatStatus(order.status) }}
                     </span>
                     <p class="text-2xl font-black text-[#2D2D2D]">{{ order.totalAmount | number:'1.0-0' }}đ</p>
+                    @if (order.paymentStatus?.toLowerCase() === 'paid' && order.status?.toLowerCase() !== 'refund_requested' && order.status?.toLowerCase() !== 'refunded' && order.status?.toLowerCase() !== 'cancelled') {
+                      <button (click)="requestRefund(order.id)" class="mt-2 text-xs font-bold bg-red-50 text-red-600 hover:bg-red-100 px-3 py-1.5 rounded-full transition-colors flex items-center gap-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                        Khiếu nại
+                      </button>
+                    }
                   </div>
                 </div>
 
@@ -109,10 +115,36 @@ import { RouterLink } from '@angular/router';
 })
 export class MyOrdersComponent implements OnInit {
   private readonly commerceStore = inject(CommerceStore);
+  private readonly orderService = inject(CommerceOrderService);
+  
   readonly orders = this.commerceStore.orders;
 
   ngOnInit() {
-    this.commerceStore.fetchMyOrders();
+    this.fetchOrders();
+  }
+
+  fetchOrders() {
+    this.orderService.getMyOrders().subscribe({
+      next: (orders) => {
+        this.commerceStore.replaceOrders(orders as any);
+      },
+      error: (err) => console.error('Failed to fetch orders:', err)
+    });
+  }
+
+  requestRefund(id: number) {
+    if (confirm('Bạn có chắc chắn muốn khiếu nại đơn hàng này và yêu cầu hoàn tiền?')) {
+      this.orderService.requestRefund(id).subscribe({
+        next: (order) => {
+          this.commerceStore.replaceOrder(order as any);
+          alert('Đã gửi yêu cầu khiếu nại thành công!');
+        },
+        error: (err) => {
+          console.error(err);
+          alert(err.error?.detail || 'Không thể khiếu nại đơn hàng này.');
+        }
+      });
+    }
   }
 
   formatStatus(status: string): string {
@@ -122,6 +154,8 @@ export class MyOrdersComponent implements OnInit {
       case 'shipped': return 'Đang giao hàng';
       case 'completed': return 'Hoàn thành';
       case 'cancelled': return 'Đã hủy';
+      case 'refund_requested': return 'Yêu cầu khiếu nại';
+      case 'refunded': return 'Đã hoàn tiền';
       default: return status;
     }
   }
@@ -132,6 +166,8 @@ export class MyOrdersComponent implements OnInit {
       case 'cancelled': return 'bg-red-50 text-red-600';
       case 'shipped': return 'bg-blue-50 text-blue-600';
       case 'processing': return 'bg-orange-50 text-orange-600';
+      case 'refund_requested': return 'bg-purple-50 text-purple-600';
+      case 'refunded': return 'bg-gray-200 text-gray-800';
       default: return 'bg-gray-50 text-gray-600';
     }
   }

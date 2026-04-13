@@ -34,4 +34,18 @@ public sealed class AdminOrdersController(IOrderService orderService) : ApiContr
         var result = orderService.UpdateStatus(ReadRequiredToken(), id, status);
         return Ok(RequireResource(result, $"Order with id {id} was not found."));
     }
+
+    [HttpPost("{id:int}/process-refund")]
+    [SwaggerOperation(
+        Summary = "Approve or reject a refund",
+        Description = "Allows admin to approve or reject a refund request (khiếu nại).")]
+    [ProducesResponseType(typeof(OrderView), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    public ActionResult<OrderView> ProcessRefund(int id, [FromQuery] bool approve)
+    {
+        var result = orderService.ProcessRefund(ReadRequiredToken(), id, approve);
+        return Ok(RequireResource(result, $"Order with id {id} was not found or not in refund requested status."));
+    }
 }

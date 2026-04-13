@@ -11,4 +11,5 @@ public interface IUserRepository
     User Create(User user);
     User? Update(User user);
     bool Delete(int userId);
+    IReadOnlyCollection<User> GetAdmins();
 }

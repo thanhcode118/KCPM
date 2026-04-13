@@ -23,8 +23,12 @@ public sealed class ProductService(
         var brands = ParseList(input.Brand);
         var styles = ParseList(input.Style);
 
-        IEnumerable<Product> query = repository.GetAll()
-            .Where(product => product.IsActive && (product.CategoryNavigation?.IsActive ?? true));
+        IEnumerable<Product> query = repository.GetAll();
+        
+        if (!input.IncludeInactive)
+        {
+            query = query.Where(product => product.IsActive && (product.CategoryNavigation?.IsActive ?? true));
+        }
 
         if (!string.IsNullOrWhiteSpace(normalizedQuery))
         {

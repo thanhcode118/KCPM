@@ -29,7 +29,8 @@ public sealed class ProductsController(IProductService productService) : ApiCont
         [FromQuery] int? ratingGte,
         [FromQuery] string? sort,
         [FromQuery] int? page,
-        [FromQuery] int? pageSize)
+        [FromQuery] int? pageSize,
+        [FromQuery] bool includeInactive = false)
     {
         var result = productService.Search(new ProductQuery(
             q,
@@ -43,7 +44,8 @@ public sealed class ProductsController(IProductService productService) : ApiCont
             ratingGte,
             sort,
             page ?? 1,
-            pageSize ?? 20));
+            pageSize ?? 20,
+            includeInactive));
 
         return Ok(result);
     }

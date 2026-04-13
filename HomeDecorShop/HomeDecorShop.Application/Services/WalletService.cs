@@ -218,6 +218,9 @@ public sealed class WalletService(
         order.UpdatedAt = now;
         orderRepository.Update(order);
 
+        // Add money to Admin's wallet
+        AddToAdminWalletInternal(order.TotalAmount, $"REVENUE-{order.OrderNumber}", $"Doanh thu từ đơn hàng {order.OrderNumber}");
+
         scope.Complete();
         return MapWallet(wallet);
     }
@@ -234,6 +237,65 @@ public sealed class WalletService(
         return walletRepository.GetTransactionsByWalletId(wallet.Id)
             .Select(MapTransaction)
             .ToArray();
+    }
+
+    public void AddToAdminWallet(decimal amount, string reference, string description)
+    {
+        using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
+        AddToAdminWalletInternal(amount, reference, description);
+        scope.Complete();
+    }
+
+    private void AddToAdminWalletInternal(decimal amount, string reference, string description)
+    {
+        var admin = userRepository.GetAdmins().FirstOrDefault();
+        if (admin is null) return;
+
+        var adminWallet = walletRepository.GetByUserId(admin.UserId) ?? CreateWallet(admin.UserId);
+        var now = DateTime.UtcNow;
+
+        adminWallet.Balance += amount;
+        adminWallet.UpdatedAt = now;
+        walletRepository.Update(adminWallet);
+
+        walletRepository.CreateTransaction(new WalletTransaction
+        {
+            WalletId = adminWallet.Id,
+            Amount = amount,
+            Type = WalletTransactionType.Deposit,
+            Status = WalletTransactionStatus.Success,
+            Reference = reference,
+            Description = description,
+            CreatedAt = now
+        });
+    }
+
+    public void ProcessRefundPayment(int customerId, decimal amount, string orderNumber)
+    {
+        using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
+        var now = DateTime.UtcNow;
+
+        // Deduct from admin
+        AddToAdminWalletInternal(-amount, $"REFUND-ORDER-{orderNumber}", $"Hoàn tiền cho khách hàng đơn {orderNumber}");
+
+        // Add to customer
+        var customerWallet = walletRepository.GetByUserId(customerId) ?? CreateWallet(customerId);
+        customerWallet.Balance += amount;
+        customerWallet.UpdatedAt = now;
+        walletRepository.Update(customerWallet);
+
+        walletRepository.CreateTransaction(new WalletTransaction
+        {
+            WalletId = customerWallet.Id,
+            Amount = amount,
+            Type = WalletTransactionType.Deposit,
+            Status = WalletTransactionStatus.Success,
+            Reference = $"REFUND-{orderNumber}",
+            Description = $"Hoàn tiền khiếu nại đơn hàng {orderNumber}",
+            CreatedAt = now
+        });
+
+        scope.Complete();
     }
 
     private Wallet CreateWallet(int userId)

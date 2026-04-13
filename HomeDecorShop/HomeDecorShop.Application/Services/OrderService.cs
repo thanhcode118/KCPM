@@ -8,7 +8,8 @@ public sealed class OrderService(
     ICartRepository cartRepository,
     IUserRepository userRepository,
     IProductRepository productRepository,
-    IPaymentRepository paymentRepository) : IOrderService
+    IPaymentRepository paymentRepository,
+    IWalletService walletService) : IOrderService
 {
     private const decimal FlatShippingFee = 30000m;
 
@@ -201,6 +202,79 @@ public sealed class OrderService(
         }
 
         return MapOrder(orderRepository.Update(order));
+    }
+
+    public OrderView? RequestRefund(string token, int orderId, string? reason)
+    {
+        var user = RequireUser(token);
+        var order = orderRepository.GetById(orderId);
+        if (order is null || order.UserId != user.UserId)
+        {
+            return null;
+        }
+
+        if (order.PaymentStatus != PaymentStatus.Paid)
+        {
+            throw new ConflictException("Chỉ đơn hàng đã thanh toán mới được khiếu nại.");
+        }
+
+        if (order.Status == OrderStatus.RefundRequested || order.Status == OrderStatus.Refunded)
+        {
+            throw new ConflictException("Đơn hàng này đã gửi yêu cầu khiếu nại hoặc đã được hoàn tiền.");
+        }
+
+        order.Status = OrderStatus.RefundRequested;
+        
+        if (!string.IsNullOrWhiteSpace(reason))
+        {
+            var prefix = string.IsNullOrWhiteSpace(order.Notes) ? "" : $"{order.Notes} | ";
+            order.Notes = $"{prefix}[KHIẾU NẠI]: {reason}";
+        }
+
+        order.UpdatedAt = DateTime.UtcNow;
+
+        return MapOrder(orderRepository.Update(order));
+    }
+
+    public OrderView? ProcessRefund(string token, int orderId, bool approve)
+    {
+        var user = RequireUser(token);
+        if (user.Role != UserRole.Admin)
+        {
+            throw new ForbiddenException("Bạn không có quyền thực hiện hành động này.");
+        }
+
+        var order = orderRepository.GetById(orderId);
+        if (order is null)
+        {
+            return null;
+        }
+
+        if (order.Status != OrderStatus.RefundRequested)
+        {
+            throw new ConflictException("Đơn hàng không ở trạng thái yêu cầu khiếu nại.");
+        }
+
+        using var scope = CreateTransactionScope();
+
+        if (approve)
+        {
+            order.Status = OrderStatus.Refunded;
+            order.PaymentStatus = PaymentStatus.Refunded;
+
+            // Refund logic
+            walletService.ProcessRefundPayment(order.UserId, order.TotalAmount, order.OrderNumber);
+        }
+        else
+        {
+            order.Status = OrderStatus.Completed; // Rejecting refund sets it back to Completed
+        }
+
+        order.UpdatedAt = DateTime.UtcNow;
+        var updated = orderRepository.Update(order);
+
+        scope.Complete();
+        return MapOrder(updated);
     }
 
     private User RequireUser(string token) =>

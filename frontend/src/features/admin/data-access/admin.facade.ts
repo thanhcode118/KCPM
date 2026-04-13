@@ -1,6 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ADMIN_DATA_SOURCE, type AdminDashboardSnapshot } from './admin.data-source';
 import { AdminOrderService } from './admin-order.service';
+import { mapOrderDto } from '@/features/commerce/data-access/commerce.mapper';
+import type { OrderDto } from '@/features/commerce/data-access/commerce.api.types';
 import type { Order } from '@/core/models';
 
 const createEmptySnapshot = (): AdminDashboardSnapshot => ({
@@ -56,8 +58,8 @@ export class AdminFacade {
     
     this.adminOrderService.getOrders().subscribe({
       next: (orders) => {
-        // cast OrderView to Order
-        this.realOrdersSignal.set(orders as unknown as Order[]);
+        // Use standard mapper to ensure property names (like notes, orderCode) are correct
+        this.realOrdersSignal.set((orders as any[]).map(o => mapOrderDto(o as OrderDto)));
       },
       error: (err) => {
         console.error('Failed to load real admin orders', err);

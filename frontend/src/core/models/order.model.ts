@@ -1,5 +1,5 @@
-export type OrderStatus = 'pending' | 'processing' | 'shipping' | 'completed' | 'cancelled';
-export type OrderPaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled';
+export type OrderStatus = 'pending_payment' | 'pending' | 'processing' | 'shipping' | 'completed' | 'cancelled' | 'refund_requested' | 'refunded';
+export type OrderPaymentStatus = 'pending' | 'paid' | 'failed' | 'cancelled' | 'refunded';
 
 export interface OrderItem {
   id: number;

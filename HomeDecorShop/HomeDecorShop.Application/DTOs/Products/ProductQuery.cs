@@ -12,4 +12,5 @@ public sealed record ProductQuery(
     int? RatingGte,
     string? SortBy,
     int Page,
-    int PageSize);
+    int PageSize,
+    bool IncludeInactive = false);

@@ -49,4 +49,10 @@ export class AdminOrderService {
     const headers = { Authorization: `Bearer ${token}` };
     return this.http.patch<OrderView>(`${this.baseUrl}/${id}/status?status=${status}`, {}, { headers });
   }
+
+  processRefund(id: number, approve: boolean): Observable<OrderView> {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post<OrderView>(`${this.baseUrl}/${id}/process-refund?approve=${approve}`, {}, { headers });
+  }
 }

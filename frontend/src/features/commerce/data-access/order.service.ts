@@ -20,18 +20,32 @@ export class CommerceOrderService {
   private readonly baseUrl = 'http://localhost:5020/api/orders';
 
   getMyOrders(): Observable<OrderView[]> {
-    return this.http.get<OrderView[]>(this.baseUrl);
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<OrderView[]>(this.baseUrl, { headers });
   }
 
   getOrderById(id: number): Observable<OrderView> {
-    return this.http.get<OrderView>(`${this.baseUrl}/${id}`);
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<OrderView>(`${this.baseUrl}/${id}`, { headers });
   }
 
   placeOrder(input: PlaceOrderInput): Observable<OrderView> {
-    return this.http.post<OrderView>(this.baseUrl, input);
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post<OrderView>(this.baseUrl, input, { headers });
   }
 
   cancelOrder(id: number): Observable<OrderView> {
-    return this.http.post<OrderView>(`${this.baseUrl}/${id}/cancel`, {});
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post<OrderView>(`${this.baseUrl}/${id}/cancel`, {}, { headers });
+  }
+
+  requestRefund(id: number, reason: string): Observable<OrderView> {
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.post<OrderView>(`${this.baseUrl}/${id}/request-refund`, { reason }, { headers });
   }
 }

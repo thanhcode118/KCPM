@@ -65,4 +65,9 @@ public sealed class SqlUserRepository : IUserRepository
     {
         return _context.Users.Include(user => user.Addresses);
     }
+
+    public IReadOnlyCollection<User> GetAdmins()
+    {
+        return QueryUsers().Where(u => u.Role == UserRole.Admin).ToList();
+    }
 }

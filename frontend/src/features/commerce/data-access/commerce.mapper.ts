@@ -18,10 +18,17 @@ function mapOrderStatus(status: string): Order['status'] {
   switch (status.toLowerCase()) {
     case 'processing':
       return 'processing';
+    case 'shipping':
+    case 'shipped':
+      return 'shipping';
     case 'completed':
       return 'completed';
     case 'cancelled':
       return 'cancelled';
+    case 'refund_requested':
+      return 'refund_requested';
+    case 'refunded':
+      return 'refunded';
     case 'pending_payment':
     default:
       return 'pending';
@@ -82,7 +89,7 @@ export function mapOrderDto(dto: OrderDto): Order {
     ward: dto.ward,
     district: dto.district,
     city: dto.city,
-    notes: dto.notes ?? undefined,
+    notes: dto.notes ?? (dto as any)['Notes'] ?? undefined,
     createdAt: dto.createdAt,
     updatedAt: dto.updatedAt
   };

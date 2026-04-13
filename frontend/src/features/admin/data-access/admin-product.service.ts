@@ -1,6 +1,6 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
+import { Observable, map } from 'rxjs';
 
 export interface ProductView {
   productId: number;
@@ -73,8 +73,8 @@ export class AdminProductService {
   private readonly baseUrl = 'http://localhost:5020/api/products';
   private readonly categoriesUrl = 'http://localhost:5020/api/categories';
 
-  getProducts(): Observable<{ products: ProductView[] }> {
-    return this.http.get<{ products: ProductView[] }>(this.baseUrl);
+  getProducts(pageSize: number = 20, includeInactive: boolean = true): Observable<any> {
+    return this.http.get<any>(`${this.baseUrl}?pageSize=${pageSize}&includeInactive=${includeInactive}`);
   }
 
   getProductById(id: number): Observable<ProductView> {
@@ -95,5 +95,20 @@ export class AdminProductService {
 
   getCategories(): Observable<CategoryView[]> {
     return this.http.get<CategoryView[]>(this.categoriesUrl);
+  }
+
+  uploadImage(file: File): Observable<{ url: string }> {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Auth token is required for the upload controller
+    const token = localStorage.getItem('token');
+    const headers = new HttpHeaders(token ? { 'Authorization': `Bearer ${token}` } : {});
+
+    return this.http.post<{ url: string }>('http://localhost:5020/api/upload/image', formData, { headers }).pipe(
+      map(res => ({
+        url: res.url.startsWith('http') ? res.url : `http://localhost:5020${res.url}`
+      }))
+    );
   }
 }

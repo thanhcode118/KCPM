@@ -5,6 +5,8 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace HomeDecorShop.API.Controllers;
 
+public sealed record RequestRefundInput(string Reason);
+
 [ApiController]
 [Authorize]
 [Route("api/orders")]
@@ -61,5 +63,18 @@ public sealed class OrdersController(IOrderService orderService) : ApiController
     public ActionResult<OrderView> Cancel(int id)
     {
         return Ok(RequireResource(orderService.Cancel(ReadRequiredToken(), id), $"Order with id {id} was not found."));
+    }
+
+    [HttpPost("{id:int}/request-refund")]
+    [SwaggerOperation(
+        Summary = "Request a refund for an order",
+        Description = "Requests a refund (Khiếu nại) for a paid order.")]
+    [ProducesResponseType(typeof(OrderView), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status409Conflict)]
+    public ActionResult<OrderView> RequestRefund(int id, [FromBody] RequestRefundInput input)
+    {
+        return Ok(RequireResource(orderService.RequestRefund(ReadRequiredToken(), id, input.Reason), $"Order with id {id} was not found."));
     }
 }

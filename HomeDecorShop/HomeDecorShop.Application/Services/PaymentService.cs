@@ -6,7 +6,8 @@ namespace HomeDecorShop.Application;
 public sealed class PaymentService(
     IPaymentRepository paymentRepository,
     IOrderRepository orderRepository,
-    IUserRepository userRepository) : IPaymentService
+    IUserRepository userRepository,
+    IWalletService walletService) : IPaymentService
 {
     private const int MaxVnPayTransactionCodeLength = 100;
 
@@ -206,6 +207,8 @@ public sealed class PaymentService(
             order.UpdatedAt = now;
             _ = orderRepository.Update(order);
 
+            walletService.AddToAdminWallet(order.TotalAmount, $"REVENUE-{order.OrderNumber}", $"Doanh thu từ đơn hàng {order.OrderNumber}");
+
             scope.Complete();
 
             Console.WriteLine(
@@ -290,6 +293,8 @@ public sealed class PaymentService(
         order.Status = OrderStatus.Processing;
         order.UpdatedAt = now;
         _ = orderRepository.Update(order);
+
+        walletService.AddToAdminWallet(order.TotalAmount, $"REVENUE-{order.OrderNumber}", $"Doanh thu từ đơn hàng {order.OrderNumber}");
 
         scope.Complete();
         return MapPayment(created);

@@ -9,4 +9,6 @@ public interface IWalletService
     WalletView Withdraw(string token, decimal amount);
     WalletView PayOrder(string token, int orderId);
     IReadOnlyCollection<WalletTransactionView> GetTransactions(string token);
+    void AddToAdminWallet(decimal amount, string reference, string description);
+    void ProcessRefundPayment(int customerId, decimal amount, string orderNumber);
 }
