@@ -6,13 +6,13 @@ using Swashbuckle.AspNetCore.Annotations;
 namespace HomeDecorShop.API.Controllers;
 
 [ApiController]
-[Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
 [Route("api/feedbacks")]
 [SwaggerTag("Feedback CRUD endpoints.")]
 [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status500InternalServerError)]
 public sealed class FeedbacksController(IFeedbackService feedbackService) : ApiControllerBase
 {
     [HttpGet]
+    [AllowAnonymous]
     [SwaggerOperation(
         Summary = "List feedback entries",
         Description = "Returns all feedback entries ordered by newest first.")]
@@ -23,6 +23,7 @@ public sealed class FeedbacksController(IFeedbackService feedbackService) : ApiC
     }
 
     [HttpGet("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Get feedback by id",
         Description = "Returns a single feedback entry by numeric identifier.")]
@@ -47,6 +48,7 @@ public sealed class FeedbacksController(IFeedbackService feedbackService) : ApiC
     }
 
     [HttpPut("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Update feedback",
         Description = "Updates an existing feedback entry by numeric identifier.")]
@@ -60,6 +62,7 @@ public sealed class FeedbacksController(IFeedbackService feedbackService) : ApiC
     }
 
     [HttpDelete("{id:int}")]
+    [Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
     [SwaggerOperation(
         Summary = "Delete feedback",
         Description = "Deletes a feedback entry by numeric identifier.")]
