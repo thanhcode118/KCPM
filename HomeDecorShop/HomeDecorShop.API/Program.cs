@@ -41,7 +41,7 @@ var app = builder.Build();
 app.InitializeDatabase();
 
 app.UseExceptionHandler();
-app.UseHttpsRedirection();
+// app.UseHttpsRedirection();
 app.UseCors("Frontend");
 app.UseAuthentication();
 app.UseAuthorization();
