@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
@@ -36,7 +36,31 @@ interface Branch {
               <input [(ngModel)]="name" name="name" placeholder="Họ tên" class="w-full border border-gray-300 rounded-lg px-3 py-2" required>
               <input [(ngModel)]="email" name="email" placeholder="Email" class="w-full border border-gray-300 rounded-lg px-3 py-2" type="email" required>
               <textarea [(ngModel)]="message" name="message" placeholder="Nội dung" class="w-full border border-gray-300 rounded-lg px-3 py-2 h-28" required></textarea>
-              <button class="bg-charcoal text-white px-4 py-2 rounded-lg font-semibold hover:bg-honey hover:text-charcoal transition-colors" type="submit">Gửi feedback</button>
+              
+              <div class="flex items-center gap-3">
+                <button 
+                  class="bg-charcoal text-white px-6 py-2 rounded-lg font-semibold hover:bg-honey hover:text-charcoal transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2" 
+                  type="submit"
+                  [disabled]="isSubmitting()"
+                >
+                  @if (isSubmitting()) {
+                    <span class="animate-spin text-lg">&#9202;</span>
+                    Đang gửi...
+                  } @else {
+                    Gửi feedback
+                  }
+                </button>
+
+                @if (showSuccess()) {
+                  <p class="text-green-600 font-medium animate-bounce">✓ Gửi thành công!</p>
+                }
+              </div>
+
+              @if (errorMessage()) {
+                <p class="text-red-600 text-sm mt-1 bg-red-50 p-2 rounded border border-red-100 italic">
+                  ⚠ {{ errorMessage() }}
+                </p>
+              }
             </form>
           </div>
 
@@ -120,6 +144,10 @@ export class ContactComponent {
   message = '';
   activeBranch = 'hanoi';
 
+  isSubmitting = signal(false);
+  showSuccess = signal(false);
+  errorMessage = signal<string | null>(null);
+
   branches: Branch[] = [
     {
       id: 'hanoi',
@@ -172,9 +200,28 @@ export class ContactComponent {
   ];
 
   submit(): void {
-    this.contactFacade.submitFeedback(this.name, this.email, this.message);
-    this.name = '';
-    this.email = '';
-    this.message = '';
+    if (!this.name || !this.email || !this.message) return;
+
+    this.isSubmitting.set(true);
+    this.errorMessage.set(null);
+    this.showSuccess.set(false);
+
+    this.contactFacade.submitFeedback(this.name, this.email, this.message).subscribe({
+      next: () => {
+        this.isSubmitting.set(false);
+        this.showSuccess.set(true);
+        this.name = '';
+        this.email = '';
+        this.message = '';
+        
+        // Hide success message after 5 seconds
+        setTimeout(() => this.showSuccess.set(false), 5000);
+      },
+      error: (err) => {
+        this.isSubmitting.set(false);
+        this.errorMessage.set('Không thể gửi feedback. Vui lòng kiểm tra lại kết nối!');
+        console.error('Feedback error:', err);
+      }
+    });
   }
 }

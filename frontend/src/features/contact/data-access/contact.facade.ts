@@ -1,6 +1,7 @@
-import { Injectable, computed, signal, inject } from '@angular/core';
+import { Injectable, computed, signal, inject, DestroyRef } from '@angular/core';
 import { ApiService } from '@/core/services/api.service';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Observable, tap } from 'rxjs';
 
 interface FeedbackItem {
   feedbackId: number;
@@ -13,6 +14,7 @@ interface FeedbackItem {
 @Injectable({ providedIn: 'root' })
 export class ContactFacade {
   private apiService = inject(ApiService);
+  private destroyRef = inject(DestroyRef);
   private readonly feedbackSignal = signal<FeedbackItem[]>([]);
 
   readonly feedbackList = computed(() => this.feedbackSignal());
@@ -23,13 +25,15 @@ export class ContactFacade {
 
   private loadFeedbacks(): void {
     this.apiService.getFeedbacks()
-      .pipe(takeUntilDestroyed())
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(list => this.feedbackSignal.set(list));
   }
 
-  submitFeedback(name: string, email: string, message: string): void {
+  submitFeedback(name: string, email: string, message: string): Observable<any> {
     const newFeedback = { name, email, message, createdAt: new Date().toISOString() };
-    this.apiService.postFeedback(newFeedback)
-      .subscribe(() => this.loadFeedbacks());
+    return this.apiService.postFeedback(newFeedback)
+      .pipe(
+        tap(() => this.loadFeedbacks())
+      );
   }
 }
