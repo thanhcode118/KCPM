@@ -188,10 +188,9 @@ export class HeaderComponent implements OnInit, OnDestroy {
       isActive: true,
       displayOrder: 1,
       categorySlugs: [
-        'ly-gom-coc-decor',
-        'khan-ban-nhieu-chat-lieu',
-        'tam-lot-ban-lot-ly',
-        'phu-kien-ban-an-bep-decor'
+        'bàn-ăn',
+        'cốc-ly',
+        'thương-hiệu-gốm-bát-tràng'
       ]
     },
     {
@@ -201,10 +200,12 @@ export class HeaderComponent implements OnInit, OnDestroy {
       isActive: true,
       displayOrder: 2,
       categorySlugs: [
-        'binh-hoa-lo-hoa-decor',
-        'khay-decor-khay-dung-do',
-        'gio-do-may-tre-decor',
-        'guong-tranh-do-treo-tuong'
+        'phụ-kiện',
+        'mây-tre',
+        'mây-tre-đan',
+        'trang-trí',
+        'trang-trí-tường',
+        'phụ-kiện-điểm-nhấn'
       ]
     },
     {
@@ -214,8 +215,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
       isActive: true,
       displayOrder: 3,
       categorySlugs: [
-        'goi-tua-vo-goi-decor',
-        'rem-vai-decor'
+        'phụ-kiện-vải'
       ]
     },
     {
@@ -225,8 +225,19 @@ export class HeaderComponent implements OnInit, OnDestroy {
       isActive: true,
       displayOrder: 4,
       categorySlugs: [
-        'nen-thom-phu-kien-nen',
-        'den-decor'
+        'hương-thơm',
+        'đèn'
+      ]
+    },
+    {
+      id: -5,
+      name: 'Làm đẹp',
+      slug: 'lam-dep',
+      isActive: true,
+      displayOrder: 5,
+      categorySlugs: [
+        'trang-điểm',
+        'đồ-trang-điểm'
       ]
     }
   ];
