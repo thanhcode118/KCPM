@@ -1,5 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { ADMIN_DATA_SOURCE, type AdminDashboardSnapshot } from './admin.data-source';
+import { AdminOrderService } from './admin-order.service';
+import type { Order } from '@/core/models';
 
 const createEmptySnapshot = (): AdminDashboardSnapshot => ({
   products: [],
@@ -11,11 +13,13 @@ const createEmptySnapshot = (): AdminDashboardSnapshot => ({
 @Injectable({ providedIn: 'root' })
 export class AdminFacade {
   private readonly dataSource = inject(ADMIN_DATA_SOURCE);
+  private readonly adminOrderService = inject(AdminOrderService);
   private readonly snapshotSignal = signal<AdminDashboardSnapshot>(createEmptySnapshot());
   private readonly hasErrorSignal = signal(false);
+  private readonly realOrdersSignal = signal<Order[]>([]);
 
   readonly products = computed(() => this.snapshotSignal().products);
-  readonly orders = computed(() => this.snapshotSignal().orders);
+  readonly orders = computed(() => this.realOrdersSignal().length > 0 ? this.realOrdersSignal() : this.snapshotSignal().orders);
   readonly users = computed(() => this.snapshotSignal().users);
   readonly feedback = computed(() => this.snapshotSignal().feedback);
   readonly hasError = computed(() => this.hasErrorSignal());
@@ -25,11 +29,12 @@ export class AdminFacade {
   });
 
   readonly pendingOrders = computed(() => {
-    return this.orders().filter((order) => order.status === 'pending').length;
+    return this.orders().filter((order: any) => order.status?.toLowerCase() === 'pending' || order.status?.toLowerCase() === 'pendingpayment').length;
   });
 
   constructor() {
     this.loadSnapshot();
+    this.loadRealOrders();
   }
 
   private loadSnapshot(): void {
@@ -41,6 +46,21 @@ export class AdminFacade {
       error: () => {
         this.snapshotSignal.set(createEmptySnapshot());
         this.hasErrorSignal.set(true);
+      }
+    });
+  }
+
+  loadRealOrders(): void {
+    const token = localStorage.getItem('token');
+    if (!token) return;
+    
+    this.adminOrderService.getOrders().subscribe({
+      next: (orders) => {
+        // cast OrderView to Order
+        this.realOrdersSignal.set(orders as unknown as Order[]);
+      },
+      error: (err) => {
+        console.error('Failed to load real admin orders', err);
       }
     });
   }

@@ -14,6 +14,7 @@ public static class ApplicationDependencyInjection
         services.AddScoped<ICartService, CartService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IWalletService, WalletService>();
         services.AddScoped<IDashboardService, DashboardService>();
         services.AddScoped<IMarketingService, MarketingService>();
         services.AddScoped<ISettingsService, SettingsService>();

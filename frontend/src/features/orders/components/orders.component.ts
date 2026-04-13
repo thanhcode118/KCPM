@@ -15,17 +15,17 @@ import type { Order } from '@/core/models';
       <div class="container mx-auto px-4 max-w-5xl space-y-6">
         <div class="flex items-start justify-between gap-4">
           <div>
-            <h1 class="text-3xl font-bold text-charcoal">Theo doi don hang</h1>
-            <p class="text-sm text-gray-500 mt-2">Xem trang thai thanh toan, dia chi giao hang va thao tac voi don cho xu ly.</p>
+            <h1 class="text-3xl font-bold text-charcoal">Theo dõi đơn hàng</h1>
+            <p class="text-sm text-gray-500 mt-2">Xem trạng thái thanh toán, địa chỉ giao hàng và thao tác với đơn chờ xử lý.</p>
           </div>
-          <a routerLink="/checkout" class="text-sm font-semibold text-honey hover:underline">Quay lai thanh toan</a>
+          <a routerLink="/checkout" class="text-sm font-semibold text-honey hover:underline">Quay lại thanh toán</a>
         </div>
 
         @if (!authFacade.isAuthenticated() && !authFacade.isRestoring()) {
           <div class="rounded-xl bg-white shadow p-6 text-center space-y-3">
-            <p class="text-charcoal font-semibold">Ban can dang nhap de xem lich su don hang.</p>
+            <p class="text-charcoal font-semibold">Bạn cần đăng nhập để xem lịch sử đơn hàng.</p>
             <a routerLink="/login" class="inline-flex items-center justify-center rounded-full bg-charcoal px-5 py-3 text-sm font-semibold text-white hover:bg-honey hover:text-charcoal">
-              Dang nhap
+              Đăng nhập
             </a>
           </div>
         } @else {
@@ -38,12 +38,12 @@ import type { Order } from '@/core/models';
           }
 
           @if (isLoading()) {
-            <div class="rounded-xl bg-white shadow p-6 text-sm text-gray-500">Dang tai don hang...</div>
+            <div class="rounded-xl bg-white shadow p-6 text-sm text-gray-500">Đang tải đơn hàng...</div>
           } @else if (orders().length === 0) {
             <div class="rounded-xl bg-white shadow p-6 text-center space-y-3">
-              <p class="text-charcoal font-semibold">Chua co don hang nao.</p>
+              <p class="text-charcoal font-semibold">Chưa có đơn hàng nào.</p>
               <a routerLink="/" class="inline-flex items-center justify-center rounded-full bg-honey px-5 py-3 text-sm font-semibold text-charcoal">
-                Tiep tuc mua sam
+                Tiếp tục mua sắm
               </a>
             </div>
           } @else {
@@ -52,9 +52,9 @@ import type { Order } from '@/core/models';
                 <article class="rounded-xl bg-white shadow p-5 space-y-4">
                   <div class="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                     <div>
-                      <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Don hang</p>
+                      <p class="text-xs uppercase tracking-[0.2em] text-gray-500">Đơn hàng</p>
                       <h2 class="text-xl font-bold text-charcoal mt-1">{{ order.orderCode }}</h2>
-                      <p class="text-sm text-gray-500 mt-1">Dat luc {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
+                      <p class="text-sm text-gray-500 mt-1">Đặt lúc {{ order.createdAt | date:'dd/MM/yyyy HH:mm' }}</p>
                     </div>
 
                     <div class="flex flex-wrap gap-2">
@@ -69,15 +69,15 @@ import type { Order } from '@/core/models';
 
                   <div class="grid md:grid-cols-3 gap-3 text-sm">
                     <div class="rounded-lg border border-gray-100 bg-[#fcfbf8] p-3">
-                      <p class="text-gray-500">Tong tien</p>
+                      <p class="text-gray-500">Tổng tiền</p>
                       <p class="mt-1 font-bold text-charcoal">{{ order.totalAmount | currency:'VND':'symbol':'1.0-0' }}</p>
                     </div>
                     <div class="rounded-lg border border-gray-100 bg-[#fcfbf8] p-3">
-                      <p class="text-gray-500">Nguoi nhan</p>
+                      <p class="text-gray-500">Người nhận</p>
                       <p class="mt-1 font-semibold text-charcoal">{{ order.fullName || '-' }}</p>
                     </div>
                     <div class="rounded-lg border border-gray-100 bg-[#fcfbf8] p-3">
-                      <p class="text-gray-500">Dien thoai</p>
+                      <p class="text-gray-500">Điện thoại</p>
                       <p class="mt-1 font-semibold text-charcoal">{{ order.phone || '-' }}</p>
                     </div>
                   </div>
@@ -89,7 +89,7 @@ import type { Order } from '@/core/models';
                         class="rounded-full bg-honey px-4 py-2 text-sm font-semibold text-charcoal disabled:opacity-60"
                         [disabled]="isActionRunning()"
                         (click)="retryVnPay(order.id)">
-                        Thanh toan VNPay
+                        Thanh toán VNPay
                       </button>
                     }
 
@@ -99,7 +99,7 @@ import type { Order } from '@/core/models';
                         class="rounded-full border border-red-200 px-4 py-2 text-sm font-semibold text-red-600 disabled:opacity-60"
                         [disabled]="isActionRunning()"
                         (click)="cancelOrder(order.id)">
-                        Huy don
+                        Huỷ đơn
                       </button>
                     }
 
@@ -107,17 +107,17 @@ import type { Order } from '@/core/models';
                       type="button"
                       class="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-charcoal"
                       (click)="toggleExpanded(order.id)">
-                      {{ expandedOrderId() === order.id ? 'An chi tiet' : 'Xem chi tiet' }}
+                      {{ expandedOrderId() === order.id ? 'Ẩn chi tiết' : 'Xem chi tiết' }}
                     </button>
                   </div>
 
                   @if (expandedOrderId() === order.id) {
                     <div class="border-t border-gray-100 pt-4 space-y-4">
                       <div class="text-sm">
-                        <p class="font-semibold text-charcoal">Dia chi giao hang</p>
+                        <p class="font-semibold text-charcoal">Địa chỉ giao hàng</p>
                         <p class="mt-1 text-gray-600">{{ formatOrderAddress(order) }}</p>
                         @if (order.notes) {
-                          <p class="mt-2 text-gray-500">Ghi chu: {{ order.notes }}</p>
+                          <p class="mt-2 text-gray-500">Ghi chú: {{ order.notes }}</p>
                         }
                       </div>
 
@@ -184,7 +184,7 @@ export class OrdersComponent implements OnInit {
       },
       error: () => {
         this.isActionRunning.set(false);
-        this.errorMessage.set('Khong tao duoc link VNPay.');
+        this.errorMessage.set('Không tạo được liên kết VNPay.');
       }
     });
   }
@@ -208,7 +208,7 @@ export class OrdersComponent implements OnInit {
       },
       error: () => {
         this.isActionRunning.set(false);
-        this.errorMessage.set('Khong the huy don hang luc nay.');
+        this.errorMessage.set('Không thể huỷ đơn hàng lúc này.');
       }
     });
   }
@@ -228,27 +228,28 @@ export class OrdersComponent implements OnInit {
   statusLabel(status: Order['status']): string {
     switch (status) {
       case 'processing':
+        return 'Đang xử lý';
       case 'shipping':
-        return 'Dang xu ly';
+        return 'Đang giao hàng';
       case 'completed':
-        return 'Hoan tat';
+        return 'Hoàn tất';
       case 'cancelled':
-        return 'Da huy';
+        return 'Đã huỷ';
       default:
-        return 'Cho thanh toan';
+        return 'Chờ thanh toán';
     }
   }
 
   paymentStatusLabel(status: NonNullable<Order['paymentStatus']>): string {
     switch (status) {
       case 'paid':
-        return 'Da thanh toan';
+        return 'Đã thanh toán';
       case 'failed':
-        return 'Thanh toan loi';
+        return 'Thanh toán lỗi';
       case 'cancelled':
-        return 'Thanh toan huy';
+        return 'Thanh toán huỷ';
       default:
-        return 'Cho thanh toan';
+        return 'Chờ thanh toán';
     }
   }
 
@@ -285,12 +286,12 @@ export class OrdersComponent implements OnInit {
       next: (success) => {
         this.isLoading.set(false);
         if (!success) {
-          this.errorMessage.set('Khong tai duoc danh sach don hang.');
+          this.errorMessage.set('Không tải được danh sách đơn hàng.');
         }
       },
       error: () => {
         this.isLoading.set(false);
-        this.errorMessage.set('Khong tai duoc danh sach don hang.');
+        this.errorMessage.set('Không tải được danh sách đơn hàng.');
       }
     });
   }
@@ -300,17 +301,17 @@ export class OrdersComponent implements OnInit {
     const orderNumber = this.route.snapshot.queryParamMap.get('orderNumber');
 
     if (payment === 'processed') {
-      this.statusMessage.set('Don hang da duoc tao va xu ly thanh toan thanh cong.');
+      this.statusMessage.set('Đơn hàng đã được tạo và xử lý thanh toán thành công.');
       return;
     }
 
     if (payment === 'success') {
-      this.statusMessage.set(orderNumber ? `Thanh toan VNPay thanh cong cho don ${orderNumber}.` : 'Thanh toan VNPay thanh cong.');
+      this.statusMessage.set(orderNumber ? `Thanh toán VNPay thành công cho đơn ${orderNumber}.` : 'Thanh toán VNPay thành công.');
       return;
     }
 
     if (payment === 'failed') {
-      this.errorMessage.set(orderNumber ? `Thanh toan VNPay khong thanh cong cho don ${orderNumber}.` : 'Thanh toan VNPay khong thanh cong.');
+      this.errorMessage.set(orderNumber ? `Thanh toán VNPay không thành công cho đơn ${orderNumber}.` : 'Thanh toán VNPay không thành công.');
     }
   }
 }

@@ -21,6 +21,8 @@ public class AppDbContext : DbContext
     public DbSet<Order> Orders => Set<Order>();
     public DbSet<OrderItem> OrderItems => Set<OrderItem>();
     public DbSet<Payment> Payments => Set<Payment>();
+    public DbSet<Wallet> Wallets => Set<Wallet>();
+    public DbSet<WalletTransaction> WalletTransactions => Set<WalletTransaction>();
     public DbSet<Coupon> Coupons => Set<Coupon>();
     public DbSet<Banner> Banners => Set<Banner>();
     public DbSet<BlogPost> BlogPosts => Set<BlogPost>();
@@ -203,6 +205,30 @@ public class AppDbContext : DbContext
             entity.Property(e => e.StoreName).IsRequired();
             entity.Property(e => e.VatPercentage).HasPrecision(18, 2);
             entity.Property(e => e.DefaultShippingFee).HasPrecision(18, 2);
+        });
+
+        modelBuilder.Entity<Wallet>(entity =>
+        {
+            entity.ToTable("Wallets");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Balance).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.User)
+                .WithOne()
+                .HasForeignKey<Wallet>(e => e.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<WalletTransaction>(entity =>
+        {
+            entity.ToTable("WalletTransactions");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Amount).HasPrecision(18, 2);
+
+            entity.HasOne(e => e.Wallet)
+                .WithMany(e => e.Transactions)
+                .HasForeignKey(e => e.WalletId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
     }

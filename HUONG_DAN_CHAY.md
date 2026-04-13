@@ -39,8 +39,8 @@ npm run dev -- --host 127.0.0.1
 ## Terminal 6 - Start ngrok
 
 ```powershell
-ngrok config add-authtoken <NGROK_TOKEN_CUA_BAN>
-ngrok http 5020
+ngrok config add-authtoken cr_3CHoaWrCdUOtOabC06EdBZIu7cA
+ngrok http --domain=gecko-canning-viability.ngrok-free.dev 5020
 ```
 
 ## URL

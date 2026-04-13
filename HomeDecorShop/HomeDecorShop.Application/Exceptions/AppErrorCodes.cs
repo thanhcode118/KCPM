@@ -50,4 +50,9 @@ public static class AppErrorCodes
     public const string OrderCancelled = "order_cancelled";
     public const string OrderAlreadyPaid = "order_already_paid";
     public const string OrderPaymentNotPending = "order_payment_not_pending";
+
+    public const string RequestValidationFailed = "request_validation_failed";
+
+    public const string WalletInsufficientBalance = "wallet_insufficient_balance";
+    public const string WalletTransactionNotFound = "wallet_transaction_not_found";
 }

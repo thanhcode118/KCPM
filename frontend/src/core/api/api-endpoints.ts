@@ -60,6 +60,14 @@ export const apiPaths = {
     process: '/api/payments',
     vnpayUrl: '/api/payments/vnpay/url'
   },
+  wallet: {
+    get: '/api/wallet',
+    transactions: '/api/wallet/transactions',
+    deposit: '/api/wallet/deposit',
+    depositVnpayUrl: '/api/wallet/deposit/vnpay/url',
+    withdraw: '/api/wallet/withdraw',
+    pay: '/api/wallet/pay'
+  },
   legacy: {
     auth: {
       register: '/api/users/register',
@@ -134,6 +142,14 @@ export const apiEndpoints = {
     byOrder: (orderId: number) => buildUrl(apiPaths.payments.byOrder(orderId)),
     process: buildUrl(apiPaths.payments.process),
     vnpayUrl: buildUrl(apiPaths.payments.vnpayUrl)
+  },
+  wallet: {
+    get: buildUrl(apiPaths.wallet.get),
+    transactions: buildUrl(apiPaths.wallet.transactions),
+    deposit: buildUrl(apiPaths.wallet.deposit),
+    depositVnpayUrl: buildUrl(apiPaths.wallet.depositVnpayUrl),
+    withdraw: buildUrl(apiPaths.wallet.withdraw),
+    pay: buildUrl(apiPaths.wallet.pay)
   },
   legacy: {
     auth: {

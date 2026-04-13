@@ -12,7 +12,11 @@ public sealed class VnPayOptions
 
     public string ReturnUrl { get; init; } = string.Empty;
 
+    public string WalletDepositReturnUrl { get; init; } = string.Empty;
+
     public string? FrontendReturnUrl { get; init; }
+
+    public string? FrontendWalletReturnUrl { get; init; }
 
     public string Locale { get; init; } = "vn";
 

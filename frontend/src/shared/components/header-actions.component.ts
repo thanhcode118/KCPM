@@ -1,14 +1,18 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { IconComponent } from './icon.component';
+import { WalletWidgetComponent } from './wallet-widget.component';
 
 @Component({
   selector: 'app-header-actions',
   standalone: true,
-  imports: [CommonModule, IconComponent],
+  imports: [CommonModule, IconComponent, WalletWidgetComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="flex items-center gap-3 flex-shrink-0 z-[101]">
+      <!-- Wallet widget (shown only when authenticated, managed internally) -->
+      <app-wallet-widget class="hidden sm:block" />
+
       <div class="relative hidden sm:block">
         <button
           type="button"
@@ -32,7 +36,7 @@ import { IconComponent } from './icon.component';
                 class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
               >
                 <app-icon name="shopping-bag" class="w-4 h-4"></app-icon>
-                Theo doi don
+                Theo dõi đơn
               </a>
 
               @if (isAdmin) {
@@ -41,7 +45,7 @@ import { IconComponent } from './icon.component';
                   class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
                 >
                   <app-icon name="grid" class="w-4 h-4"></app-icon>
-                  Trang quan tri
+                  Trang quản trị
                 </a>
               }
 
@@ -51,7 +55,7 @@ import { IconComponent } from './icon.component';
                 class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
               >
                 <app-icon name="close" class="w-4 h-4"></app-icon>
-                Dang xuat
+                Đăng xuất
               </button>
             } @else {
               <a
@@ -59,7 +63,7 @@ import { IconComponent } from './icon.component';
                 class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
               >
                 <app-icon name="user" class="w-4 h-4"></app-icon>
-                Dang nhap
+                Đăng nhập
               </a>
             }
           </div>

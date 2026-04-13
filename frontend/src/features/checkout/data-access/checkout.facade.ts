@@ -18,8 +18,9 @@ import type {
   VnPayCreateUrlRequestDto,
   VnPayCreateUrlResponseDto
 } from '@/features/commerce/data-access/commerce.api.types';
+import { WalletFacade } from '@/features/commerce/data-access/wallet.facade';
 
-export type CheckoutPaymentMethod = 'cod' | 'bank' | 'vnpay';
+export type CheckoutPaymentMethod = 'cod' | 'bank' | 'vnpay' | 'wallet';
 
 export interface CheckoutSubmission {
   addressId?: number | null;
@@ -52,6 +53,7 @@ export class CheckoutFacade {
   private readonly http = inject(HttpClient);
   private readonly commerceStore = inject(CommerceStore);
   private readonly catalogStore = inject(CatalogStore);
+  private readonly walletFacade = inject(WalletFacade);
 
   readonly users = this.commerceStore.users;
   readonly orders = this.commerceStore.orders;
@@ -267,6 +269,21 @@ export class CheckoutFacade {
           kind: 'error' as const,
           message: `Don hang ${order.orderNumber} da duoc tao, nhung khong tao duoc link VNPay. ${this.readProblemMessage(error, 'Thu lai sau.')}`
         }))
+      );
+    }
+
+    if (paymentMethod === 'wallet') {
+      return this.walletFacade.payOrder(order.id).pipe(
+        map((result) => {
+          if (result.kind === 'success') {
+            this.commerceStore.markOrderAsProcessing(order.id);
+            return {
+              kind: 'success' as const,
+              message: `Don hang ${order.orderNumber} da duoc thanh toan bang vi thanh cong.`
+            };
+          }
+          return { kind: 'error' as const, message: result.message };
+        })
       );
     }
 

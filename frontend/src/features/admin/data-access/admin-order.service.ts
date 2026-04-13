@@ -39,10 +39,14 @@ export class AdminOrderService {
   private readonly baseUrl = 'http://localhost:5020/api/admin/orders';
 
   getOrders(): Observable<OrderView[]> {
-    return this.http.get<OrderView[]>(this.baseUrl);
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.get<OrderView[]>(this.baseUrl, { headers });
   }
 
   updateOrderStatus(id: number, status: string): Observable<OrderView> {
-    return this.http.patch<OrderView>(`${this.baseUrl}/${id}/status?status=${status}`, {});
+    const token = localStorage.getItem('token');
+    const headers = { Authorization: `Bearer ${token}` };
+    return this.http.patch<OrderView>(`${this.baseUrl}/${id}/status?status=${status}`, {}, { headers });
   }
 }

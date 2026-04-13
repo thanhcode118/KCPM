@@ -15,6 +15,7 @@ public static class InfrastructureDependencyInjection
         services.AddScoped<ICartRepository, SqlCartRepository>();
         services.AddScoped<IOrderRepository, SqlOrderRepository>();
         services.AddScoped<IPaymentRepository, SqlPaymentRepository>();
+        services.AddScoped<IWalletRepository, SqlWalletRepository>();
         services.AddScoped<IMarketingRepository, MarketingRepository>();
         services.AddScoped<ISettingsRepository, SqlSettingsRepository>();
         services.AddScoped<IEmailService, EmailService>();
