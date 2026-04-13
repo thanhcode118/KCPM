@@ -44,35 +44,35 @@ import { RouterModule } from '@angular/router';
             (mouseleave)="stopDrag()"
           >
             @for (product of homeFacade.newArrivals(); track product.id) {
-              <div 
-                [routerLink]="['/product', product.id]"
-                class="w-[70%] sm:w-[45%] md:w-[30%] lg:w-[23%] flex-shrink-0 snap-always snap-start group cursor-pointer"
-              >
-                  <div class="relative overflow-hidden rounded-2xl mb-4 aspect-[4/5] bg-gray-50 shadow-sm border border-gray-100 group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
-                     <!-- Images -->
-                     <img [src]="product.image" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 pointer-events-none">
-                     <img [src]="product.hoverImage" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:scale-105 pointer-events-none">
-                     
-                     <!-- New Tag -->
-                     <div class="absolute top-3 left-3 bg-[#E8F5E9]/90 backdrop-blur-sm text-[#2E7D32] text-xs font-black px-3 py-1.5 rounded-lg shadow-sm tracking-wider">
-                       NEW
-                     </div>
-                  </div>
-                  
-                  <div class="space-y-1.5 px-1">
-                    <p class="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{{ product.category }}</p>
-                    <h3 class="font-bold text-charcoal group-hover:text-honey transition-colors line-clamp-1 min-h-[1.5rem]">{{ product.name | uppercase }}</h3>
-                    
-                    <p class="text-honey font-bold text-lg pt-1">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
-
-                    <div class="flex items-center gap-1.5 mt-1">
-                      <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[0.5px]"></app-icon>
-                      <span class="text-[11px] text-gray-500 font-medium leading-none">
-                        {{ product.rating || 4.5 }} • ({{ product.reviews || 0 }} đánh giá)
-                      </span>
+                <div 
+                  [routerLink]="['/product', product.id]"
+                  class="w-[48%] sm:w-[45%] md:w-[30%] lg:w-[23%] flex-shrink-0 snap-always snap-start group cursor-pointer"
+                >
+                    <div class="relative overflow-hidden rounded-xl mb-3 aspect-[4/5] bg-gray-50 shadow-sm border border-gray-100 group-hover:shadow-xl group-hover:-translate-y-1 transition-all duration-300">
+                       <!-- Images -->
+                       <img [src]="product.image" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0 pointer-events-none">
+                       <img [src]="product.hoverImage" (error)="handleImageError($event)" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100 group-hover:scale-105 pointer-events-none">
+                       
+                       <!-- New Tag -->
+                       <div class="absolute top-2 left-2 bg-[#E8F5E9]/90 backdrop-blur-sm text-[#2E7D32] text-[9px] font-black px-2 py-1 rounded shadow-sm tracking-wider">
+                         NEW
+                       </div>
                     </div>
-                  </div>
-              </div>
+                    
+                    <div class="space-y-1 px-1">
+                      <p class="text-[9px] text-gray-400 font-bold uppercase tracking-widest truncate">{{ product.category }}</p>
+                      <h3 class="text-sm font-bold text-charcoal group-hover:text-honey transition-colors line-clamp-1 min-h-[1.2rem] capitalize">{{ product.name.toLowerCase() }}</h3>
+                      
+                      <p class="text-honey font-bold text-base pt-0.5">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
+  
+                      <div class="flex items-center gap-1 mt-1">
+                        <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[1.5px]"></app-icon>
+                        <span class="text-[10px] text-gray-500 font-medium leading-none">
+                          {{ product.rating || 4.5 }} • ({{ product.reviews || 0 }})
+                        </span>
+                      </div>
+                    </div>
+                </div>
             }
           </div>
         </div>

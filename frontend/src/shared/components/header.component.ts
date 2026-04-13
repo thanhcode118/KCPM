@@ -49,37 +49,40 @@ type ResolvedCategoryGroup = {
          [class.bg-white]="!useTransparentHeader()"
          [class.shadow-md]="useSolidHeaderStyle()"
          [class.scrolled]="useSolidHeaderStyle()">
-      <div class="max-w-screen-2xl mx-auto px-4 h-14 flex items-center justify-between gap-4 relative">
-        <a href="#"
-           (click)="goHome($event)"
-           class="logo-link flex items-center group flex-shrink-0 z-[101] transition-all duration-500"
-           [class.opacity-0]="isScrolled()"
-           [class.w-0]="isScrolled()"
-           [class.overflow-hidden]="isScrolled()"
-           [class.gap-0]="isScrolled()">
-          <img src="/assets/images/logo.png" alt="BeeShop - Phụ kiện decor" class="logo-img h-16 w-auto object-contain transition-all duration-300 group-hover:scale-105 drop-shadow-md mt-1">
-        </a>
-
-        <!-- Hamburger Button (mobile only) -->
-        <button
-          class="xl:hidden flex items-center justify-center w-10 h-10 rounded-full transition-colors z-[101] flex-shrink-0"
-          [ngClass]="useSolidHeaderStyle() ? 'text-charcoal hover:bg-gray-100' : 'text-white hover:bg-white/10'"
-          (click)="mobileMenuOpen.set(true)"
-          aria-label="Mở menu"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-        </button>
+      <div class="max-w-screen-2xl mx-auto px-4 h-14 flex items-center gap-2 relative">
+        <!-- Left: Hamburger & Logo -->
+        <div class="flex items-center gap-2 z-[101]">
+          <!-- Hamburger Button (mobile only) -->
+          <button
+            class="xl:hidden flex items-center justify-center w-8 h-8 rounded-full transition-colors flex-shrink-0"
+            [ngClass]="useSolidHeaderStyle() ? 'text-charcoal hover:bg-gray-100' : 'text-white hover:bg-white/10'"
+            (click)="mobileMenuOpen.set(true)"
+            aria-label="Mở menu"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          
+          <a href="#"
+             (click)="goHome($event)"
+             class="logo-link flex items-center group flex-shrink-0 transition-all duration-500"
+             [class.opacity-0]="isScrolled()"
+             [class.w-0]="isScrolled()"
+             [class.overflow-hidden]="isScrolled()">
+            <img src="/assets/images/logo.png" alt="BeeShop - Phụ kiện decor" class="logo-img h-12 md:h-16 w-auto object-contain transition-all duration-300 group-hover:scale-105 drop-shadow-md">
+          </a>
+        </div>
 
         <app-header-navigation
+          class="hidden xl:block"
           [navigationStructure]="navigationStructure()"
           [solidStyle]="useSolidHeaderStyle()"
           (navigate)="navigateTo($event)"
           (navigateSub)="navigateToSub($event.category, $event.item)"
         />
 
-        <div class="flex items-center gap-3 flex-shrink-0 z-[101]">
+        <div class="flex items-center gap-2 md:gap-3 flex-shrink-0 z-[101]">
           <app-header-search
             [query]="searchFacade.query()"
             [isFocused]="isSearchFocused()"

@@ -75,7 +75,7 @@ import { RouterModule } from '@angular/router';
               </div>
 
               <div class="flex items-center gap-1.5 mt-1">
-                <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 mb-[1px]"></app-icon>
+                <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[1.5px]"></app-icon>
                 <span class="text-[11px] text-gray-500 font-medium leading-none">
                   {{ product.rating || 4.5 }} • Còn {{ product.stockLeft ?? 0 }} sp
                 </span>
