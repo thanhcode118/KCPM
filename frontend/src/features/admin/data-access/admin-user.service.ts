@@ -1,9 +1,9 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface UserView {
-  userId: number;
+  id: number;
   email: string;
   fullName: string;
   phone: string;
@@ -18,18 +18,23 @@ export class AdminUserService {
   private readonly baseUrl = 'http://localhost:5020/api/users';
 
   getUsers(): Observable<UserView[]> {
-    return this.http.get<UserView[]>(this.baseUrl);
+    return this.http.get<UserView[]>(this.baseUrl, { headers: this.authHeaders() });
   }
 
-  updateUserRole(userId: number, role: number): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${userId}/role`, { role });
+  updateUserRole(id: number, role: 'admin' | 'customer'): Observable<any> {
+    return this.http.put<any>(`${this.baseUrl}/${id}/role`, { role }, { headers: this.authHeaders() });
   }
 
-  toggleUserStatus(userId: number): Observable<void> {
-    return this.http.patch<void>(`${this.baseUrl}/${userId}/status`, {});
+  toggleUserStatus(id: number): Observable<any> {
+    return this.http.patch<any>(`${this.baseUrl}/${id}/status`, {}, { headers: this.authHeaders() });
   }
 
-  deleteUser(userId: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${userId}`);
+  deleteUser(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.authHeaders() });
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders(token ? { 'Authorization': `Bearer ${token}` } : {});
   }
 }

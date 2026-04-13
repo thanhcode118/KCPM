@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Observable } from 'rxjs';
 
 export interface CouponView {
@@ -63,41 +63,46 @@ export class AdminMarketingService {
 
   // Coupons
   getCoupons(): Observable<CouponView[]> {
-    return this.http.get<CouponView[]>(`${this.baseUrl}/coupons`);
+    return this.http.get<CouponView[]>(`${this.baseUrl}/coupons`, { headers: this.authHeaders() });
   }
 
   createCoupon(input: CreateCouponInput): Observable<CouponView> {
-    return this.http.post<CouponView>(`${this.baseUrl}/coupons`, input);
+    return this.http.post<CouponView>(`${this.baseUrl}/coupons`, input, { headers: this.authHeaders() });
   }
 
   deleteCoupon(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/coupons/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/coupons/${id}`, { headers: this.authHeaders() });
   }
 
   // Banners
   getBanners(): Observable<BannerView[]> {
-    return this.http.get<BannerView[]>(`${this.baseUrl}/banners`);
+    return this.http.get<BannerView[]>(`${this.baseUrl}/banners`, { headers: this.authHeaders() });
   }
 
   updateBanner(id: number | null, input: UpdateBannerInput): Observable<BannerView> {
     const url = id ? `${this.baseUrl}/banners/${id}` : `${this.baseUrl}/banners`;
-    return this.http.put<BannerView>(url, input);
+    return this.http.put<BannerView>(url, input, { headers: this.authHeaders() });
   }
 
   deleteBanner(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/banners/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/banners/${id}`, { headers: this.authHeaders() });
   }
 
   // Blog Posts
   getBlogPosts(): Observable<BlogPostView[]> {
-    return this.http.get<BlogPostView[]>(`${this.baseUrl}/blogs`);
+    return this.http.get<BlogPostView[]>(`${this.baseUrl}/blogs`, { headers: this.authHeaders() });
   }
 
   createBlogPost(input: CreateBlogPostInput): Observable<BlogPostView> {
-    return this.http.post<BlogPostView>(`${this.baseUrl}/blogs`, input);
+    return this.http.post<BlogPostView>(`${this.baseUrl}/blogs`, input, { headers: this.authHeaders() });
   }
 
   deleteBlogPost(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/blogs/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/blogs/${id}`, { headers: this.authHeaders() });
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders(token ? { 'Authorization': `Bearer ${token}` } : {});
   }
 }

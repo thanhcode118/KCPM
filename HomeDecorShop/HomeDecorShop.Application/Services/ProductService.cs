@@ -212,9 +212,17 @@ public sealed class ProductService(
         var created = reviewRepository.Create(review);
 
         // Update product average rating
-        var allReviews = reviewRepository.GetByProductId(input.ProductId);
-        product.Rating = allReviews.Average(r => r.Rating);
-        product.Reviews = allReviews.Count;
+        var allReviews = reviewRepository.GetByProductId(input.ProductId).ToList();
+        if (allReviews.Count > 0)
+        {
+            product.Rating = allReviews.Average(r => r.Rating);
+            product.Reviews = allReviews.Count;
+        }
+        else
+        {
+            product.Rating = created.Rating;
+            product.Reviews = 1;
+        }
         repository.Update(product);
 
         return new ProductReviewView

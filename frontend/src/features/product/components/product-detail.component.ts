@@ -5,6 +5,7 @@ import { ActivatedRoute } from '@angular/router';
 import { ProductDetailFacade } from '@/features/product/data-access/product-detail.facade';
 import { CheckoutFacade } from '@/features/checkout/data-access/checkout.facade';
 import { IconComponent } from '@/shared/components/icon.component';
+import { AuthFacade } from '@/features/auth/data-access/auth.facade';
 
 @Component({
   selector: 'app-product-detail',
@@ -229,6 +230,7 @@ import { IconComponent } from '@/shared/components/icon.component';
 export class ProductDetailComponent {
   productFacade = inject(ProductDetailFacade);
   checkoutFacade = inject(CheckoutFacade);
+  authFacade = inject(AuthFacade);
   route = inject(ActivatedRoute);
 
   currentImage = signal<string | null>(null);
@@ -242,6 +244,12 @@ export class ProductDetailComponent {
     const idStr = this.route.snapshot.paramMap.get('id');
     if (idStr) {
       this.productFacade.selectProductById(Number(idStr));
+    }
+
+    // Auto-fill author if logged in
+    const user = this.authFacade.currentUser();
+    if (user) {
+      this.author = user.fullName;
     }
   }
 
@@ -262,9 +270,15 @@ export class ProductDetailComponent {
     if (!this.author || !this.comment) return;
 
     this.productFacade.addComment(this.author, this.rating, this.comment);
-    this.author = '';
-    this.rating = 5;
+    
+    // Clear comment but keep author if they want to write another one (optional)
+    // or keep author from session.
     this.comment = '';
+    this.rating = 5;
+    
+    // Show feedback (Simulating a toast or simple alert if a toast system isn't globally available here)
+    // Note: The Admin dashboard had a toast signal. Product detail might not have one yet.
+    // For now, I'll rely on the reactive list update to show success.
   }
 
   formatDescription(desc: string | undefined) {

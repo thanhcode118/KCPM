@@ -14,7 +14,7 @@
 
     <nav class="p-4 space-y-1 flex-1 mt-4 overflow-y-auto">
       <!-- Nav Item Dashboard -->
-      <button (click)="activeTab = 'dashboard'"
+      <button (click)="selectTab('dashboard')"
         [ngClass]="activeTab === 'dashboard' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">1</i>
@@ -22,7 +22,7 @@
       </button>
 
       <!-- Nav Item Products -->
-      <button (click)="activeTab = 'products'"
+      <button (click)="selectTab('products')"
         [ngClass]="activeTab === 'products' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">2</i>
@@ -30,7 +30,7 @@
       </button>
 
       <!-- Nav Item Orders -->
-      <button (click)="activeTab = 'orders'"
+      <button (click)="selectTab('orders')"
         [ngClass]="activeTab === 'orders' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">3</i>
@@ -38,7 +38,7 @@
       </button>
 
       <!-- Nav Item Customers -->
-      <button (click)="activeTab = 'customers'"
+      <button (click)="selectTab('customers')"
         [ngClass]="activeTab === 'customers' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">4</i>
@@ -46,7 +46,7 @@
       </button>
 
       <!-- Nav Item Marketing -->
-      <button (click)="activeTab = 'marketing'"
+      <button (click)="selectTab('marketing')"
         [ngClass]="activeTab === 'marketing' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">5</i>
@@ -54,7 +54,7 @@
       </button>
 
       <!-- Nav Item Settings -->
-      <button (click)="activeTab = 'settings'"
+      <button (click)="selectTab('settings')"
         [ngClass]="activeTab === 'settings' ? 'bg-honey text-charcoal font-bold shadow-honey/30 shadow-lg' : 'text-gray-400 hover:bg-gray-800 hover:text-white'"
         class="w-full flex items-center gap-3 px-5 py-3.5 rounded-2xl transition-all duration-300 group">
         <i class="w-5 h-5 flex items-center justify-center font-black">6</i>
@@ -501,69 +501,60 @@
           <thead>
             <tr class="border-b border-gray-100 text-xs font-black text-gray-400 uppercase tracking-widest">
               <th class="pb-3 px-2">Khách hàng</th>
-              <th class="pb-3 px-2">Lịch sử Mua hàng</th>
-              <th class="pb-3 px-2">Phân loại VIP</th>
+              <th class="pb-3 px-2">Quyền hạn</th>
+              <th class="pb-3 px-2">Ngày tạo</th>
               <th class="pb-3 px-2 text-right">Bảo mật (Khóa ban)</th>
             </tr>
           </thead>
           <tbody class="text-sm">
-            <tr class="border-b border-gray-50">
+            @for (user of adminFacade.users(); track user.id) {
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors group">
               <td class="py-4 px-2">
                 <div class="flex items-center gap-3">
                   <div
-                    class="w-10 h-10 bg-blue-100 text-blue-600 font-black flex items-center justify-center rounded-full">
-                    L</div>
+                    class="w-10 h-10 bg-blue-100 text-blue-600 font-black flex items-center justify-center rounded-full uppercase">
+                    {{ user.fullName.substring(0, 1) }}</div>
                   <div>
-                    <p class="font-bold text-gray-900">Lê Thế Anh</p>
-                    <p class="text-[11px] text-gray-400">theanh@gmail.com</p>
+                    <p class="font-bold text-gray-900">{{ user.fullName }}</p>
+                    <p class="text-[11px] text-gray-400">{{ user.email }}</p>
+                    @if (user.phone) {
+                    <p class="text-[10px] text-gray-400">{{ user.phone }}</p>
+                    }
                   </div>
                 </div>
               </td>
               <td class="py-4 px-2">
-                <p class="font-black text-charcoal">Đã mua 15 đơn</p>
-                <p class="text-xs font-medium text-gray-500">Tổng chi tiêu: <span
-                    class="text-green-600 font-bold">45,800,000đ</span></p>
+                <span [ngClass]="user.role.toLowerCase() === 'admin' ? 'bg-amber-100 text-amber-700' : 'bg-blue-50 text-blue-600'"
+                  class="font-black text-[10px] uppercase px-3 py-1 rounded-full shadow-sm">
+                  {{ user.role }}
+                </span>
               </td>
               <td class="py-4 px-2">
-                <span
-                  class="bg-yellow-100 text-yellow-700 font-black text-[10px] uppercase px-3 py-1 rounded-full shadow-sm">Khách
-                  VIP (Vàng)</span>
+                <p class="text-xs font-medium text-gray-500">{{ user.createdAt | date:'dd/MM/yyyy' }}</p>
               </td>
               <td class="py-4 px-2 text-right">
-                <button
-                  class="bg-gray-100 text-gray-500 hover:bg-red-100 hover:text-red-600 transition-colors font-bold text-xs px-4 py-2 rounded-xl">
-                  Khóa (Ban)
-                </button>
-              </td>
-            </tr>
-            <tr class="border-b border-gray-50">
-              <td class="py-4 px-2">
-                <div class="flex items-center gap-3">
-                  <div
-                    class="w-10 h-10 bg-gray-100 text-gray-600 font-black flex items-center justify-center rounded-full">
-                    S</div>
-                  <div>
-                    <p class="font-bold text-gray-900">Spammer123</p>
-                    <p class="text-[11px] text-gray-400">fake.email@spam.com</p>
-                  </div>
+                <div class="flex justify-end items-center gap-2">
+                  @if (!user.isActive) {
+                    <span class="text-[10px] font-black text-red-600 italic mr-2 border border-red-100 bg-red-50 px-2 py-0.5 rounded">ĐÃ KHÓA</span>
+                  }
+                  
+                  <button (click)="toggleUserStatus(user.id)"
+                    [ngClass]="user.isActive ? 'bg-red-50 text-red-500 hover:bg-red-500 hover:text-white' : 'bg-emerald-50 text-emerald-600 hover:bg-emerald-600 hover:text-white'"
+                    class="transition-all font-bold text-[10px] uppercase px-4 py-2 rounded-xl border border-transparent hover:shadow-md active:scale-95">
+                    {{ user.isActive ? 'Khóa (Ban)' : 'Mở Khóa' }}
+                  </button>
+
+                  <button (click)="deleteUser(user.id)"
+                    class="p-2 text-red-300 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all"
+                    title="Xóa vĩnh viễn">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
                 </div>
               </td>
-              <td class="py-4 px-2">
-                <p class="font-bold text-gray-600">Đã mua 3 đơn</p>
-                <p class="text-xs font-bold text-red-500">Tỷ lệ bùng hàng: 100%</p>
-              </td>
-              <td class="py-4 px-2">
-                <span class="bg-gray-100 text-gray-500 font-black text-[10px] uppercase px-3 py-1 rounded-full">Khách
-                  mới</span>
-              </td>
-              <td class="py-4 px-2 text-right">
-                <button
-                  class="bg-red-100 text-red-600 border border-red-200 font-bold text-xs px-4 py-2 rounded-xl mr-2">
-                  Mở Khóa
-                </button>
-                <span class="text-xs font-bold text-red-600 italic">Đã Ban</span>
-              </td>
             </tr>
+            }
           </tbody>
         </table>
       </div>
@@ -580,24 +571,40 @@
       <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 flex flex-col">
         <div class="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
           <h2 class="font-black text-xl text-gray-900">Mã giảm giá (Coupons)</h2>
-          <button class="bg-honey text-charcoal font-bold text-xs px-3 py-1.5 rounded-lg">+ Tạo Mã</button>
+          <button (click)="openAddCouponModal()" class="bg-honey text-charcoal font-bold text-xs px-3 py-1.5 rounded-lg active:scale-95 transition-transform">+ Tạo Mã</button>
         </div>
-        <div class="flex-1 space-y-3">
-          <!-- Item -->
+        <div class="flex-1 space-y-3 max-h-[500px] overflow-y-auto pr-2 custom-scrollbar">
+          @for (coupon of adminFacade.coupons(); track coupon.id) {
           <div
-            class="border border-dashed border-gray-300 rounded-2xl p-4 flex justify-between items-center bg-gray-50">
+            class="border border-dashed border-gray-300 rounded-2xl p-4 flex justify-between items-center bg-gray-50/50 hover:bg-gray-50 transition-colors group">
             <div>
-              <h3 class="font-black text-honey text-lg uppercase tracking-wider">TET2026</h3>
-              <p class="text-xs font-bold text-gray-600">-20% cho Đơn từ 1 Triệu</p>
-              <p class="text-[10px] text-gray-400 mt-1">Hết hạn: 15/02/2026 (Còn 150 lượt)</p>
+              <div class="flex items-center gap-2">
+                <h3 class="font-black text-honey text-lg uppercase tracking-wider">{{ coupon.code }}</h3>
+                @if (!coupon.isActive) {
+                  <span class="text-[9px] bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-black">HẾT HẠN</span>
+                }
+              </div>
+              <p class="text-xs font-bold text-gray-600">-{{ coupon.discountPercentage }}% cho mọi đơn hàng</p>
+              <p class="text-[10px] text-gray-400 mt-1">
+                Hết hạn: {{ coupon.expiryDate | date:'dd/MM/yyyy' }} • 
+                Sử dụng: <span class="font-bold text-charcoal">{{ coupon.currentUsage }}/{{ coupon.maxUsage }}</span>
+              </p>
             </div>
-            <button class="text-red-500 hover:text-red-700 font-bold text-xs"><svg class="w-5 h-5" fill="none"
-                stroke="currentColor" viewBox="0 0 24 24">
+            <button (click)="deleteCoupon(coupon.id)" 
+              class="text-red-300 hover:text-red-600 font-bold text-xs p-2 transition-colors"
+               title="Xóa mã giảm giá">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                   d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
                 </path>
-              </svg></button>
+              </svg>
+            </button>
           </div>
+          } @empty {
+            <div class="p-10 text-center border-2 border-dashed border-gray-100 rounded-3xl">
+              <p class="text-xs font-bold text-gray-300 uppercase tracking-widest">Chưa có mã giảm giá nào</p>
+            </div>
+          }
         </div>
       </div>
 
@@ -609,13 +616,18 @@
             <h2 class="font-black text-lg text-gray-900">Quản lý Banner/Slider</h2>
             <button class="text-blue-600 font-bold text-xs hover:underline">Chỉnh sửa Homepage</button>
           </div>
-          <div
-            class="h-24 bg-gray-200 rounded-xl flex items-center justify-center font-black text-gray-400 border border-gray-300 border-dashed relative overflow-hidden group">
-            <p class="z-10 bg-white/80 px-3 py-1 rounded-full text-sm">Banner_Tet_Main.jpg</p>
-            <div
-              class="absolute inset-0 bg-black/5 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="bg-white px-4 py-2 rounded-lg font-bold shadow text-sm">Thay đổi hình</button>
+          
+          <div class="space-y-3">
+            @for (banner of adminFacade.banners(); track banner.id) {
+            <div class="h-24 bg-gray-200 rounded-xl flex items-center justify-center font-black text-gray-400 border border-gray-300 border-dashed relative overflow-hidden group">
+              <img [src]="getAbsoluteImageUrl(banner.imageUrl)" class="absolute inset-0 w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity">
+              <p class="z-10 bg-white/80 px-3 py-1 rounded-full text-xs font-black text-charcoal shadow-sm">{{ banner.title }}</p>
             </div>
+            } @empty {
+              <div class="h-24 bg-gray-50 rounded-xl flex items-center justify-center font-black text-gray-300 border border-gray-100 border-dashed">
+                <p class="text-xs">Chưa có banner nào hoạt động</p>
+              </div>
+            }
           </div>
         </div>
 
@@ -623,18 +635,25 @@
         <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6 flex-1">
           <div class="flex justify-between items-center mb-4">
             <h2 class="font-black text-lg text-gray-900">Blog / Tin Mẹo (SEO)</h2>
-            <button class="bg-gray-100 text-charcoal font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-gray-200">Viết
-              bài mới</button>
+            <button (click)="openAddBlogModal()" class="bg-gray-100 text-charcoal font-bold text-xs px-3 py-1.5 rounded-lg hover:bg-gray-200 active:scale-95 transition-all">Viết bài mới</button>
           </div>
-          <ul class="space-y-2">
-            <li class="flex gap-4 items-center bg-gray-50 p-2 rounded-lg">
-              <div class="w-10 h-10 bg-gray-300 rounded"></div>
+          <ul class="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+            @for (post of adminFacade.blogs(); track post.id) {
+            <li class="flex gap-4 items-center bg-gray-50 p-2 rounded-2xl hover:bg-gray-100 transition-colors group">
+              <img [src]="getAbsoluteImageUrl(post.imageUrl)" class="w-12 h-12 bg-gray-300 rounded-xl object-cover shadow-sm">
               <div class="flex-1">
-                <p class="font-bold text-sm line-clamp-1">5 Mẹo trang trí phòng ngủ Minimalism</p>
-                <p class="text-[10px] text-gray-500">Người đăng: Content_B • Lượt xem: 2.1k</p>
+                <p class="font-bold text-sm line-clamp-1 text-gray-900">{{ post.title }}</p>
+                <p class="text-[10px] text-gray-500 font-medium">Người đăng: {{ post.author }} • Lượt xem: {{ post.views }}</p>
               </div>
-              <button class="text-blue-600 text-xs font-bold mr-2">Sửa</button>
+              <div class="flex gap-1">
+                <button (click)="deleteBlog(post.id)" class="text-red-400 hover:text-red-700 p-2 transition-colors font-black text-xs">XÓA</button>
+              </div>
             </li>
+            } @empty {
+              <div class="py-10 text-center">
+                <p class="text-[10px] font-black text-gray-300 uppercase tracking-widest">Chưa có bài viết nào</p>
+              </div>
+            }
           </ul>
         </div>
       </div>
@@ -645,32 +664,64 @@
              TAB 6: TÙY CHỈNH HỆ THỐNG
              ============================== -->
     @if (activeTab === 'settings') {
-    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-6">
-      <h2 class="font-black text-2xl text-gray-900 mb-6">Cài đặt Hệ thống & Phân Quyền</h2>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-        <!-- Cấu hình chung -->
+    <div class="bg-white rounded-[2rem] shadow-sm border border-gray-100 p-8">
+      <div class="flex justify-between items-center mb-8 border-b border-gray-100 pb-6">
         <div>
-          <h3 class="font-bold text-lg text-charcoal mb-4 border-b border-gray-100 pb-2">Cấu hình Cửa hàng</h3>
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs font-bold text-gray-500 mb-1">Tên cửa hàng (Logo text)</label>
-              <input type="text" value="BeeShop - Phụ Kiện Decor"
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 outline-none focus:border-honey">
+          <h2 class="font-black text-3xl text-gray-900">Cấu hình Hệ thống</h2>
+          <p class="text-xs text-gray-400 font-bold uppercase tracking-widest mt-1">Quản lý các thiết lập vận hành cốt lõi</p>
+        </div>
+        <button (click)="saveSettings()"
+            class="bg-charcoal text-white font-black text-sm px-8 py-3.5 rounded-2xl hover:bg-honey hover:text-charcoal transition-all shadow-xl shadow-charcoal/10 active:scale-95">Lưu Cấu Hình</button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        <!-- Cấu hình chung -->
+        <div class="space-y-8">
+          <div class="bg-gray-50/50 p-6 rounded-[2rem] border border-gray-100/50">
+             <h3 class="font-black text-sm text-gray-400 uppercase tracking-widest mb-6 border-b border-gray-100 pb-2">Thông tin Cửa hàng</h3>
+             <div class="space-y-5">
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Tên cửa hàng (Logo text)</label>
+                  <input type="text" [(ngModel)]="settingsForm.storeName"
+                    class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all">
+                </div>
+                <div>
+                  <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Địa chỉ Shop</label>
+                  <input type="text" [(ngModel)]="settingsForm.address"
+                    class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Email liên hệ</label>
+                    <input type="email" [(ngModel)]="settingsForm.contactEmail"
+                      class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all">
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Số điện thoại</label>
+                    <input type="text" [(ngModel)]="settingsForm.contactPhone"
+                      class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all">
+                  </div>
+                </div>
+             </div>
+          </div>
+
+          <div class="bg-amber-50/30 p-6 rounded-[2rem] border border-amber-100/50">
+            <h3 class="font-black text-sm text-amber-600/50 uppercase tracking-widest mb-6 border-b border-amber-100 pb-2">Thông số Tài chính</h3>
+            <div class="grid grid-cols-2 gap-6">
+              <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Thuế (VAT %)</label>
+                <div class="relative">
+                  <input type="number" [(ngModel)]="settingsForm.vatPercentage"
+                    class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all pr-8">
+                  <span class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 font-bold">%</span>
+                </div>
+              </div>
+              <div>
+                <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1.5 ml-1">Phí GH mặc định (VNĐ)</label>
+                <input type="number" [(ngModel)]="settingsForm.defaultShippingFee"
+                  class="w-full bg-white border border-gray-100 rounded-xl px-4 py-3 text-sm font-bold text-gray-900 outline-none focus:border-honey/50 transition-all">
+              </div>
             </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 mb-1">Cấu hình Thuế (VAT %)</label>
-              <input type="number" value="10"
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 outline-none focus:border-honey">
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-gray-500 mb-1">Phí Giao Hàng Mặc Định (VNĐ)</label>
-              <input type="text" value="30,000"
-                class="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm font-bold text-gray-900 outline-none focus:border-honey">
-            </div>
-            <button
-              class="bg-charcoal text-white font-bold text-sm px-5 py-2.5 rounded-xl hover:bg-honey hover:text-charcoal w-full mt-2">Lưu
-              Cấu Hình</button>
           </div>
         </div>
 
@@ -1069,4 +1120,98 @@
     </div>
     }
   </div>
+
+  <!-- Coupon Modal -->
+  @if (showCouponModal()) {
+  <div class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" (click)="showCouponModal.set(false)"></div>
+    <div class="relative w-full max-w-lg bg-white rounded-[2.5rem] shadow-2xl overflow-hidden p-8 animate-in zoom-in-95 duration-200">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-black text-charcoal">Tạo Mã Giảm Giá</h3>
+        <button (click)="showCouponModal.set(false)" class="text-gray-400 hover:text-charcoal transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Mã Code</label>
+          <input [(ngModel)]="couponForm.code" type="text" placeholder="VÍ DỤ: GIAMGIA20" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-bold focus:border-honey outline-none transition-all uppercase">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">% Giảm giá</label>
+            <input [(ngModel)]="couponForm.discountPercentage" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-bold focus:border-honey outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Lượt sử dụng tối đa</label>
+            <input [(ngModel)]="couponForm.maxUsage" type="number" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-bold focus:border-honey outline-none">
+          </div>
+        </div>
+        <div>
+          <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Ngày hết hạn</label>
+          <input [(ngModel)]="couponForm.expiryDate" type="date" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-bold focus:border-honey outline-none">
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        <button (click)="showCouponModal.set(false)" class="flex-1 py-4 rounded-2xl text-gray-500 font-bold text-sm bg-gray-50 hover:bg-gray-100 transition-all">Hủy</button>
+        <button (click)="saveCoupon()" class="flex-1 py-4 rounded-2xl bg-honey text-charcoal font-black text-sm shadow-lg shadow-honey/20 hover:shadow-honey/40 transition-all active:scale-95">Lưu Mã</button>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Blog Modal -->
+  @if (showBlogModal()) {
+  <div class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-charcoal/40 backdrop-blur-sm" (click)="showBlogModal.set(false)"></div>
+    <div class="relative w-full max-w-2xl bg-white rounded-[2.5rem] shadow-2xl overflow-hidden p-8 animate-in zoom-in-95 duration-200">
+      <div class="flex justify-between items-center mb-6">
+        <h3 class="text-2xl font-black text-charcoal tracking-tight">Viết Bài Blog Mới</h3>
+        <button (click)="showBlogModal.set(false)" class="text-gray-400 hover:text-charcoal transition-colors">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <!-- Thumbnail Upload -->
+        <div class="md:col-span-1">
+          <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-2">Ảnh bìa bài viết</label>
+          <div class="relative group aspect-square rounded-[2rem] bg-gray-50 border-2 border-dashed border-gray-100 flex items-center justify-center overflow-hidden">
+            @if (blogForm.imageUrl) {
+              <img [src]="getAbsoluteImageUrl(blogForm.imageUrl)" class="w-full h-full object-cover">
+            } @else {
+              <div class="text-center p-4">
+                <i class="block text-2xl mb-1">🖼️</i>
+                <p class="text-[10px] font-bold text-gray-400">Tải ảnh lên</p>
+              </div>
+            }
+            <input type="file" (change)="onMarketingImageUpload($event, 'blog')" class="absolute inset-0 opacity-0 cursor-pointer">
+          </div>
+        </div>
+
+        <div class="md:col-span-2 space-y-4">
+          <div>
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Tiêu đề bài viết</label>
+            <input [(ngModel)]="blogForm.title" (change)="onBlogTitleChange()" type="text" placeholder="VÍ DỤ: 5 Mẹo Decor..." class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-bold focus:border-honey outline-none transition-all">
+          </div>
+          <div>
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Đường dẫn SEO (Slug)</label>
+            <input [(ngModel)]="blogForm.slug" type="text" class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-2 text-xs font-medium text-gray-500 bg-gray-100/50" readonly>
+          </div>
+          <div>
+            <label class="block text-xs font-black text-gray-400 uppercase tracking-widest mb-1.5">Nội dung chi tiết</label>
+            <textarea [(ngModel)]="blogForm.content" rows="4" placeholder="Nhập nội dung bài viết tại đây..." class="w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3 text-sm font-medium focus:border-honey outline-none resize-none"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 flex gap-3">
+        <button (click)="showBlogModal.set(false)" class="flex-1 py-4 rounded-2xl text-gray-500 font-bold text-sm bg-gray-50 hover:bg-gray-100 transition-all">Lưu nháp</button>
+        <button (click)="saveBlog()" class="flex-1 py-4 rounded-2xl bg-charcoal text-white font-black text-sm hover:bg-honey hover:text-charcoal transition-all active:scale-95">Đăng Bài Viết</button>
+      </div>
+    </div>
+  </div>
+  }
 </div>

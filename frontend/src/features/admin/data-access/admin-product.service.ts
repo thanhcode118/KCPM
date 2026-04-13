@@ -82,15 +82,15 @@ export class AdminProductService {
   }
 
   createProduct(product: ProductUpsertInput): Observable<ProductView> {
-    return this.http.post<ProductView>(this.baseUrl, product);
+    return this.http.post<ProductView>(this.baseUrl, product, { headers: this.authHeaders() });
   }
 
   updateProduct(id: number, product: ProductUpsertInput): Observable<ProductView> {
-    return this.http.put<ProductView>(`${this.baseUrl}/${id}`, product);
+    return this.http.put<ProductView>(`${this.baseUrl}/${id}`, product, { headers: this.authHeaders() });
   }
 
   deleteProduct(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.baseUrl}/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`, { headers: this.authHeaders() });
   }
 
   getCategories(): Observable<CategoryView[]> {
@@ -100,15 +100,16 @@ export class AdminProductService {
   uploadImage(file: File): Observable<{ url: string }> {
     const formData = new FormData();
     formData.append('file', file);
-    
-    // Auth token is required for the upload controller
-    const token = localStorage.getItem('token');
-    const headers = new HttpHeaders(token ? { 'Authorization': `Bearer ${token}` } : {});
 
-    return this.http.post<{ url: string }>('http://localhost:5020/api/upload/image', formData, { headers }).pipe(
+    return this.http.post<{ url: string }>('http://localhost:5020/api/upload/image', formData, { headers: this.authHeaders() }).pipe(
       map(res => ({
         url: res.url.startsWith('http') ? res.url : `http://localhost:5020${res.url}`
       }))
     );
+  }
+
+  private authHeaders(): HttpHeaders {
+    const token = localStorage.getItem('token');
+    return new HttpHeaders(token ? { 'Authorization': `Bearer ${token}` } : {});
   }
 }

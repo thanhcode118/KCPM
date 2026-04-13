@@ -4,6 +4,8 @@ import { AdminFacade } from '@/features/admin/data-access/admin.facade';
 import { DashboardService, DashboardStats } from '@/features/admin/data-access/dashboard.service';
 import { AdminOrderService } from '@/features/admin/data-access/admin-order.service';
 import { AdminProductService, ProductView, ProductUpsertInput, CategoryView } from '@/features/admin/data-access/admin-product.service';
+import { AdminUserService } from '@/features/admin/data-access/admin-user.service';
+import { AdminMarketingService } from '@/features/admin/data-access/admin-marketing.service';
 import { FormsModule } from '@angular/forms';
 import { debounceTime, distinctUntilChanged, Subject, map } from 'rxjs';
 
@@ -19,7 +21,46 @@ export class AdminDashboardComponent implements OnInit {
   private readonly dashboardService = inject(DashboardService);
   private readonly adminOrderService = inject(AdminOrderService);
   private readonly adminProductService = inject(AdminProductService);
+  private readonly adminUserService = inject(AdminUserService);
+  private readonly adminMarketingService = inject(AdminMarketingService);
   activeTab = 'dashboard';
+
+  selectTab(tab: string): void {
+    this.activeTab = tab;
+    if (tab === 'settings') {
+      this.syncSettingsForm();
+    }
+  }
+
+  syncSettingsForm(): void {
+    const current = this.adminFacade.systemSettings();
+    if (current) {
+      this.settingsForm = {
+        storeName: current.storeName,
+        vatPercentage: current.vatPercentage,
+        defaultShippingFee: current.defaultShippingFee,
+        contactEmail: current.contactEmail || '',
+        contactPhone: current.contactPhone || '',
+        address: current.address || ''
+      };
+    }
+  }
+
+  saveSettings(): void {
+    const current = this.adminFacade.systemSettings();
+    if (!current) {
+      this.showToast('Không có dữ liệu thiết lập để lưu.', 'error');
+      return;
+    }
+
+    const updated = {
+      ...current,
+      ...this.settingsForm
+    };
+
+    this.adminFacade.updateSettings(updated);
+    this.showToast('Đã lưu cấu hình hệ thống thành công!', 'success');
+  }
   
   getTitle(): string {
     switch (this.activeTab) {
@@ -43,6 +84,22 @@ export class AdminDashboardComponent implements OnInit {
   readonly showProductModal = signal(false);
   readonly isEditing = signal(false);
   readonly currentProduct = signal<ProductView | null>(null);
+  
+  // Marketing State
+  readonly showCouponModal = signal(false);
+  readonly showBlogModal = signal(false);
+  couponForm = { code: '', discountPercentage: 10, expiryDate: '', maxUsage: 100 };
+  blogForm = { title: '', slug: '', content: '', author: 'Admin', imageUrl: '' };
+
+  // Settings State
+  settingsForm = {
+    storeName: '',
+    vatPercentage: 10,
+    defaultShippingFee: 30000,
+    contactEmail: '',
+    contactPhone: '',
+    address: ''
+  };
   
   // Suggestion Control
   readonly activeSuggestionField = signal<string | null>(null);
@@ -250,6 +307,12 @@ export class AdminDashboardComponent implements OnInit {
   openAddProductModal(): void {
     this.isEditing.set(false);
     this.productForm = this.getEmptyProduct();
+    // Re-set category to first loaded category if available
+    if (this.categories().length > 0) {
+      const firstCat = this.categories()[0];
+      this.productForm.categoryId = firstCat.id;
+      this.productForm.category = firstCat.name;
+    }
     this.showProductModal.set(true);
   }
 
@@ -283,6 +346,23 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   saveProduct(): void {
+    // Client-side validation
+    if (!this.productForm.name || this.productForm.name.length < 2) {
+      this.showToast('Tên sản phẩm phải có ít nhất 2 ký tự!', 'error'); return;
+    }
+    if (!this.productForm.sku || this.productForm.sku.length < 2) {
+      this.showToast('Mã SKU phải có ít nhất 2 ký tự!', 'error'); return;
+    }
+    if (!this.productForm.slug || this.productForm.slug.length < 2) {
+      this.showToast('Slug phải có ít nhất 2 ký tự!', 'error'); return;
+    }
+    if (!this.productForm.image || this.productForm.image.length < 3) {
+      this.showToast('Vui lòng tải ảnh chính lên trước khi lưu!', 'error'); return;
+    }
+    if (!this.productForm.hoverImage || this.productForm.hoverImage.length < 3) {
+      this.showToast('Vui lòng tải ảnh hover lên trước khi lưu!', 'error'); return;
+    }
+
     if (this.isEditing() && this.currentProduct()) {
       this.adminProductService.updateProduct(this.currentProduct()!.productId, this.productForm).subscribe({
         next: () => {
@@ -290,7 +370,10 @@ export class AdminDashboardComponent implements OnInit {
           this.closeProductModal();
           this.loadProducts();
         },
-        error: (err) => this.showToast(err.error?.detail || 'Lỗi khi cập nhật sản phẩm', 'error')
+        error: (err) => {
+          const msg = err.error?.errors ? JSON.stringify(err.error.errors) : (err.error?.detail || err.error?.title || 'Lỗi khi cập nhật sản phẩm');
+          this.showToast(msg, 'error');
+        }
       });
     } else {
       this.adminProductService.createProduct(this.productForm).subscribe({
@@ -299,7 +382,10 @@ export class AdminDashboardComponent implements OnInit {
           this.closeProductModal();
           this.loadProducts();
         },
-        error: (err) => this.showToast(err.error?.detail || 'Lỗi khi thêm sản phẩm', 'error')
+        error: (err) => {
+          const msg = err.error?.errors ? JSON.stringify(err.error.errors) : (err.error?.detail || err.error?.title || 'Lỗi khi thêm sản phẩm');
+          this.showToast(msg, 'error');
+        }
       });
     }
   }
@@ -349,14 +435,16 @@ export class AdminDashboardComponent implements OnInit {
   }
 
   private getEmptyProduct(): ProductUpsertInput {
+    // Set category from first available category
+    const firstCat = this.categories()[0];
     return {
       sku: '',
       name: '',
       slug: '',
       price: 0,
       originalPrice: 0,
-      categoryId: 1,
-      category: '',
+      categoryId: firstCat?.id ?? 1,
+      category: firstCat?.name ?? 'Chưa phân loại',
       image: '',
       hoverImage: '',
       videoUrl: '',
@@ -365,10 +453,10 @@ export class AdminDashboardComponent implements OnInit {
       stockLeft: 100,
       rating: 5,
       reviews: 0,
-      brand: 'HomeDecor',
-      color: 'Default',
-      material: 'Wood',
-      style: 'Modern',
+      brand: 'BeeShop',
+      color: 'Mặc định',
+      material: 'Gỗ',
+      style: 'Hiện đại (Modern)',
       inStock: true,
       isActive: true
     };
@@ -431,5 +519,129 @@ export class AdminDashboardComponent implements OnInit {
 
   hideToast(): void {
     this.toast.set(null);
+  }
+
+  // User Management Actions
+  toggleUserStatus(userId: number): void {
+    this.adminUserService.toggleUserStatus(userId).subscribe({
+      next: () => {
+        this.showToast('Cập nhật trạng thái người dùng thành công!', 'success');
+        this.adminFacade.loadRealUsers();
+        this.adminFacade.loadRealOrders(); // Refresh stats if needed
+      },
+      error: (err) => {
+        this.showToast(err.error?.detail || 'Lỗi khi cập nhật trạng thái người dùng', 'error');
+      }
+    });
+  }
+
+  deleteUser(userId: number): void {
+    console.log('AdminDashboard: Deleting user ID:', userId);
+    if (!confirm('Bạn có chắc chắn muốn xóa người dùng này? Thao tác này không thể hoàn tác.')) return;
+
+    this.adminUserService.deleteUser(userId).subscribe({
+      next: () => {
+        this.showToast('Đã xóa người dùng thành công!', 'success');
+        this.adminFacade.loadRealUsers();
+      },
+      error: (err) => {
+        console.error('AdminDashboard: Delete user failed', err);
+        const errorDetail = err.error?.detail || err.error?.title || 'Lỗi không xác định';
+        this.showToast(`Lỗi khi xóa người dùng: ${errorDetail}`, 'error');
+      }
+    });
+  }
+
+  // Marketing Actions
+  openAddCouponModal(): void {
+    const today = new Date();
+    today.setMonth(today.getMonth() + 1);
+    this.couponForm = { code: '', discountPercentage: 10, expiryDate: today.toISOString().split('T')[0], maxUsage: 100 };
+    this.showCouponModal.set(true);
+  }
+
+  saveCoupon(): void {
+    this.adminMarketingService.createCoupon(this.couponForm).subscribe({
+      next: () => {
+        this.showToast('Đã tạo mã giảm giá thành công!', 'success');
+        this.showCouponModal.set(false);
+        this.adminFacade.loadMarketingData();
+      },
+      error: (err) => this.showToast(err.error?.detail || 'Lỗi khi tạo mã giảm giá', 'error')
+    });
+  }
+
+  deleteCoupon(id: number): void {
+    console.log('AdminDashboard: Deleting coupon ID:', id);
+    if (!confirm('Xóa mã giảm giá này?')) return;
+    this.adminMarketingService.deleteCoupon(id).subscribe({
+      next: () => {
+        this.showToast('Đã xóa mã giảm giá!', 'success');
+        this.adminFacade.loadMarketingData();
+      },
+      error: (err) => {
+        console.error('AdminDashboard: Delete coupon failed', err);
+        const errorDetail = err.error?.detail || err.error?.title || 'Lỗi không xác định';
+        this.showToast(`Lỗi khi xóa mã giảm giá: ${errorDetail}`, 'error');
+      }
+    });
+  }
+
+  openAddBlogModal(): void {
+    this.blogForm = { title: '', slug: '', content: '', author: 'Admin', imageUrl: '' };
+    this.showBlogModal.set(true);
+  }
+
+  onBlogTitleChange(): void {
+    this.blogForm.slug = this.slugify(this.blogForm.title);
+  }
+
+  saveBlog(): void {
+    if (!this.blogForm.imageUrl) {
+      this.showToast('Vui lòng tải ảnh bìa cho bài viết!', 'error'); return;
+    }
+    this.adminMarketingService.createBlogPost(this.blogForm).subscribe({
+      next: () => {
+        this.showToast('Đã đăng bài viết thành công!', 'success');
+        this.showBlogModal.set(false);
+        this.adminFacade.loadMarketingData();
+      },
+      error: (err) => this.showToast(err.error?.detail || 'Lỗi khi đăng bài viết', 'error')
+    });
+  }
+
+  deleteBlog(id: number): void {
+    console.log('AdminDashboard: Deleting blog ID:', id);
+    if (!confirm('Xóa bài viết này?')) return;
+    this.adminMarketingService.deleteBlogPost(id).subscribe({
+      next: () => {
+        this.showToast('Đã xóa bài viết!', 'success');
+        this.adminFacade.loadMarketingData();
+      },
+      error: (err) => {
+        console.error('AdminDashboard: Delete blog failed', err);
+        const errorDetail = err.error?.detail || err.error?.title || 'Lỗi không xác định';
+        this.showToast(`Lỗi khi xóa bài viết: ${errorDetail}`, 'error');
+      }
+    });
+  }
+
+  onMarketingImageUpload(event: any, type: 'blog' | 'banner'): void {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    this.isUploading = true;
+    this.adminProductService.uploadImage(file).subscribe({
+      next: (res) => {
+        const url = 'http://localhost:5020' + res.url;
+        if (type === 'blog') this.blogForm.imageUrl = url;
+        this.isUploading = false;
+        this.showToast('Tải ảnh thành công!', 'success');
+      },
+      error: () => {
+        this.isUploading = false;
+        this.showToast('Lỗi khi tải ảnh', 'error');
+      }
+    });
   }
 }

@@ -112,6 +112,7 @@ public sealed class ProductsController(IProductService productService) : ApiCont
     }
 
     [HttpPost("{id:int}/reviews")]
+    [Authorize]
     [SwaggerOperation(Summary = "Add a product review")]
     public ActionResult<ProductReviewView> AddReview(int id, [FromBody] ProductReviewCreateInput input)
     {

@@ -22,6 +22,7 @@ export const apiPaths = {
   products: {
     list: '/api/products',
     detail: (id: number) => `/api/products/${id}`,
+    reviews: (id: number) => `/api/products/${id}/reviews`,
     create: '/api/products',
     update: (id: number) => `/api/products/${id}`,
     delete: (id: number) => `/api/products/${id}`
@@ -105,6 +106,7 @@ export const apiEndpoints = {
   products: {
     list: buildUrl(apiPaths.products.list),
     detail: (id: number) => buildUrl(apiPaths.products.detail(id)),
+    reviews: (id: number) => buildUrl(apiPaths.products.reviews(id)),
     create: buildUrl(apiPaths.products.create),
     update: (id: number) => buildUrl(apiPaths.products.update(id)),
     delete: (id: number) => buildUrl(apiPaths.products.delete(id))

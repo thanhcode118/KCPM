@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using HomeDecorShop.Application;
 using HomeDecorShop.Domain;
 using Microsoft.AspNetCore.Mvc;
@@ -6,6 +7,7 @@ namespace HomeDecorShop.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize(Roles = ApiAuthenticationDefaults.AdminRole)]
 public class SettingsController(ISettingsService settingsService) : ApiControllerBase
 {
     [HttpGet]
