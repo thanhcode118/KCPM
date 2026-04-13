@@ -44,13 +44,12 @@ import { IconComponent } from '@/shared/components/icon.component';
             <p class="text-sm text-gray-400 uppercase tracking-widest font-medium">SKU: {{ product.sku }}</p>
           </div>
 
-          <div class="flex items-center gap-4 mb-6">
-            <div class="flex text-honey gap-1.5">
-              @for (star of [1,2,3,4,5]; track star) {
-                <app-icon [name]="star <= (product.rating || 5) ? 'star-filled' : 'star-outline'" class="w-5 h-5"></app-icon>
-              }
+          <div class="flex items-center gap-2 mb-6">
+            <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg">
+              <app-icon name="star-filled" class="w-4 h-4 text-yellow-500 translate-y-[-0.5px]"></app-icon>
+              <span class="text-lg font-bold text-charcoal">{{ product.rating || 5 | number:'1.1-1' }}</span>
             </div>
-            <span class="text-sm text-gray-500 font-medium">(Còn {{ product.stockLeft || 0 }} sản phẩm)</span>
+            <span class="text-sm text-gray-500 font-medium ml-2">(Còn {{ product.stockLeft || 0 }} sản phẩm)</span>
           </div>
 
           <div class="flex items-center gap-4 mb-8">
@@ -143,12 +142,11 @@ import { IconComponent } from '@/shared/components/icon.component';
                 <div class="flex items-center gap-6">
                    <div class="text-6xl font-black text-honey">{{ product.rating || 5 | number:'1.1-1' }}</div>
                    <div class="space-y-1">
-                     <div class="flex text-honey gap-1">
-                        @for (star of [1,2,3,4,5]; track star) {
-                          <app-icon [name]="star <= (product.rating || 5) ? 'star-filled' : 'star-outline'" class="w-5 h-5"></app-icon>
-                        }
+                     <div class="flex items-center text-honey gap-1.5">
+                        <app-icon name="star-filled" class="w-5 h-5 translate-y-[-1px]"></app-icon>
+                        <span class="text-lg font-bold text-charcoal">Đánh giá chung</span>
                      </div>
-                     <div class="text-gray-400 text-sm italic">Giá trị trung bình từ đánh giá khách hàng</div>
+                     <div class="text-gray-400 text-sm italic">Dựa trên {{ product.reviews || 0 }} lượt nhận xét</div>
                    </div>
                 </div>
               </div>
@@ -210,10 +208,9 @@ import { IconComponent } from '@/shared/components/icon.component';
                             <span class="font-bold text-charcoal">{{ review.author }}</span>
                             <span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded font-bold border border-green-100 uppercase tracking-tighter">Đã mua hàng</span>
                           </div>
-                          <div class="flex text-honey gap-0.5">
-                            @for (star of [1,2,3,4,5]; track star) {
-                              <app-icon [name]="star <= review.rating ? 'star-filled' : 'star-outline'" class="w-3.5 h-3.5"></app-icon>
-                            }
+                          <div class="flex items-center gap-1.5 mt-0.5">
+                            <app-icon name="star-filled" class="w-3.5 h-3.5 text-yellow-500 translate-y-[-0.5px]"></app-icon>
+                            <span class="font-bold text-charcoal text-sm">{{ review.rating | number:'1.1-1' }}</span>
                           </div>
                         </div>
                         <span class="text-xs text-gray-400 italic font-medium">{{ review.createdAt | date:'dd/MM/yyyy' }}</span>
