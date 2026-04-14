@@ -1,7 +1,8 @@
 import { Injectable, computed, signal, inject } from '@angular/core';
 import { Product, ProductViewDto, mapProductViewDtoToProduct } from '@/core/models';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { apiEndpoints } from '@/core/api/api-endpoints';
+import { apiConfig } from '@/core/api/api.config';
 import { tap } from 'rxjs';
 
 export interface ProductReview {
@@ -22,6 +23,8 @@ export class ProductDetailFacade {
   readonly hasError = signal(false);
   readonly errorMessage = signal<string | null>(null);
   private readonly reviewsSignal = signal<ProductReview[]>([]);
+  readonly reviewSubmitStatus = signal<'idle' | 'submitting' | 'success' | 'error'>('idle');
+  readonly reviewErrorMessage = signal<string | null>(null);
 
   readonly productImages = computed(() => {
     const product = this.selectedProduct();
@@ -80,14 +83,44 @@ export class ProductDetailFacade {
       comment
     };
 
-    this.http.post<ProductReview>(apiEndpoints.products.reviews(p.id), payload)
+    const token = localStorage.getItem('token')?.trim() ?? '';
+    let options = {};
+    if (token) {
+      options = {
+        headers: new HttpHeaders({
+          [apiConfig.authorizationHeader]: `${apiConfig.bearerPrefix}${token}`,
+          [apiConfig.authTokenHeader]: token
+        })
+      };
+    }
+
+    this.reviewSubmitStatus.set('submitting');
+    this.reviewErrorMessage.set(null);
+
+    this.http.post<ProductReview>(apiEndpoints.products.reviews(p.id), payload, options)
       .subscribe({
         next: () => {
+          this.reviewSubmitStatus.set('success');
           // Refresh reviews and product details to update rating/counts
           this.loadReviews(p.id);
           this.refreshProduct(p.id);
+          
+          // Reset status after a few seconds
+          setTimeout(() => {
+            if (this.reviewSubmitStatus() === 'success') {
+              this.reviewSubmitStatus.set('idle');
+            }
+          }, 3000);
         },
-        error: (err) => console.error('Failed to add review', err)
+        error: (err) => {
+          console.error('Failed to add review', err);
+          this.reviewSubmitStatus.set('error');
+          if (err.status === 401) {
+            this.reviewErrorMessage.set('Vui lòng đăng nhập để gửi đánh giá.');
+          } else {
+            this.reviewErrorMessage.set('Không thể gửi đánh giá lúc này, vui lòng thử lại sau.');
+          }
+        }
       });
   }
 

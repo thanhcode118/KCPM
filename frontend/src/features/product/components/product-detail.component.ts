@@ -1,4 +1,4 @@
-import { Component, ChangeDetectionStrategy, inject, signal } from '@angular/core';
+import { Component, ChangeDetectionStrategy, inject, signal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -155,38 +155,59 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
               <!-- Write Review Form -->
               <div class="bg-cream p-8 rounded-3xl border border-honey/10">
                 <h3 class="text-xl font-bold text-charcoal mb-6">Viết nhận xét của bạn</h3>
-                <form class="space-y-4" (ngSubmit)="submitComment()">
-                  <div class="space-y-2">
-                    <label class="text-sm font-bold text-gray-600 block">Tên hiển thị</label>
-                    <input [(ngModel)]="author" name="author" 
-                           class="w-full border-gray-200 border rounded-xl px-4 py-3 focus:ring-2 focus:ring-honey outline-none" 
-                           placeholder="Nhập tên của bạn..." required>
-                  </div>
-                  
-                  <div class="space-y-2">
-                    <label class="text-sm font-bold text-gray-600 block">Đánh giá số sao</label>
-                    <div class="flex gap-2">
-                      @for (star of [1,2,3,4,5]; track star) {
-                        <button type="button" (click)="rating = star" class="transition-transform active:scale-90">
-                           <app-icon [name]="star <= rating ? 'star-filled' : 'star-outline'" 
-                                    class="w-8 h-8" [class.text-honey]="star <= rating" [class.text-gray-300]="star > rating"></app-icon>
-                        </button>
-                      }
+                @if (authFacade.isAuthenticated()) {
+                  <form class="space-y-4" (ngSubmit)="submitComment()">
+                    @if (productFacade.reviewSubmitStatus() === 'success') {
+                      <div class="bg-green-50 text-green-700 p-4 rounded-xl border border-green-200 font-medium text-sm">
+                        Cảm ơn bạn đã đánh giá! Review của bạn đã được đăng thành công.
+                      </div>
+                    }
+
+                    @if (productFacade.reviewSubmitStatus() === 'error') {
+                      <div class="bg-red-50 text-red-700 p-4 rounded-xl border border-red-200 font-medium text-sm">
+                        {{ productFacade.reviewErrorMessage() }}
+                      </div>
+                    }
+
+                    <div class="space-y-2">
+                      <label class="text-sm font-bold text-gray-600 block">Tên hiển thị</label>
+                      <input [(ngModel)]="author" name="author" 
+                             class="w-full border-gray-200 border rounded-xl px-4 py-3 focus:ring-2 focus:ring-honey outline-none" 
+                             placeholder="Nhập tên của bạn..." required>
                     </div>
-                  </div>
+                    
+                    <div class="space-y-2">
+                      <label class="text-sm font-bold text-gray-600 block">Đánh giá số sao</label>
+                      <div class="flex gap-2">
+                        @for (star of [1,2,3,4,5]; track star) {
+                          <button type="button" (click)="rating = star" class="transition-transform active:scale-90">
+                             <app-icon [name]="star <= rating ? 'star-filled' : 'star-outline'" 
+                                      class="w-8 h-8" [class.text-honey]="star <= rating" [class.text-gray-300]="star > rating"></app-icon>
+                          </button>
+                        }
+                      </div>
+                    </div>
 
-                  <div class="space-y-2">
-                    <label class="text-sm font-bold text-gray-600 block">Nội dung bình luận</label>
-                    <textarea [(ngModel)]="comment" name="comment" 
-                             class="w-full border-gray-200 border rounded-xl px-4 py-3 h-32 focus:ring-2 focus:ring-honey outline-none resize-none" 
-                             placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." required></textarea>
-                  </div>
+                    <div class="space-y-2">
+                      <label class="text-sm font-bold text-gray-600 block">Nội dung bình luận</label>
+                      <textarea [(ngModel)]="comment" name="comment" 
+                               class="w-full border-gray-200 border rounded-xl px-4 py-3 h-32 focus:ring-2 focus:ring-honey outline-none resize-none" 
+                               placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm..." required></textarea>
+                    </div>
 
-                  <button class="w-full bg-honey text-charcoal px-6 py-4 rounded-xl font-bold hover:bg-honey-dark transition-all transform hover:-translate-y-1 shadow-lg shadow-honey/20" 
-                          type="submit">
-                    GỬI ĐÁNH GIÁ NGAY
-                  </button>
-                </form>
+                    <button class="w-full bg-honey text-charcoal px-6 py-4 rounded-xl font-bold hover:bg-honey-dark transition-all transform hover:-translate-y-1 shadow-lg shadow-honey/20 disabled:opacity-50 disabled:cursor-not-allowed" 
+                            type="submit" [disabled]="productFacade.reviewSubmitStatus() === 'submitting'">
+                      {{ productFacade.reviewSubmitStatus() === 'submitting' ? 'ĐANG GỬI...' : 'GỬI ĐÁNH GIÁ NGAY' }}
+                    </button>
+                  </form>
+                } @else {
+                  <div class="text-center py-6">
+                    <p class="text-gray-600 mb-4 font-medium">Vui lòng đăng nhập để gửi đánh giá về sản phẩm này.</p>
+                    <a href="/login" class="inline-block bg-honey text-charcoal px-6 py-3 rounded-xl font-bold hover:bg-honey-dark transition-colors shadow-lg shadow-honey/20">
+                      ĐĂNG NHẬP NGAY
+                    </a>
+                  </div>
+                }
               </div>
             </div>
 
@@ -251,6 +272,13 @@ export class ProductDetailComponent {
     if (user) {
       this.author = user.fullName;
     }
+
+    effect(() => {
+      if (this.productFacade.reviewSubmitStatus() === 'success') {
+        this.comment = '';
+        this.rating = 5;
+      }
+    });
   }
 
   updateQuantity(delta: number): void {
@@ -267,18 +295,10 @@ export class ProductDetailComponent {
   }
 
   submitComment(): void {
+    if (!this.authFacade.isAuthenticated()) return;
     if (!this.author || !this.comment) return;
 
     this.productFacade.addComment(this.author, this.rating, this.comment);
-    
-    // Clear comment but keep author if they want to write another one (optional)
-    // or keep author from session.
-    this.comment = '';
-    this.rating = 5;
-    
-    // Show feedback (Simulating a toast or simple alert if a toast system isn't globally available here)
-    // Note: The Admin dashboard had a toast signal. Product detail might not have one yet.
-    // For now, I'll rely on the reactive list update to show success.
   }
 
   formatDescription(desc: string | undefined) {

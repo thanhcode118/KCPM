@@ -136,11 +136,25 @@ export class AdminDashboardComponent implements OnInit {
   // Auto-fill logic
   onNameChange() {
     if (!this.isEditing()) {
-      if (!this.productForm.slug) this.productForm.slug = this.slugify(this.productForm.name);
-      if (!this.productForm.sku) {
-        const prefix = (this.productForm.brand || 'BEE').substring(0, 3).toUpperCase();
-        const namePart = this.productForm.name.split(' ').map(w => w[0]).join('').toUpperCase();
-        this.productForm.sku = `${prefix}-${namePart}-${Math.floor(100 + Math.random() * 900)}`;
+      this.productForm.slug = this.slugify(this.productForm.name);
+      
+      const prefix = (this.productForm.brand || 'BEE').substring(0, 3).toUpperCase();
+      const words = this.productForm.name.trim().split(' ').filter(w => w);
+      const namePart = words.length > 0 ? words.map(w => w[0]).join('').toUpperCase() : '';
+      
+      let suffix = '';
+      if (this.productForm.sku) {
+        const parts = this.productForm.sku.split('-');
+        suffix = parts.length > 0 ? parts[parts.length - 1] : '';
+      }
+      if (!suffix || isNaN(Number(suffix))) {
+        suffix = Math.floor(100 + Math.random() * 900).toString();
+      }
+      
+      if (namePart) {
+        this.productForm.sku = `${prefix}-${namePart}-${suffix}`;
+      } else {
+        this.productForm.sku = '';
       }
     }
   }
@@ -414,7 +428,7 @@ export class AdminDashboardComponent implements OnInit {
     this.isUploading = true;
     this.adminProductService.uploadImage(file).subscribe({
       next: (res) => {
-        this.productForm[field] = 'http://localhost:5020' + res.url;
+        this.productForm[field] = res.url;
         this.isUploading = false;
         this.showToast('Tải ảnh thành công!', 'success');
       },
@@ -633,8 +647,7 @@ export class AdminDashboardComponent implements OnInit {
     this.isUploading = true;
     this.adminProductService.uploadImage(file).subscribe({
       next: (res) => {
-        const url = 'http://localhost:5020' + res.url;
-        if (type === 'blog') this.blogForm.imageUrl = url;
+        if (type === 'blog') this.blogForm.imageUrl = res.url;
         this.isUploading = false;
         this.showToast('Tải ảnh thành công!', 'success');
       },
