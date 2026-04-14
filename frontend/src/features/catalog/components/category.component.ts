@@ -225,11 +225,11 @@ import { IconComponent } from '@/shared/components/icon.component';
                           }
                         </div>
 
-                        <div class="flex items-center gap-1.5 mt-1">
-                          <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[1.5px]"></app-icon>
-                          <span class="text-[11px] text-gray-500 font-medium leading-none">
-                            {{ product.rating || 4.5 }} • ({{ product.reviews }} đánh giá)
-                          </span>
+                        <div class="flex items-center gap-1 mt-1.5 text-[11px] text-slate-500 font-medium">
+                          <app-icon name="star-filled" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 -translate-y-[0.5px]"></app-icon>
+                          <span>{{ (product.rating || 4.5) | number:'1.1-1' }}</span>
+                          <span class="text-slate-300 mx-1">•</span>
+                          <span>({{ product.reviews }} đánh giá)</span>
                         </div>
                       </div>
                     </div>
@@ -256,11 +256,11 @@ import { IconComponent } from '@/shared/components/icon.component';
                                 <span class="text-sm font-medium text-gray-400 line-through">{{ product.originalPrice | currency:'VND':'symbol':'1.0-0' }}</span>
                               }
                             </div>
-                            <div class="flex items-center gap-1.5">
-                              <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[0.5px]"></app-icon>
-                              <span class="text-[11px] text-gray-500 font-medium leading-none">
-                                {{ product.rating || 4.5 }} • ({{ product.reviews }} đánh giá)
-                              </span>
+                            <div class="flex items-center gap-1 mt-1 text-[11px] text-slate-500 font-medium">
+                              <app-icon name="star-filled" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 -translate-y-[0.5px]"></app-icon>
+                              <span>{{ (product.rating || 4.5) | number:'1.1-1' }}</span>
+                              <span class="text-slate-300 mx-1">•</span>
+                              <span>({{ product.reviews }} đánh giá)</span>
                             </div>
                           </div>
                           <button (click)="addToCart(product, $event)" class="px-6 py-2 bg-charcoal text-white rounded font-bold hover:bg-honey hover:text-charcoal transition-colors">Thêm vào giỏ</button>

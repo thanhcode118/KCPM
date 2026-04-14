@@ -61,10 +61,10 @@ import { RouterModule } from '@angular/router';
                 
                 <p class="text-honey font-bold text-base md:text-lg">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</p>
 
-                <div class="flex items-center gap-1 mt-1">
-                  <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[1.5px]"></app-icon>
-                  <span class="text-[10px] md:text-[11px] text-gray-400 font-medium leading-none">
-                    {{ product.rating || 4.5 }} • ({{ product.reviews || 0 }})
+                <div class="flex items-center gap-1 mt-1 text-[11px] text-gray-400 font-medium">
+                  <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 flex-shrink-0"></app-icon>
+                  <span class="leading-none">
+                    {{ (product.rating || 4.5) | number:'1.1-1' }} • ({{ product.reviews || 0 }})
                   </span>
                 </div>
               </div>

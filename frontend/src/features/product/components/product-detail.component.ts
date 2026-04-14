@@ -46,9 +46,9 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
           </div>
 
           <div class="flex items-center gap-2 mb-6">
-            <div class="flex items-center gap-1.5 px-2 py-1 rounded-lg">
-              <app-icon name="star-filled" class="w-4 h-4 text-yellow-500 translate-y-[-0.5px]"></app-icon>
-              <span class="text-lg font-bold text-charcoal">{{ product.rating || 5 | number:'1.1-1' }}</span>
+            <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-orange-50 text-amber-600 font-bold border border-orange-100">
+              <app-icon name="star-filled" class="w-4 h-4 flex-shrink-0 -translate-y-[0.5px]"></app-icon>
+              <span class="text-lg leading-none">{{ (product.rating || 5) | number:'1.1-1' }}</span>
             </div>
             <span class="text-sm text-gray-500 font-medium ml-2">(Còn {{ product.stockLeft || 0 }} sản phẩm)</span>
           </div>
@@ -141,10 +141,10 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
               <div>
                 <h2 class="text-3xl font-bold text-charcoal mb-6">Đánh giá từ khách hàng</h2>
                 <div class="flex items-center gap-6">
-                   <div class="text-6xl font-black text-honey">{{ product.rating || 5 | number:'1.1-1' }}</div>
+                   <div class="text-6xl font-black text-honey">{{ (product.rating || 5) | number:'1.1-1' }}</div>
                    <div class="space-y-1">
                      <div class="flex items-center text-honey gap-1.5">
-                        <app-icon name="star-filled" class="w-5 h-5 translate-y-[-1px]"></app-icon>
+                        <app-icon name="star-filled" class="w-5 h-5 flex-shrink-0"></app-icon>
                         <span class="text-lg font-bold text-charcoal">Đánh giá chung</span>
                      </div>
                      <div class="text-gray-400 text-sm italic">Dựa trên {{ product.reviews || 0 }} lượt nhận xét</div>
@@ -210,8 +210,8 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
                             <span class="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded font-bold border border-green-100 uppercase tracking-tighter">Đã mua hàng</span>
                           </div>
                           <div class="flex items-center gap-1.5 mt-0.5">
-                            <app-icon name="star-filled" class="w-3.5 h-3.5 text-yellow-500 translate-y-[-0.5px]"></app-icon>
-                            <span class="font-bold text-charcoal text-sm">{{ review.rating | number:'1.1-1' }}</span>
+                            <app-icon name="star-filled" class="w-3.5 h-3.5 text-yellow-500 flex-shrink-0"></app-icon>
+                            <span class="font-bold text-charcoal text-sm leading-none">{{ (review.rating || 5) | number:'1.1-1' }}</span>
                           </div>
                         </div>
                         <span class="text-xs text-gray-400 italic font-medium">{{ review.createdAt | date:'dd/MM/yyyy' }}</span>

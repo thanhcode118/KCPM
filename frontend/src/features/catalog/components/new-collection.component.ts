@@ -224,9 +224,9 @@ import { RouterModule } from '@angular/router';
                     <h4 class="font-bold text-charcoal mb-1 truncate">{{ product.name }}</h4>
                     <div class="flex justify-between items-center">
                       <span class="text-honey font-bold">{{ product.price | currency:'VND':'symbol':'1.0-0' }}</span>
-                      <div class="flex text-yellow-400 text-xs">
-                         <app-icon name="star-filled" class="w-3 h-3"></app-icon>
-                         <span class="ml-1 text-gray-400">({{product.reviews}})</span>
+                      <div class="flex items-center gap-1 text-[11px] text-gray-500 font-medium h-4">
+                         <app-icon name="star-filled" class="w-3.5 h-3.5 text-yellow-400 flex-shrink-0"></app-icon>
+                         <span class="leading-none pt-0.5">{{ (product.rating || 4.5) | number:'1.1-1' }} • ({{product.reviews}})</span>
                       </div>
                     </div>
                  </div>

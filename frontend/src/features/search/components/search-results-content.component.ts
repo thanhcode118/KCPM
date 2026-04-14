@@ -74,11 +74,11 @@ import { RouterModule } from '@angular/router';
                 }
               </div>
 
-              <div class="flex items-center gap-1.5 mt-1">
-                <app-icon name="star-filled" class="w-2.5 h-2.5 text-yellow-500 translate-y-[1.5px]"></app-icon>
-                <span class="text-[11px] text-gray-500 font-medium leading-none">
-                  {{ product.rating || 4.5 }} • Còn {{ product.stockLeft ?? 0 }} sp
-                </span>
+              <div class="flex items-center gap-1 mt-1.5 text-[11px] text-slate-500 font-medium">
+                <app-icon name="star-filled" class="w-3.5 h-3.5 text-amber-400 flex-shrink-0 -translate-y-[0.5px]"></app-icon>
+                <span>{{ (product.rating || 4.5) | number:'1.1-1' }}</span>
+                <span class="text-slate-300 mx-1">•</span>
+                <span>Còn {{ product.stockLeft ?? 0 }} sp</span>
               </div>
             </div>
           </article>
