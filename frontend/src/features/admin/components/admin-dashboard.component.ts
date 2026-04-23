@@ -1,5 +1,7 @@
 import { Component, inject, OnInit, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Router } from '@angular/router';
+import { AuthFacade } from '@/features/auth/data-access/auth.facade';
 import { AdminFacade } from '@/features/admin/data-access/admin.facade';
 import { DashboardService, DashboardStats } from '@/features/admin/data-access/dashboard.service';
 import { AdminOrderService } from '@/features/admin/data-access/admin-order.service';
@@ -7,12 +9,13 @@ import { AdminProductService, ProductView, ProductUpsertInput, CategoryView } fr
 import { AdminUserService } from '@/features/admin/data-access/admin-user.service';
 import { AdminMarketingService } from '@/features/admin/data-access/admin-marketing.service';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { debounceTime, distinctUntilChanged, Subject, map } from 'rxjs';
 
 @Component({
   selector: 'app-admin-dashboard',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterLink],
   templateUrl: './admin-dashboard.component.html',
   styles: []
 })
@@ -23,10 +26,14 @@ export class AdminDashboardComponent implements OnInit {
   private readonly adminProductService = inject(AdminProductService);
   private readonly adminUserService = inject(AdminUserService);
   private readonly adminMarketingService = inject(AdminMarketingService);
+  private readonly authFacade = inject(AuthFacade);
+  private readonly router = inject(Router);
   activeTab = 'dashboard';
+  readonly isSidebarOpen = signal(false);
 
   selectTab(tab: string): void {
     this.activeTab = tab;
+    this.isSidebarOpen.set(false);
     if (tab === 'settings') {
       this.syncSettingsForm();
     }
@@ -656,5 +663,10 @@ export class AdminDashboardComponent implements OnInit {
         this.showToast('Lỗi khi tải ảnh', 'error');
       }
     });
+  }
+
+  logout(): void {
+    this.authFacade.logout();
+    this.router.navigate(['/']);
   }
 }

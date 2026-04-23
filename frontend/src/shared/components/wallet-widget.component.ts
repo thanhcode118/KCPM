@@ -43,9 +43,12 @@ type WalletTab = 'balance' | 'deposit' | 'withdraw' | 'history';
 
         <!-- Dropdown panel -->
         @if (panelOpen()) {
+          <!-- Overlay for mobile -->
+          <div class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[190] sm:hidden" (click)="panelOpen.set(false)"></div>
+
           <div
             id="wallet-panel"
-            class="wallet-panel absolute right-0 top-full mt-2 w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[200] animate-wallet-down"
+            class="wallet-panel fixed sm:absolute left-1/2 sm:left-auto sm:right-0 -translate-x-1/2 sm:translate-x-0 top-1/2 sm:top-full mt-0 sm:mt-3 w-[92vw] max-w-[360px] sm:w-80 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[200] transform -translate-y-1/2 sm:translate-y-0 animate-wallet-mobile sm:animate-wallet-down"
           >
             <!-- Header -->
             <div class="wallet-header px-5 py-4 bg-gradient-to-r from-amber-500 to-amber-400 text-white">
@@ -114,11 +117,11 @@ type WalletTab = 'balance' | 'deposit' | 'withdraw' | 'history';
               @if (activeTab() === 'deposit') {
                 <div class="space-y-4">
                   <p class="text-sm text-gray-600">Nhập số tiền muốn nạp vào ví:</p>
-                  <div class="grid grid-cols-3 gap-2">
+                  <div class="grid grid-cols-2 gap-2">
                     @for (preset of depositPresets; track preset) {
                       <button
                         (click)="depositAmount = preset"
-                        class="py-2 rounded-lg border text-xs font-bold transition-colors"
+                        class="py-2 rounded-lg border text-[11px] font-bold transition-colors"
                         [class]="depositAmount === preset
                           ? 'bg-amber-500 text-white border-amber-500'
                           : 'border-gray-200 text-gray-700 hover:border-amber-300'"
@@ -224,6 +227,14 @@ type WalletTab = 'balance' | 'deposit' | 'withdraw' | 'history';
     @keyframes walletDown {
       from { opacity: 0; transform: translateY(-10px) scale(0.97); }
       to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .animate-wallet-mobile {
+      animation: walletMobile 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    }
+    @keyframes walletMobile {
+      from { opacity: 0; transform: translate(-50%, -45%) scale(0.96); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
     .wallet-header {

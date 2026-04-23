@@ -9,11 +9,11 @@ import { WalletWidgetComponent } from './wallet-widget.component';
   imports: [CommonModule, IconComponent, WalletWidgetComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <div class="flex items-center gap-3 flex-shrink-0 z-[101]">
+    <div class="flex items-center gap-2 md:gap-3 flex-shrink-0 z-[101]">
       <!-- Wallet widget (shown only when authenticated, managed internally) -->
-      <app-wallet-widget class="hidden sm:block" />
+      <app-wallet-widget />
 
-      <div class="relative hidden sm:block">
+      <div class="relative">
         <button
           type="button"
           (click)="toggleUserMenu.emit()"
@@ -24,47 +24,56 @@ import { WalletWidgetComponent } from './wallet-widget.component';
         </button>
 
         @if (userMenuOpen) {
-          <div class="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-dropdown origin-top-right">
+          <!-- Mobile Backdrop Overlay -->
+          <div class="fixed inset-0 bg-charcoal/20 backdrop-blur-[2px] z-[105] sm:hidden" (click)="toggleUserMenu.emit()"></div>
+
+          <div class="fixed sm:absolute left-4 right-4 sm:left-auto sm:right-0 top-14 sm:top-full sm:mt-2 sm:w-64 bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden z-[110] animate-dropdown origin-top sm:origin-top-right ring-4 ring-black/5">
             @if (isAuthenticated) {
-              <div class="px-4 py-3 border-b border-gray-100 bg-cream">
-                <p class="text-sm font-bold text-charcoal truncate">{{ currentUserName }}</p>
-                <p class="text-xs text-gray-500">{{ currentUserEmail }}</p>
+              <div class="px-5 py-4 border-b border-gray-100 bg-gradient-to-br from-honey/5 to-transparent">
+                <p class="text-sm font-black text-charcoal truncate">{{ currentUserName }}</p>
+                <p class="text-[11px] text-gray-500 font-medium">{{ currentUserEmail }}</p>
               </div>
 
-              <a
-                (click)="goToOrders.emit()"
-                class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
-              >
-                <app-icon name="shopping-bag" class="w-4 h-4"></app-icon>
-                Theo dõi đơn
-              </a>
-
-              @if (isAdmin) {
+              <div class="py-1">
                 <a
-                  (click)="goToAdmin.emit()"
-                  class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
+                  (click)="goToOrders.emit()"
+                  class="flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-gray-700 hover:bg-honey/10 hover:text-honey cursor-pointer transition-all active:bg-honey/20"
                 >
-                  <app-icon name="grid" class="w-4 h-4"></app-icon>
-                  Trang quản trị
+                  <app-icon name="shopping-bag" class="w-4 h-4"></app-icon>
+                  Theo dõi đơn hàng
                 </a>
-              }
 
-              <button
-                type="button"
-                (click)="logout.emit()"
-                class="w-full flex items-center gap-2 px-4 py-3 text-sm text-red-600 hover:bg-red-50 cursor-pointer transition-colors"
-              >
-                <app-icon name="close" class="w-4 h-4"></app-icon>
-                Đăng xuất
-              </button>
+                @if (isAdmin) {
+                  <a
+                    (click)="goToAdmin.emit()"
+                    class="flex items-center gap-3 px-5 py-3.5 text-sm font-bold text-gray-700 hover:bg-honey/10 hover:text-honey cursor-pointer transition-all active:bg-honey/20"
+                  >
+                    <app-icon name="grid" class="w-4 h-4"></app-icon>
+                    Trang quản trị
+                  </a>
+                }
+              </div>
+
+              <div class="border-t border-gray-50 py-1 bg-gray-50/30">
+                <button
+                  type="button"
+                  (click)="logout.emit()"
+                  class="w-full flex items-center gap-3 px-5 py-3.5 text-sm font-black text-red-500 hover:bg-red-50 cursor-pointer transition-all active:bg-red-100"
+                >
+                  <app-icon name="close" class="w-4 h-4"></app-icon>
+                  Đăng xuất tài khoản
+                </button>
+              </div>
             } @else {
-              <a
-                (click)="goToLogin.emit()"
-                class="flex items-center gap-2 px-4 py-3 text-sm text-charcoal hover:bg-honey/10 hover:text-honey cursor-pointer transition-colors"
-              >
-                <app-icon name="user" class="w-4 h-4"></app-icon>
-                Đăng nhập
-              </a>
+              <div class="p-2">
+                <a
+                  (click)="goToLogin.emit()"
+                  class="flex items-center gap-3 px-5 py-4 text-sm font-black text-charcoal bg-honey/10 rounded-xl hover:bg-honey/20 hover:text-honey cursor-pointer transition-all text-center justify-center"
+                >
+                  <app-icon name="user" class="w-4 h-4"></app-icon>
+                  Đăng nhập ngay
+                </a>
+              </div>
             }
           </div>
         }
@@ -82,14 +91,6 @@ import { WalletWidgetComponent } from './wallet-widget.component';
             {{ cartCount }}
           </span>
         }
-      </button>
-
-      <button
-        type="button"
-        class="xl:hidden action-btn header-icon transition-all duration-300 hover:text-honey group-hover/header:text-[#333]"
-        [ngClass]="solidStyle ? 'text-[#333]' : 'text-white'"
-      >
-        <app-icon name="list" class="w-6 h-6"></app-icon>
       </button>
     </div>
   `,
@@ -143,4 +144,5 @@ export class HeaderActionsComponent {
   @Output() readonly goToAdmin = new EventEmitter<void>();
   @Output() readonly logout = new EventEmitter<void>();
   @Output() readonly openCart = new EventEmitter<void>();
+  @Output() readonly openMobileMenu = new EventEmitter<void>();
 }

@@ -112,6 +112,7 @@ type ResolvedCategoryGroup = {
             (goToAdmin)="goToAdmin()"
             (logout)="doLogout()"
             (openCart)="openCartDrawer()"
+            (openMobileMenu)="mobileMenuOpen.set(true)"
           />
         </div>
       </div>
