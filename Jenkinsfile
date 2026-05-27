@@ -37,7 +37,7 @@ pipeline {
             steps {
                 sh "docker stop ${CONTAINER_NAME} || true"
                 sh "docker rm ${CONTAINER_NAME} || true"
-                sh "docker run -d -p 5000:80 --name ${CONTAINER_NAME} ${DOCKER_IMAGE}"
+                sh "docker run -d -p 5000:8080 --name ${CONTAINER_NAME} ${DOCKER_IMAGE}"
             }
         }
 

@@ -38,7 +38,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"email\": \"admin@homedecorshop.com\",\n    \"password\": \"AdminPassword123\"\n}"
+					"raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
 				},
 				"url": {
 					"raw": "{{url}}/api/auth/login",
