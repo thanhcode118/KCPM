@@ -6,21 +6,105 @@
 	},
 	"item": [
 		{
-			"name": "POST /api/auth/login",
+			"name": "POST /api/auth/register (Thành công)",
 			"event": [
 				{
 					"listen": "test",
 					"script": {
 						"exec": [
-							"// Kiem tra phan hoi tra ve ma 200 OK",
+							"pm.test(\"Đăng ký thành công phải trả về 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"testcustomer_{{$timestamp}}@homedecorshop.local\",\n    \"fullName\": \"Test Customer Dynamic\",\n    \"phone\": \"0987654321\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/register (Trùng email - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng ký trùng email phải trả về 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"fullName\": \"Test Duplicate Admin\",\n    \"phone\": \"0123456789\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/login (Admin)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
 							"pm.test(\"Status code phải là 200 OK\", function () {",
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"// Kiem tra phan hoi phai chua JWT Token bao mat",
-							"pm.test(\"Phải trả về Token bảo mật\", function () {",
+							"pm.test(\"Phải trả về Token bảo mật Admin\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData).to.have.property('token');",
+							"    // Luu Token Admin vao bien global de dung cho cac API tiep theo",
+							"    pm.globals.set(\"admin_token\", jsonData.token);",
 							"});"
 						],
 						"type": "text/javascript"
@@ -49,6 +133,261 @@
 						"api",
 						"auth",
 						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/login (Nhap MK sai xem no co bao dung khong)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 401 Unauthorized\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"testcustomer@homedecorshop.local\",\n    \"password\": \"WrongPassword_123\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về danh sách sản phẩm\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('items');",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?pageSize=5",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "pageSize",
+							"value": "5"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id} (Thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id} (Thất bại - Không tồn tại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/9999",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"9999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id}/reviews",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về mảng danh sách review\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/1/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"1",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/categories (Thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về mảng danh mục\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/categories/{id} (Thất bại - Không tồn tại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/categories/9999",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"9999"
 					]
 				}
 			},

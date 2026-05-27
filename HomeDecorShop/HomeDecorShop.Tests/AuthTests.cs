@@ -44,6 +44,20 @@ public class AuthTests
         Assert.Equal("mock-token-12345", result.Token);
         Assert.Equal("test@example.com", result.User.Email);
     }
+
+    [Fact]
+    public void MockUserService_Login_ShouldReturnNull_WhenCredentialsAreInvalid()
+    {
+        // Arrange
+        var mockUserService = new MockUserService();
+        var loginInput = new LoginInput { Email = "test@example.com", Password = "WrongPassword" };
+
+        // Act
+        var result = mockUserService.Login(loginInput);
+
+        // Assert
+        Assert.Null(result);
+    }
 }
 
 // A simple mock for verification without requiring external libraries
