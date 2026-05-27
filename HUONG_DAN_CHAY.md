@@ -50,3 +50,9 @@ Frontend: http://127.0.0.1:3000
 Backend: http://localhost:5020
 Swagger: http://localhost:5020/swagger
 ```
+
+
+## auto-test
+```text
+newman run HomeDecorShop/HomeDecorShop_Postman.json --env-var "url=http://localhost:5020"
+```
