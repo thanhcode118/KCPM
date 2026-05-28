@@ -836,7 +836,8 @@
 							"",
 							"pm.test(\"Phải trả về lỗi trùng tên danh mục và có mã lỗi rõ ràng\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.code).to.equal(\"CategoryNameAlreadyExists\");",
+							"    var code = jsonData.code || (jsonData.extensions && jsonData.extensions.code);",
+							"    pm.expect(code).to.equal(\"CategoryNameAlreadyExists\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -859,7 +860,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Lighting\",\n    \"slug\": \"lighting-unique-test\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+					"raw": "{\n    \"name\": \"Đèn decor\",\n    \"slug\": \"den-decor-unique-test\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
 				},
 				"url": {
 					"raw": "{{url}}/api/categories",
@@ -887,7 +888,8 @@
 							"",
 							"pm.test(\"Phải trả về lỗi trùng slug danh mục và có mã lỗi rõ ràng\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.code).to.equal(\"CategorySlugAlreadyExists\");",
+							"    var code = jsonData.code || (jsonData.extensions && jsonData.extensions.code);",
+							"    pm.expect(code).to.equal(\"CategorySlugAlreadyExists\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -910,7 +912,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Lighting Unique Test\",\n    \"slug\": \"lighting\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+					"raw": "{\n    \"name\": \"Đèn decor Unique Test\",\n    \"slug\": \"den-decor\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
 				},
 				"url": {
 					"raw": "{{url}}/api/categories",
@@ -938,7 +940,8 @@
 							"",
 							"pm.test(\"Báo lỗi không thể tắt hoạt động danh mục khi còn sản phẩm đang bán\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.code).to.equal(\"CategoryHasActiveProducts\");",
+							"    var code = jsonData.code || (jsonData.extensions && jsonData.extensions.code);",
+							"    pm.expect(code).to.equal(\"CategoryHasActiveProducts\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -961,7 +964,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"name\": \"Lighting\",\n    \"slug\": \"lighting\",\n    \"groupId\": 1,\n    \"isActive\": false\n}"
+					"raw": "{\n    \"name\": \"Khăn bàn nhiều chất liệu\",\n    \"slug\": \"khan-ban-nhieu-chat-lieu\",\n    \"groupId\": 1,\n    \"isActive\": false\n}"
 				},
 				"url": {
 					"raw": "{{url}}/api/categories/2",
@@ -990,7 +993,8 @@
 							"",
 							"pm.test(\"Báo lỗi không thể xóa danh mục đang có sản phẩm tham chiếu\", function () {",
 							"    var jsonData = pm.response.json();",
-							"    pm.expect(jsonData.code).to.equal(\"CategoryHasProducts\");",
+							"    var code = jsonData.code || (jsonData.extensions && jsonData.extensions.code);",
+							"    pm.expect(code).to.equal(\"CategoryHasProducts\");",
 							"});"
 						],
 						"type": "text/javascript"
