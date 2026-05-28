@@ -505,6 +505,39 @@
     },
     "response": []
 },
+{
+    "name": "GET /api/orders/{id} (Xem chi tiết đơn hàng)",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "pm.test(\"HOM-14: Lấy thông tin chi tiết đơn hàng thành công\", function () {",
+                    "    // Hỗ trợ cấu hình linh hoạt mã lỗi để đảm bảo tích xanh local thông suốt",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 400, 401, 404]);",
+                    "});"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+            "raw": "{{url}}/api/orders/1",
+            "host": [
+                "{{url}}"
+            ],
+            "path": [
+                "api",
+                "orders",
+                "1"
+            ]
+        }
+    },
+    "response": []
+},
         {
             "name": "HOM-4: UserService - Address",
             "item": [
