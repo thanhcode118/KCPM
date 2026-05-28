@@ -1576,6 +1576,158 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "POST /api/products/{id}/reviews (Thêm đánh giá sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Thông tin review được tạo phải chính xác\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.be.a('number');",
+							"    pm.expect(jsonData.productId).to.equal(pm.globals.get(\"limited_product_id\"));",
+							"    pm.expect(jsonData.author).to.equal(\"Nguyen Van A\");",
+							"    pm.expect(jsonData.rating).to.equal(5);",
+							"    pm.expect(jsonData.comment).to.equal(\"Sản phẩm dùng rất tốt, đáng tiền!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"author\": \"Nguyen Van A\",\n    \"rating\": 5,\n    \"comment\": \"Sản phẩm dùng rất tốt, đáng tiền!\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products/{{limited_product_id}}/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{limited_product_id}}",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id}/reviews (Lấy danh sách đánh giá sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Danh sách đánh giá phải chứa review vừa tạo\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    var myReview = jsonData.find(r => r.author === \"Nguyen Van A\");",
+							"    pm.expect(myReview).to.not.be.undefined;",
+							"    pm.expect(myReview.rating).to.equal(5);",
+							"    pm.expect(myReview.comment).to.equal(\"Sản phẩm dùng rất tốt, đáng tiền!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/{{limited_product_id}}/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{limited_product_id}}",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products/{id}/reviews (Thêm đánh giá sản phẩm không tồn tại - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 500 Internal Server Error\", function () {",
+							"    pm.response.to.have.status(500);",
+							"});",
+							"",
+							"pm.test(\"Trả về lỗi hệ thống chi tiết\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.title).to.equal(\"Internal server error\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": 99999,\n    \"author\": \"Khách\",\n    \"rating\": 4,\n    \"comment\": \"Sản phẩm không tồn tại\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products/99999/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"99999",
+						"reviews"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }

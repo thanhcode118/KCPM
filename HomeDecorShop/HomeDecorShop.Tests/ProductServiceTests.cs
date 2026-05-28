@@ -439,4 +439,185 @@ public class ProductServiceTests
         Assert.Single(result.Items); // page 1: 2 items, page 2: 1 item remaining
         Assert.Equal(3, result.Items.First().ProductId); // The third item in price order (Sofa, 450m)
     }
+
+    /// <summary>
+    /// Scenario 11: GetReviews trả về danh sách các đánh giá được map chính xác từ DB.
+    /// </summary>
+    [Fact]
+    public void GetReviews_Success_ReturnsMappedReviews()
+    {
+        // Arrange
+        var productId = 1;
+        var reviews = new List<ProductReview>
+        {
+            new() { Id = 101, ProductId = productId, Author = "Nguyen Van A", Rating = 5, Comment = "Rất tốt", CreatedAt = DateTime.UtcNow.AddDays(-2) },
+            new() { Id = 102, ProductId = productId, Author = "Tran Thi B", Rating = 4, Comment = "Đẹp và chắc chắn", CreatedAt = DateTime.UtcNow.AddDays(-1) }
+        };
+
+        _mockReviewRepository.Setup(r => r.GetByProductId(productId)).Returns(reviews);
+
+        // Act
+        var result = _productService.GetReviews(productId);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(2, result.Count);
+        
+        var first = result.First();
+        Assert.Equal(101, first.Id);
+        Assert.Equal(productId, first.ProductId);
+        Assert.Equal("Nguyen Van A", first.Author);
+        Assert.Equal(5, first.Rating);
+        Assert.Equal("Rất tốt", first.Comment);
+
+        var second = result.Last();
+        Assert.Equal(102, second.Id);
+        Assert.Equal("Tran Thi B", second.Author);
+        Assert.Equal(4, second.Rating);
+    }
+
+    /// <summary>
+    /// Scenario 12: AddReview ném lỗi Exception nếu sản phẩm không tồn tại.
+    /// </summary>
+    [Fact]
+    public void AddReview_ProductDoesNotExist_ThrowsException()
+    {
+        // Arrange
+        var input = new ProductReviewCreateInput { ProductId = 999, Author = "Khách", Rating = 5, Comment = "Test" };
+        _mockProductRepository.Setup(r => r.GetById(input.ProductId)).Returns((Product?)null);
+
+        // Act & Assert
+        var exception = Assert.Throws<Exception>(() => _productService.AddReview(input));
+        Assert.Equal("Product does not exist.", exception.Message);
+        _mockReviewRepository.Verify(r => r.Create(It.IsAny<ProductReview>()), Times.Never);
+    }
+
+    /// <summary>
+    /// Scenario 13: AddReview thành công, tự động clamp rating từ 1 đến 5, tính toán lại và cập nhật Rating/Reviews của sản phẩm.
+    /// </summary>
+    [Theory]
+    [InlineData(6, 5)] // rating > 5 sẽ bị clamp về 5
+    [InlineData(0, 1)] // rating < 1 sẽ bị clamp về 1
+    [InlineData(4, 4)] // rating hợp lệ được giữ nguyên
+    public void AddReview_Success_CreatesReviewAndUpdatesProductAverageRating(int inputRating, int expectedClampedRating)
+    {
+        // Arrange
+        var product = new Product
+        {
+            ProductId = 1,
+            ProductName = "Classic Wooden Chair",
+            Rating = 4.5,
+            Reviews = 2
+        };
+
+        var input = new ProductReviewCreateInput
+        {
+            ProductId = product.ProductId,
+            Author = "Nguyen Van C",
+            Rating = inputRating,
+            Comment = "Đáng mua"
+        };
+
+        var createdReview = new ProductReview
+        {
+            Id = 200,
+            ProductId = input.ProductId,
+            Author = input.Author,
+            Rating = expectedClampedRating,
+            Comment = input.Comment,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        // Danh sách review sau khi đã thêm review mới (bao gồm 2 review cũ và 1 review mới)
+        var dbReviews = new List<ProductReview>
+        {
+            new() { Id = 101, ProductId = product.ProductId, Rating = 5 },
+            new() { Id = 102, ProductId = product.ProductId, Rating = 4 },
+            createdReview
+        };
+
+        _mockProductRepository.Setup(r => r.GetById(product.ProductId)).Returns(product);
+        _mockReviewRepository.Setup(r => r.Create(It.IsAny<ProductReview>())).Returns(createdReview);
+        _mockReviewRepository.Setup(r => r.GetByProductId(product.ProductId)).Returns(dbReviews);
+
+        // Act
+        var result = _productService.AddReview(input);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(200, result.Id);
+        Assert.Equal(expectedClampedRating, result.Rating);
+        Assert.Equal("Nguyen Van C", result.Author);
+
+        // Kiểm tra xem reviewRepository.Create đã được gọi với rating bị clamp chính xác chưa
+        _mockReviewRepository.Verify(r => r.Create(It.Is<ProductReview>(pr => 
+            pr.ProductId == product.ProductId &&
+            pr.Author == input.Author &&
+            pr.Rating == expectedClampedRating &&
+            pr.Comment == input.Comment
+        )), Times.Once);
+
+        // Kiểm tra xem product có được cập nhật rating trung bình và số lượng đánh giá chính xác hay không
+        // average of [5, 4, expectedClampedRating]
+        var expectedAverage = (5.0 + 4.0 + expectedClampedRating) / 3.0;
+        Assert.Equal(expectedAverage, product.Rating, 5);
+        Assert.Equal(3, product.Reviews);
+
+        // Xác thực productRepository.Update được gọi để lưu sản phẩm
+        _mockProductRepository.Verify(r => r.Update(product), Times.Once);
+    }
+
+    /// <summary>
+    /// Scenario 14: AddReview thành công khi không có review nào khác trong DB (nhánh else), 
+    /// thiết lập Rating của sản phẩm bằng chính Rating của review mới tạo và Reviews = 1.
+    /// </summary>
+    [Fact]
+    public void AddReview_NoExistingReviews_SetsRatingToCreatedReviewRatingAndCountToOne()
+    {
+        // Arrange
+        var product = new Product
+        {
+            ProductId = 1,
+            ProductName = "Classic Wooden Chair",
+            Rating = 0.0,
+            Reviews = 0
+        };
+
+        var input = new ProductReviewCreateInput
+        {
+            ProductId = product.ProductId,
+            Author = "Nguyen Van D",
+            Rating = 5,
+            Comment = "Tuyệt vời"
+        };
+
+        var createdReview = new ProductReview
+        {
+            Id = 300,
+            ProductId = input.ProductId,
+            Author = input.Author,
+            Rating = 5,
+            Comment = input.Comment,
+            CreatedAt = DateTime.UtcNow
+        };
+
+        _mockProductRepository.Setup(r => r.GetById(product.ProductId)).Returns(product);
+        _mockReviewRepository.Setup(r => r.Create(It.IsAny<ProductReview>())).Returns(createdReview);
+        // Trả về danh sách trống khi lấy tất cả reviews của sản phẩm để kích hoạt nhánh else
+        _mockReviewRepository.Setup(r => r.GetByProductId(product.ProductId)).Returns(new List<ProductReview>());
+
+        // Act
+        var result = _productService.AddReview(input);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(300, result.Id);
+        Assert.Equal(5, result.Rating);
+
+        // Kiểm tra xem sản phẩm được cập nhật chính xác rating = 5 và Reviews = 1
+        Assert.Equal(5.0, product.Rating);
+        Assert.Equal(1, product.Reviews);
+
+        _mockProductRepository.Verify(r => r.Update(product), Times.Once);
+    }
 }
