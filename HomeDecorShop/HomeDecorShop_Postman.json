@@ -181,7 +181,7 @@
 			"response": []
 		},
 		{
-			"name": "GET /api/products",
+			"name": "GET /api/products?q=  Chair   (Tìm kiếm theo từ khóa thô, cắt khoảng trắng và không phân biệt chữ hoa thường)",
 			"event": [
 				{
 					"listen": "test",
@@ -191,9 +191,386 @@
 							"    pm.response.to.have.status(200);",
 							"});",
 							"",
-							"pm.test(\"Phải trả về danh sách sản phẩm\", function () {",
+							"pm.test(\"Phải trả về danh sách và tất cả sản phẩm tìm thấy chứa từ khóa 'chair' (không phân biệt hoa thường)\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData).to.have.property('items');",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    ",
+							"    // Kiểm tra xem tất cả các sản phẩm trả về có chứa từ khóa 'chair' hay không (trong tên, SKU, brand, style, v.v.)",
+							"    jsonData.items.forEach(function(item) {",
+							"        var match = false;",
+							"        var fields = [item.productName, item.sku, item.brand, item.style, item.material, item.color, item.category];",
+							"        fields.forEach(function(field) {",
+							"            if (field && field.toLowerCase().indexOf('chair') !== -1) {",
+							"                match = true;",
+							"            }",
+							"        });",
+							"        pm.expect(match, \"Sản phẩm ID \" + item.productId + \" phải khớp với từ khóa tìm kiếm\").to.be.true;",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?q=  Chair  ",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "  Chair  "
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?minPrice=50&maxPrice=150 (Lọc sản phẩm theo khoảng giá)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có giá trong khoảng [50, 150]\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.price).to.be.at.least(50);",
+							"        pm.expect(item.price).to.be.at.most(150);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?minPrice=50&maxPrice=150",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "minPrice",
+							"value": "50"
+						},
+						{
+							"key": "maxPrice",
+							"value": "150"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?inStock=true (Lọc sản phẩm còn hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có trạng thái còn hàng (inStock hoặc stockLeft > 0)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.inStock || item.stockLeft > 0).to.be.true;",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?inStock=true",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "inStock",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?onSale=true (Lọc sản phẩm đang giảm giá)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có giá cũ lớn hơn giá hiện tại (oldPrice > price)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.oldPrice).to.be.a('number');",
+							"        pm.expect(item.oldPrice).to.be.greaterThan(item.price);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?onSale=true",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "onSale",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=price-asc (Sắp xếp giá tăng dần)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về phải được sắp xếp tăng dần theo giá\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].price).to.be.at.most(items[i+1].price);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=price-asc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price-asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=price-desc (Sắp xếp giá giảm dần)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về phải được sắp xếp giảm dần theo giá\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].price).to.be.at.least(items[i+1].price);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=price-desc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price-desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=rating-desc (Sắp xếp đánh giá cao nhất)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm phải được sắp xếp giảm dần theo số sao đánh giá (rating)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].rating).to.be.at.least(items[i+1].rating);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=rating-desc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "rating-desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=newest (Sắp xếp theo sản phẩm mới nhất)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm phải được sắp xếp giảm dần theo thời gian tạo (createdAt)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        var dateI = new Date(items[i].createdAt);",
+							"        var dateNext = new Date(items[i+1].createdAt);",
+							"        pm.expect(dateI.getTime()).to.be.at.least(dateNext.getTime());",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=newest",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "newest"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?q=Chair&sort=relevance (Sắp xếp theo độ liên quan)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về có thuộc tính items là mảng\", function () {",
+							"    var jsonData = pm.response.json();",
 							"    pm.expect(jsonData.items).to.be.an('array');",
 							"});"
 						],
@@ -205,7 +582,7 @@
 				"method": "GET",
 				"header": [],
 				"url": {
-					"raw": "{{url}}/api/products?pageSize=5",
+					"raw": "{{url}}/api/products?q=Chair&sort=relevance",
 					"host": [
 						"{{url}}"
 					],
@@ -215,8 +592,61 @@
 					],
 					"query": [
 						{
+							"key": "q",
+							"value": "Chair"
+						},
+						{
+							"key": "sort",
+							"value": "relevance"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?page=2&pageSize=3 (Kiểm tra phân trang chính xác)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phân trang chính xác các thuộc tính trả về\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.page).to.equal(2);",
+							"    pm.expect(jsonData.pageSize).to.equal(3);",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    pm.expect(jsonData.items.length).to.be.at.most(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?page=2&pageSize=3",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
 							"key": "pageSize",
-							"value": "5"
+							"value": "3"
 						}
 					]
 				}
