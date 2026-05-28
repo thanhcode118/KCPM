@@ -822,6 +822,203 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "POST /api/categories (Trùng tên danh mục - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về lỗi trùng tên danh mục và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.code).to.equal(\"CategoryNameAlreadyExists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Lighting\",\n    \"slug\": \"lighting-unique-test\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/categories (Trùng slug danh mục - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về lỗi trùng slug danh mục và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.code).to.equal(\"CategorySlugAlreadyExists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Lighting Unique Test\",\n    \"slug\": \"lighting\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/categories/{id} (Tắt hoạt động khi danh mục vẫn chứa sản phẩm đang bán - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi không thể tắt hoạt động danh mục khi còn sản phẩm đang bán\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.code).to.equal(\"CategoryHasActiveProducts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Lighting\",\n    \"slug\": \"lighting\",\n    \"groupId\": 1,\n    \"isActive\": false\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/categories/{id} (Xóa danh mục vẫn còn chứa sản phẩm - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi không thể xóa danh mục đang có sản phẩm tham chiếu\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.code).to.equal(\"CategoryHasProducts\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/categories/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"2"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
