@@ -15,11 +15,8 @@ docker compose -f docker-compose.sql.yml ps
 ```
 
 ## Terminal 3 - Start Backend
-
-```powershell
-dotnet restore HomeDecorShop\HomeDecorShop.sln
-cd HomeDecorShop\HomeDecorShop.API
-dotnet run --launch-profile http
+C:\WORK_SPACE\NEW_KCPM\KCPM\HomeDecorShop\HomeDecorShop.API
+dotnet run
 ```
 
 ## Terminal 4 - Seed du lieu
@@ -29,19 +26,24 @@ Invoke-RestMethod -Method Post http://localhost:5020/api/Maintenance/seed/all
 ```
 
 ## Terminal 5 - Start Frontend
-
-```powershell
-cd frontend
+C:\WORK_SPACE\NEW_KCPM\KCPM\frontend
 npm install
-npm run dev -- --host 127.0.0.1
+npm run dev
 ```
 
 ## Terminal 6 - Start ngrok
 
 ```powershell
-ngrok config add-authtoken cr_3CHoaWrCdUOtOabC06EdBZIu7cA
+ngrok config add-authtoken 3CHqDga7M0o27PcWJWmERTM55E1_5mfBKdmVUCZ5fj9QnR8FN
+
+
 ngrok http --domain=gecko-canning-viability.ngrok-free.dev 5020
-```
+
+Ngân hàng: NCB
+Số thẻ: 9704198526191432198
+Tên chủ thẻ: NGUYEN VAN A
+Ngày phát hành: 07/15
+Mã OTP: 123456
 
 ## URL
 

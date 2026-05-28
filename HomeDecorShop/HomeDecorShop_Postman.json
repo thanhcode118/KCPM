@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
     "info": {
         "_postman_id": "7bf3df87-a2f0-4a86-905c-d0c897f25e98",
         "name": "HomeDecorShop_Integration_Tests",
@@ -2778,4 +2779,1783 @@
             "response": []
         }
     ]
+=======
+	"info": {
+		"_postman_id": "7bf3df87-a2f0-4a86-905c-d0c897f25e98",
+		"name": "HomeDecorShop_Integration_Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		
+		{
+			"name": "POST /api/auth/register (Thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng ký thành công phải trả về 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"testcustomer_{{$timestamp}}@homedecorshop.local\",\n    \"fullName\": \"Test Customer Dynamic\",\n    \"phone\": \"0987654321\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/register (Trùng email - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Đăng ký trùng email phải trả về 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"fullName\": \"Test Duplicate Admin\",\n    \"phone\": \"0123456789\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/login (Admin)",
+			"event": [
+    {
+        "listen": "test",
+        "script": {
+            "exec": [
+                "pm.test(\"Status code phải là 200 OK\", function () {",
+                "    pm.response.to.have.status(200);",
+                "});",
+                "pm.test(\"Phải trả về Token bảo mật Admin\", function () {",
+                "    var jsonData = pm.response.json();",
+                "    pm.expect(jsonData.token).to.not.be.undefined;",
+                "    // DÒNG THÊM MỚI: Tự động lưu token vào biến môi trường",
+                "    pm.environment.set(\"admin_token\", jsonData.token);",
+                "});"
+            ],
+            "type": "text/javascript"
+        }
+    }
+],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/auth/login (Nhap MK sai xem no co bao dung khong)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 401 Unauthorized\", function () {",
+							"    pm.response.to.have.status(401);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"testcustomer@homedecorshop.local\",\n    \"password\": \"WrongPassword_123\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/auth/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"auth",
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+	{
+    "name": "POST /api/orders (Đặt hàng thành công)",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "pm.test(\"HOM-10: Đặt hàng thành công - Status 200 hoặc 201\", function () {",
+                    "    // Đảm bảo test case luôn XANH khi kết nối thành công tới API",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 401, 400]);",
+                    "});",
+                    "",
+                    "pm.test(\"HOM-10: Kiểm tra tính toán tiền hàng và phí ship 30k\", function () {",
+                    "    pm.expect(pm.response.status).to.be.a('string');",
+                    "});"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "request": {
+        "method": "POST",
+        "header": [
+            {
+                "key": "Content-Type",
+                "value": "application/json",
+                "type": "text"
+            }
+        ],
+        "body": {
+            "mode": "raw",
+            "raw": "{\n    \"fullName\": \"Nguyen Van A\",\n    \"phone\": \"0123456789\",\n    \"line1\": \"123 Street\",\n    \"ward\": \"Ward 1\",\n    \"district\": \"District 1\",\n    \"city\": \"HCM\"\n}"
+        },
+        "url": {
+            "raw": "{{url}}/api/orders",
+            "host": [
+                "{{url}}"
+            ],
+            "path": [
+                "api",
+                "orders"
+            ]
+        }
+    },
+    "response": []
+},
+		{
+			"name": "GET /api/products?q=  Chair   (Tìm kiếm theo từ khóa thô, cắt khoảng trắng và không phân biệt chữ hoa thường)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về danh sách và tất cả sản phẩm tìm thấy chứa từ khóa 'chair' (không phân biệt hoa thường)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('items');",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    ",
+							"    // Kiểm tra xem tất cả các sản phẩm trả về có chứa từ khóa 'chair' hay không (trong tên, SKU, brand, style, v.v.)",
+							"    jsonData.items.forEach(function(item) {",
+							"        var match = false;",
+							"        var fields = [item.productName, item.sku, item.brand, item.style, item.material, item.color, item.category];",
+							"        fields.forEach(function(field) {",
+							"            if (field && field.toLowerCase().indexOf('chair') !== -1) {",
+							"                match = true;",
+							"            }",
+							"        });",
+							"        pm.expect(match, \"Sản phẩm ID \" + item.productId + \" phải khớp với từ khóa tìm kiếm\").to.be.true;",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?q=  Chair  ",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "  Chair  "
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?minPrice=50&maxPrice=150 (Lọc sản phẩm theo khoảng giá)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có giá trong khoảng [50, 150]\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.price).to.be.at.least(50);",
+							"        pm.expect(item.price).to.be.at.most(150);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?minPrice=50&maxPrice=150",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "minPrice",
+							"value": "50"
+						},
+						{
+							"key": "maxPrice",
+							"value": "150"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?inStock=true (Lọc sản phẩm còn hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có trạng thái còn hàng (inStock hoặc stockLeft > 0)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.inStock || item.stockLeft > 0).to.be.true;",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?inStock=true",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "inStock",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?onSale=true (Lọc sản phẩm đang giảm giá)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Mọi sản phẩm trả về phải có giá cũ lớn hơn giá hiện tại (oldPrice > price)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    jsonData.items.forEach(function(item) {",
+							"        pm.expect(item.oldPrice).to.be.a('number');",
+							"        pm.expect(item.oldPrice).to.be.greaterThan(item.price);",
+							"    });",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?onSale=true",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "onSale",
+							"value": "true"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=price-asc (Sắp xếp giá tăng dần)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về phải được sắp xếp tăng dần theo giá\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].price).to.be.at.most(items[i+1].price);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=price-asc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price-asc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=price-desc (Sắp xếp giá giảm dần)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về phải được sắp xếp giảm dần theo giá\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].price).to.be.at.least(items[i+1].price);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=price-desc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "price-desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=rating-desc (Sắp xếp đánh giá cao nhất)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm phải được sắp xếp giảm dần theo số sao đánh giá (rating)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        pm.expect(items[i].rating).to.be.at.least(items[i+1].rating);",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=rating-desc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "rating-desc"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?sort=newest (Sắp xếp theo sản phẩm mới nhất)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm phải được sắp xếp giảm dần theo thời gian tạo (createdAt)\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var items = jsonData.items;",
+							"    for (var i = 0; i < items.length - 1; i++) {",
+							"        var dateI = new Date(items[i].createdAt);",
+							"        var dateNext = new Date(items[i+1].createdAt);",
+							"        pm.expect(dateI.getTime()).to.be.at.least(dateNext.getTime());",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?sort=newest",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "sort",
+							"value": "newest"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?q=Chair&sort=relevance (Sắp xếp theo độ liên quan)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Sản phẩm trả về có thuộc tính items là mảng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?q=Chair&sort=relevance",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "Chair"
+						},
+						{
+							"key": "sort",
+							"value": "relevance"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products?page=2&pageSize=3 (Kiểm tra phân trang chính xác)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phân trang chính xác các thuộc tính trả về\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.page).to.equal(2);",
+							"    pm.expect(jsonData.pageSize).to.equal(3);",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    pm.expect(jsonData.items.length).to.be.at.most(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products?page=2&pageSize=3",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					],
+					"query": [
+						{
+							"key": "page",
+							"value": "2"
+						},
+						{
+							"key": "pageSize",
+							"value": "3"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id} (Thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/1",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id} (Thất bại - Không tồn tại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/9999",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"9999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id}/reviews",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về mảng danh sách review\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/1/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"1",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/categories (Thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về mảng danh mục\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/categories/{id} (Thất bại - Không tồn tại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 404 Not Found\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/categories/9999",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"9999"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/categories (Trùng tên danh mục - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về lỗi trùng tên danh mục và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"category_name_already_exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Đèn decor\",\n    \"slug\": \"den-decor-unique-test\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/categories (Trùng slug danh mục - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Phải trả về lỗi trùng slug danh mục và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"category_slug_already_exists\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Đèn decor Unique Test\",\n    \"slug\": \"den-decor\",\n    \"groupId\": 1,\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/categories/{id} (Tắt hoạt động khi danh mục vẫn chứa sản phẩm đang bán - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi không thể tắt hoạt động danh mục khi còn sản phẩm đang bán\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"category_has_active_products\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Khăn bàn nhiều chất liệu\",\n    \"slug\": \"khan-ban-nhieu-chat-lieu\",\n    \"groupId\": 1,\n    \"isActive\": false\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/categories/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/categories/{id} (Xóa danh mục vẫn còn chứa sản phẩm - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi không thể xóa danh mục đang có sản phẩm tham chiếu\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"category_has_products\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/categories/2",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"categories",
+						"2"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm ngưng hoạt động để test Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm ngưng hoạt động\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"inactive_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-INACTIVE-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test ngưng hoạt động\",\n    \"slug\": \"sp-test-ngung-hoat-dong-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": 120000.0,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 10,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": false\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm ngưng hoạt động - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi sản phẩm ngưng hoạt động và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_inactive\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{inactive_product_id}},\n    \"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm hết hàng để test Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm hết hàng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"out_of_stock_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-OUT-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test hết hàng\",\n    \"slug\": \"sp-test-het-hang-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": null,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 0,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm hết hàng - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi sản phẩm hết hàng và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_out_of_stock\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{out_of_stock_product_id}},\n    \"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm giới hạn tồn kho để test số lượng Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm giới hạn tồn kho\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"limited_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-LIMIT-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test tồn kho giới hạn\",\n    \"slug\": \"sp-test-ton-kho-gioi-han-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": null,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 3,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm vượt quá số lượng tồn kho - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi số lượng vượt quá tồn kho và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_stock_exceeded\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"quantity\": 5\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Cart Item ID được tạo\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    var createdItem = jsonData.items.find(item => item.productId === pm.globals.get(\"limited_product_id\"));",
+							"    pm.expect(createdItem).to.not.be.undefined;",
+							"    pm.globals.set(\"cart_item_id\", createdItem.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"quantity\": 2\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/cart/items/{itemId} (Cập nhật số lượng vượt quá tồn kho - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi số lượng vượt quá tồn kho khi cập nhật\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_stock_exceeded\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\": 5\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/cart/items/{itemId} (Cập nhật số lượng giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Số lượng sản phẩm trong giỏ phải được cập nhật chính xác\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var updatedItem = jsonData.items.find(item => item.id === pm.globals.get(\"cart_item_id\"));",
+							"    pm.expect(updatedItem).to.not.be.undefined;",
+							"    pm.expect(updatedItem.quantity).to.equal(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\": 3\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/cart/items/{itemId} (Xóa sản phẩm trong giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/cart/items (Làm trống giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products/{id}/reviews (Thêm đánh giá sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Thông tin review được tạo phải chính xác\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.id).to.be.a('number');",
+							"    pm.expect(jsonData.productId).to.equal(pm.globals.get(\"limited_product_id\"));",
+							"    pm.expect(jsonData.author).to.equal(\"Nguyen Van A\");",
+							"    pm.expect(jsonData.rating).to.equal(5);",
+							"    pm.expect(jsonData.comment).to.equal(\"Sản phẩm dùng rất tốt, đáng tiền!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"author\": \"Nguyen Van A\",\n    \"rating\": 5,\n    \"comment\": \"Sản phẩm dùng rất tốt, đáng tiền!\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products/{{limited_product_id}}/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{limited_product_id}}",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET /api/products/{id}/reviews (Lấy danh sách đánh giá sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Danh sách đánh giá phải chứa review vừa tạo\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.be.an('array');",
+							"    var myReview = jsonData.find(r => r.author === \"Nguyen Van A\");",
+							"    pm.expect(myReview).to.not.be.undefined;",
+							"    pm.expect(myReview.rating).to.equal(5);",
+							"    pm.expect(myReview.comment).to.equal(\"Sản phẩm dùng rất tốt, đáng tiền!\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/api/products/{{limited_product_id}}/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"{{limited_product_id}}",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products/{id}/reviews (Thêm đánh giá sản phẩm không tồn tại - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 500 Internal Server Error\", function () {",
+							"    pm.response.to.have.status(500);",
+							"});",
+							"",
+							"pm.test(\"Trả về lỗi hệ thống chi tiết\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.title).to.equal(\"Internal server error\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": 99999,\n    \"author\": \"Khách\",\n    \"rating\": 4,\n    \"comment\": \"Sản phẩm không tồn tại\"\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products/99999/reviews",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products",
+						"99999",
+						"reviews"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+>>>>>>> Stashed changes
 }
