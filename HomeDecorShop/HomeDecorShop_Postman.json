@@ -1023,6 +1023,559 @@
 				}
 			},
 			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm ngưng hoạt động để test Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm ngưng hoạt động\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"inactive_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-INACTIVE-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test ngưng hoạt động\",\n    \"slug\": \"sp-test-ngung-hoat-dong-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": 120000.0,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 10,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": false\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm ngưng hoạt động - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi sản phẩm ngưng hoạt động và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_inactive\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{inactive_product_id}},\n    \"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm hết hàng để test Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm hết hàng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"out_of_stock_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-OUT-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test hết hàng\",\n    \"slug\": \"sp-test-het-hang-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": null,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 0,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm hết hàng - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi sản phẩm hết hàng và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_out_of_stock\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{out_of_stock_product_id}},\n    \"quantity\": 1\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/products (Tạo sản phẩm giới hạn tồn kho để test số lượng Giỏ hàng)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 201 Created\", function () {",
+							"    pm.response.to.have.status(201);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Product ID của sản phẩm giới hạn tồn kho\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.globals.set(\"limited_product_id\", jsonData.productId);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"sku\": \"CART-LIMIT-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test tồn kho giới hạn\",\n    \"slug\": \"sp-test-ton-kho-gioi-han-{{$timestamp}}\",\n    \"price\": 100000.0,\n    \"originalPrice\": null,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 3,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Vintage\",\n    \"isActive\": true\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/products",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"products"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm vượt quá số lượng tồn kho - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi số lượng vượt quá tồn kho và có mã lỗi rõ ràng\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_stock_exceeded\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"quantity\": 5\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "POST /api/cart/items (Thêm sản phẩm thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Lưu lại Cart Item ID được tạo\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.items).to.be.an('array');",
+							"    var createdItem = jsonData.items.find(item => item.productId === pm.globals.get(\"limited_product_id\"));",
+							"    pm.expect(createdItem).to.not.be.undefined;",
+							"    pm.globals.set(\"cart_item_id\", createdItem.id);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"productId\": {{limited_product_id}},\n    \"quantity\": 2\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/cart/items/{itemId} (Cập nhật số lượng vượt quá tồn kho - Thất bại)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 409 Conflict\", function () {",
+							"    pm.response.to.have.status(409);",
+							"});",
+							"",
+							"pm.test(\"Báo lỗi số lượng vượt quá tồn kho khi cập nhật\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
+							"    pm.expect(code).to.equal(\"product_stock_exceeded\");",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\": 5\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PUT /api/cart/items/{itemId} (Cập nhật số lượng giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 200 OK\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Số lượng sản phẩm trong giỏ phải được cập nhật chính xác\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    var updatedItem = jsonData.items.find(item => item.id === pm.globals.get(\"cart_item_id\"));",
+							"    pm.expect(updatedItem).to.not.be.undefined;",
+							"    pm.expect(updatedItem.quantity).to.equal(3);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					},
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"quantity\": 3\n}"
+				},
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/cart/items/{itemId} (Xóa sản phẩm trong giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/cart/items/{{cart_item_id}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items",
+						"{{cart_item_id}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE /api/cart/items (Làm trống giỏ hàng thành công)",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code phải là 204 No Content\", function () {",
+							"    pm.response.to.have.status(204);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer {{admin_token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/api/cart/items",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"api",
+						"cart",
+						"items"
+					]
+				}
+			},
+			"response": []
 		}
 	]
 }
