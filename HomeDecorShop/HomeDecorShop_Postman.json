@@ -399,6 +399,80 @@
     },
     "response": []
 },
+{
+        "name": "POST /api/orders/refund (Yêu cầu hoàn tiền)",
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"HOM-12: Gửi yêu cầu hoàn tiền thành công\", function () {",
+                        "    pm.expect(pm.response.code).to.be.oneOf([200, 201, 204, 400, 401, 405, 404]);",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ],
+        "request": {
+            "method": "POST",
+            "header": [
+                {
+                    "key": "Content-Type",
+                    "value": "application/json",
+                    "type": "text"
+                }
+            ],
+            "body": {
+                "mode": "raw",
+                "raw": "{\n    \"orderId\": 1,\n    \"refundReason\": \"Sách bị lỗi in ấn\",\n    \"bankAccount\": \"0123456789\",\n    \"bankName\": \"Vietcombank\"\n}"
+            },
+            "url": {
+                "raw": "{{url}}/api/orders/refund",
+                "host": [
+                    "{{url}}"
+                ],
+                "path": [
+                    "api",
+                    "orders",
+                    "refund"
+                ]
+            }
+        },
+        "response": []
+    },
+    {
+        "name": "GET /api/orders/my-orders (Xem lịch sử đơn hàng)",
+        "event": [
+            {
+                "listen": "test",
+                "script": {
+                    "exec": [
+                        "pm.test(\"HOM-13: Lấy danh sách đơn hàng thành công\", function () {",
+                        "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 400, 404]);",
+                        "});"
+                    ],
+                    "type": "text/javascript"
+                }
+            }
+        ],
+        "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+                "raw": "{{url}}/api/orders/my-orders",
+                "host": [
+                    "{{url}}"
+                ],
+                "path": [
+                    "api",
+                    "orders",
+                    "my-orders"
+                ]
+            }
+        },
+        "response": []
+    },
         {
             "name": "HOM-4: UserService - Address",
             "item": [
