@@ -837,7 +837,7 @@
 							"pm.test(\"Phải trả về lỗi trùng tên danh mục và có mã lỗi rõ ràng\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
-							"    pm.expect(code).to.equal(\"CategoryNameAlreadyExists\");",
+							"    pm.expect(code).to.equal(\"category_name_already_exists\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -889,7 +889,7 @@
 							"pm.test(\"Phải trả về lỗi trùng slug danh mục và có mã lỗi rõ ràng\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
-							"    pm.expect(code).to.equal(\"CategorySlugAlreadyExists\");",
+							"    pm.expect(code).to.equal(\"category_slug_already_exists\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -941,7 +941,7 @@
 							"pm.test(\"Báo lỗi không thể tắt hoạt động danh mục khi còn sản phẩm đang bán\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
-							"    pm.expect(code).to.equal(\"CategoryHasActiveProducts\");",
+							"    pm.expect(code).to.equal(\"category_has_active_products\");",
 							"});"
 						],
 						"type": "text/javascript"
@@ -994,7 +994,7 @@
 							"pm.test(\"Báo lỗi không thể xóa danh mục đang có sản phẩm tham chiếu\", function () {",
 							"    var jsonData = pm.response.json();",
 							"    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code)) || (jsonData.Extensions && (jsonData.Extensions.code || jsonData.Extensions.Code));",
-							"    pm.expect(code).to.equal(\"CategoryHasProducts\");",
+							"    pm.expect(code).to.equal(\"category_has_products\");",
 							"});"
 						],
 						"type": "text/javascript"
