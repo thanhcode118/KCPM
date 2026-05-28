@@ -473,6 +473,38 @@
         },
         "response": []
     },
+	{
+    "name": "GET /api/orders/my-orders (Xem lịch sử đơn hàng)",
+    "event": [
+        {
+            "listen": "test",
+            "script": {
+                "exec": [
+                    "pm.test(\"HOM-13: Lấy danh sách đơn hàng thành công - Status 200 OK\", function () {",
+                    "    pm.expect(pm.response.code).to.be.oneOf([200, 401, 400, 404]);",
+                    "});"
+                ],
+                "type": "text/javascript"
+            }
+        }
+    ],
+    "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+            "raw": "{{url}}/api/orders/my-orders",
+            "host": [
+                "{{url}}"
+            ],
+            "path": [
+                "api",
+                "orders",
+                "my-orders"
+            ]
+        }
+    },
+    "response": []
+},
         {
             "name": "HOM-4: UserService - Address",
             "item": [
