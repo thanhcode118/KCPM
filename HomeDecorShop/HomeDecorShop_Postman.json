@@ -6,6 +6,2755 @@
 	},
 	"item": [
         {
+  "name": "HOM-15: WalletService - Deposit / Withdraw",
+  "item": [
+    {
+      "name": "Đăng nhập lấy Token cho Wallet",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.1: Login thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.1: Lưu wallet_test_token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.expect(jsonData.token).to.be.a('string').and.not.empty;",
+              "    pm.globals.set('wallet_test_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/login",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet (Lấy ví trước khi nạp)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.2: Lấy ví thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.2: Response phải có balance\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.be.a('number');",
+              "    pm.globals.set('wallet_balance_before_deposit', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/deposit (Nạp tiền thành công)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.3: Deposit thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.3: Balance phải tăng đúng số tiền nạp\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var before = Number(pm.globals.get('wallet_balance_before_deposit'));",
+              "    var depositAmount = 100000;",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.equal(before + depositAmount);",
+              "    pm.globals.set('wallet_balance_after_deposit', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": 100000\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/deposit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "deposit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/withdraw (Rút tiền thành công)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.4: Withdraw thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.4: Balance phải giảm đúng số tiền rút\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var before = Number(pm.globals.get('wallet_balance_after_deposit'));",
+              "    var withdrawAmount = 50000;",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.equal(before - withdrawAmount);",
+              "    pm.globals.set('wallet_balance_after_withdraw', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": 50000\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/withdraw",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "withdraw"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/deposit (Amount = 0 - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.5: Deposit amount = 0 phải trả về 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.5: Phải trả về mã lỗi validation\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('code');",
+              "    pm.expect(jsonData.code).to.equal('request_validation_failed');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": 0\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/deposit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "deposit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/withdraw (Amount âm - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.6: Withdraw amount âm phải trả về 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.6: Phải trả về mã lỗi validation\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('code');",
+              "    pm.expect(jsonData.code).to.equal('request_validation_failed');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": -10000\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/withdraw",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "withdraw"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/withdraw (Rút vượt số dư - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.7: Withdraw vượt số dư phải trả về 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.7: Phải trả về mã lỗi wallet_insufficient_balance\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('code');",
+              "    pm.expect(jsonData.code).to.equal('wallet_insufficient_balance');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": 999999999\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/withdraw",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "withdraw"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet/transactions (Xem lịch sử giao dịch ví)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-15.8: Lấy lịch sử giao dịch thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-15.8: Response phải là mảng giao dịch\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});",
+              "",
+              "pm.test(\"HOM-15.8: Có giao dịch Deposit hoặc Withdraw\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var hasWalletTransaction = jsonData.some(function (item) {",
+              "        return item.type === 'Deposit' || item.type === 'Withdraw';",
+              "    });",
+              "    pm.expect(hasWalletTransaction).to.equal(true);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Auth-Token",
+            "value": "{{wallet_test_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet/transactions",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+},
+{
+  "name": "HOM-16: WalletService - Pay Order",
+  "item": [
+    {
+      "name": "Đăng nhập Admin để tạo sản phẩm test",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.1: Login Admin thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.1: Lưu admin token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('wallet_pay_admin_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/login",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/products (Tạo sản phẩm test Pay Order)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.2: Tạo sản phẩm thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.2: Lưu productId\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('productId');",
+              "    pm.globals.set('wallet_pay_product_id', jsonData.productId);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_admin_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\": \"PAY-ORDER-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test Pay Order\",\n    \"slug\": \"san-pham-test-pay-order-{{$timestamp}}\",\n    \"price\": 120000.0,\n    \"originalPrice\": 150000.0,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 20,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Modern\",\n    \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/products",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Đăng ký Customer mới cho Pay Order",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.3: Đăng ký customer thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.3: Lưu customer token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('wallet_pay_customer_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"walletpay_{{$timestamp}}@homedecorshop.local\",\n    \"fullName\": \"Wallet Pay Customer\",\n    \"phone\": \"0987654321\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/register",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /api/cart/items (Làm trống giỏ hàng)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.4: Làm trống giỏ hàng thành công - Status 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/cart/items (Thêm sản phẩm vào giỏ hàng)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.5: Thêm sản phẩm vào giỏ thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"productId\": {{wallet_pay_product_id}},\n    \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/orders (Tạo đơn hàng PendingPayment)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.6: Tạo đơn hàng thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.6: Lưu orderId và totalAmount\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('totalAmount');",
+              "    pm.globals.set('wallet_pay_order_id', jsonData.id);",
+              "    pm.globals.set('wallet_pay_total_amount', jsonData.totalAmount);",
+              "    pm.globals.set('wallet_pay_deposit_amount', jsonData.totalAmount);",
+              "    pm.expect(jsonData.status).to.equal('pending_payment');",
+              "    pm.expect(jsonData.paymentStatus).to.equal('pending');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fullName\": \"Wallet Pay Customer\",\n    \"phone\": \"0987654321\",\n    \"line1\": \"123 Test Street\",\n    \"ward\": \"Ward 1\",\n    \"district\": \"District 1\",\n    \"city\": \"HCM\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/orders",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet (Lấy số dư trước khi thanh toán)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.7: Lấy ví thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.7: Lưu balance trước thanh toán\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.globals.set('wallet_pay_balance_before', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/deposit (Nạp đúng số tiền cần thanh toán)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.8: Nạp tiền thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.8: Balance tăng đúng số tiền đơn hàng\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var before = Number(pm.globals.get('wallet_pay_balance_before'));",
+              "    var amount = Number(pm.globals.get('wallet_pay_deposit_amount'));",
+              "    pm.expect(jsonData.balance).to.equal(before + amount);",
+              "    pm.globals.set('wallet_pay_balance_after_deposit', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": {{wallet_pay_deposit_amount}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/deposit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "deposit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/pay (Thanh toán đơn hàng bằng ví thành công)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.9: Pay Order thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.9: Balance giảm đúng tổng tiền đơn hàng\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var before = Number(pm.globals.get('wallet_pay_balance_after_deposit'));",
+              "    var total = Number(pm.globals.get('wallet_pay_total_amount'));",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.expect(jsonData.balance).to.equal(before - total);",
+              "    pm.globals.set('wallet_pay_balance_after_payment', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": {{wallet_pay_order_id}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/pay",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/orders/{id} (Kiểm tra đơn đã được thanh toán)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.10: Lấy chi tiết đơn hàng thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.10: Order chuyển sang processing và paid\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.equal('processing');",
+              "    pm.expect(jsonData.paymentStatus).to.equal('paid');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/orders/{{wallet_pay_order_id}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders",
+            "{{wallet_pay_order_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/pay (Thanh toán lại đơn đã paid - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.11: Pay lại đơn đã thanh toán phải trả về 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.11: Phải trả về mã lỗi order_already_paid\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code));",
+              "    pm.expect(code).to.equal('order_already_paid');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": {{wallet_pay_order_id}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/pay",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/pay (Order không tồn tại - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.12: Order không tồn tại phải trả về 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.12: Phải trả về mã lỗi order_not_found\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code));",
+              "    pm.expect(code).to.equal('order_not_found');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": 99999999\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/pay",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /api/cart/items (Làm trống giỏ hàng lần 2)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.13: Làm trống giỏ hàng lần 2 thành công\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/cart/items (Thêm sản phẩm tạo đơn thiếu tiền)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.14: Thêm sản phẩm lần 2 thành công\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"productId\": {{wallet_pay_product_id}},\n    \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/orders (Tạo đơn hàng để test thiếu số dư)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.15: Tạo đơn hàng thiếu số dư thành công\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.15: Lưu orderId thiếu số dư\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.globals.set('wallet_pay_insufficient_order_id', jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fullName\": \"Wallet Pay Customer\",\n    \"phone\": \"0987654321\",\n    \"line1\": \"456 Test Street\",\n    \"ward\": \"Ward 2\",\n    \"district\": \"District 2\",\n    \"city\": \"HCM\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/orders",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/pay (Thiếu số dư - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-16.16: Pay Order thiếu số dư phải trả về 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});",
+              "",
+              "pm.test(\"HOM-16.16: Phải trả về mã lỗi wallet_insufficient_balance\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code));",
+              "    pm.expect(code).to.equal('wallet_insufficient_balance');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_pay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": {{wallet_pay_insufficient_order_id}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/pay",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+},
+{
+  "name": "HOM-17: WalletService - Refund",
+  "item": [
+    {
+      "name": "Đăng nhập Admin cho Refund",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.1: Login Admin thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.1: Lưu admin token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('wallet_refund_admin_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/login",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/products (Tạo sản phẩm test Refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.2: Tạo sản phẩm thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.2: Lưu productId\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('productId');",
+              "    pm.globals.set('wallet_refund_product_id', jsonData.productId);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_admin_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\": \"REFUND-TEST-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test Refund\",\n    \"slug\": \"san-pham-test-refund-{{$timestamp}}\",\n    \"price\": 130000.0,\n    \"originalPrice\": 160000.0,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 20,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Modern\",\n    \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/products",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Đăng ký Customer mới cho Refund",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.3: Đăng ký customer thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.3: Lưu customer token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('wallet_refund_customer_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"walletrefund_{{$timestamp}}@homedecorshop.local\",\n    \"fullName\": \"Wallet Refund Customer\",\n    \"phone\": \"0987654321\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/register",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/cart/items (Thêm sản phẩm vào giỏ)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.4: Thêm sản phẩm vào giỏ thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"productId\": {{wallet_refund_product_id}},\n    \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/orders (Tạo đơn hàng để refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.5: Tạo đơn hàng thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.5: Lưu orderId và totalAmount\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('totalAmount');",
+              "    pm.globals.set('wallet_refund_order_id', jsonData.id);",
+              "    pm.globals.set('wallet_refund_total_amount', jsonData.totalAmount);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fullName\": \"Wallet Refund Customer\",\n    \"phone\": \"0987654321\",\n    \"line1\": \"123 Refund Street\",\n    \"ward\": \"Ward 1\",\n    \"district\": \"District 1\",\n    \"city\": \"HCM\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/orders",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/deposit (Nạp tiền để thanh toán đơn refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.6: Nạp tiền thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"amount\": {{wallet_refund_total_amount}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/deposit",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "deposit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/wallet/pay (Thanh toán đơn hàng)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.7: Thanh toán đơn hàng thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": {{wallet_refund_order_id}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/wallet/pay",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/orders/{id}/request-refund (Customer yêu cầu hoàn tiền)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.8: Yêu cầu hoàn tiền thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.8: Order chuyển sang refund_requested\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.equal('refund_requested');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"reason\": \"Sản phẩm bị lỗi, yêu cầu hoàn tiền\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/orders/{{wallet_refund_order_id}}/request-refund",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders",
+            "{{wallet_refund_order_id}}",
+            "request-refund"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet (Lấy ví customer trước khi admin duyệt refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.9: Lấy ví thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.9: Lưu balance trước refund\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('balance');",
+              "    pm.globals.set('wallet_refund_balance_before', jsonData.balance);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/admin/orders/{id}/process-refund?approve=true (Admin duyệt refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.10: Admin duyệt refund thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.10: Order chuyển sang refunded\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.status).to.equal('refunded');",
+              "    pm.expect(jsonData.paymentStatus).to.equal('refunded');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_admin_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/admin/orders/{{wallet_refund_order_id}}/process-refund?approve=true",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "orders",
+            "{{wallet_refund_order_id}}",
+            "process-refund"
+          ],
+          "query": [
+            {
+              "key": "approve",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet (Kiểm tra balance customer sau refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.11: Lấy ví sau refund thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.11: Balance tăng đúng số tiền refund\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var before = Number(pm.globals.get('wallet_refund_balance_before'));",
+              "    var amount = Number(pm.globals.get('wallet_refund_total_amount'));",
+              "    pm.expect(jsonData.balance).to.equal(before + amount);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/wallet/transactions (Kiểm tra transaction refund)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.12: Lấy lịch sử giao dịch thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-17.12: Có transaction REFUND của đơn hàng\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    var orderId = pm.globals.get('wallet_refund_order_id');",
+              "    var hasRefund = jsonData.some(function (item) {",
+              "        return item.reference && item.reference.indexOf('REFUND-') === 0;",
+              "    });",
+              "    pm.expect(hasRefund).to.equal(true);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/wallet/transactions",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "wallet",
+            "transactions"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/admin/orders/{id}/process-refund?approve=true (Duyệt lại refund - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-17.13: Duyệt lại refund phải trả về 409 Conflict\", function () {",
+              "    pm.response.to.have.status(409);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{wallet_refund_admin_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/admin/orders/{{wallet_refund_order_id}}/process-refund?approve=true",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "admin",
+            "orders",
+            "{{wallet_refund_order_id}}",
+            "process-refund"
+          ],
+          "query": [
+            {
+              "key": "approve",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+},
+{
+  "name": "HOM-18: PaymentService - VNPay",
+  "item": [
+    {
+      "name": "Đăng nhập Admin cho VNPay",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.1: Login Admin thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.1: Lưu admin token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('vnpay_admin_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"admin1@homedecorshop.local\",\n    \"password\": \"admin123\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/login",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/products (Tạo sản phẩm test VNPay)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.2: Tạo sản phẩm thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.2: Lưu productId\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('productId');",
+              "    pm.globals.set('vnpay_product_id', jsonData.productId);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_admin_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"sku\": \"VNPAY-TEST-{{$timestamp}}\",\n    \"name\": \"Sản phẩm test VNPay\",\n    \"slug\": \"san-pham-test-vnpay-{{$timestamp}}\",\n    \"price\": 180000.0,\n    \"originalPrice\": 220000.0,\n    \"categoryId\": 2,\n    \"category\": \"Khăn bàn\",\n    \"image\": \"img\",\n    \"hoverImage\": \"hover\",\n    \"stockLeft\": 20,\n    \"brand\": \"BeeShop\",\n    \"color\": \"Màu gỗ\",\n    \"material\": \"Gỗ\",\n    \"style\": \"Modern\",\n    \"isActive\": true\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/products",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "products"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Đăng ký Customer mới cho VNPay",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.3: Đăng ký customer thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.3: Lưu customer token\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('token');",
+              "    pm.globals.set('vnpay_customer_token', jsonData.token);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"email\": \"vnpaycustomer_{{$timestamp}}@homedecorshop.local\",\n    \"fullName\": \"VNPay Test Customer\",\n    \"phone\": \"0987654321\",\n    \"password\": \"Password123\",\n    \"role\": \"customer\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/auth/register",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "auth",
+            "register"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "DELETE /api/cart/items (Làm trống giỏ hàng VNPay)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.4: Làm trống giỏ hàng thành công - Status 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/cart/items (Thêm sản phẩm VNPay vào giỏ)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.5: Thêm sản phẩm vào giỏ thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"productId\": {{vnpay_product_id}},\n    \"quantity\": 1\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/cart/items",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "cart",
+            "items"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/orders (Tạo đơn hàng PendingPayment cho VNPay)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.6: Tạo đơn hàng thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.6: Lưu orderId và totalAmount\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData).to.have.property('totalAmount');",
+              "    pm.globals.set('vnpay_order_id', jsonData.id);",
+              "    pm.globals.set('vnpay_total_amount', jsonData.totalAmount);",
+              "    pm.expect(jsonData.paymentStatus).to.equal('pending');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"fullName\": \"VNPay Test Customer\",\n    \"phone\": \"0987654321\",\n    \"line1\": \"123 VNPay Street\",\n    \"ward\": \"Ward 1\",\n    \"district\": \"District 1\",\n    \"city\": \"HCM\"\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/orders",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "orders"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/payments/vnpay/url (Tạo URL thanh toán VNPay)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.7: Tạo VNPay URL thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.7: Response có dữ liệu VNPay hợp lệ\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('paymentId');",
+              "    pm.expect(jsonData).to.have.property('orderId');",
+              "    pm.expect(jsonData).to.have.property('orderNumber');",
+              "    pm.expect(jsonData).to.have.property('amount');",
+              "    pm.expect(jsonData).to.have.property('transactionCode');",
+              "    pm.expect(jsonData).to.have.property('paymentUrl');",
+              "",
+              "    pm.expect(jsonData.orderId).to.equal(Number(pm.globals.get('vnpay_order_id')));",
+              "    pm.expect(jsonData.amount).to.equal(Number(pm.globals.get('vnpay_total_amount')));",
+              "    pm.expect(jsonData.transactionCode).to.be.a('string').and.not.empty;",
+              "    pm.expect(jsonData.paymentUrl).to.be.a('string').and.not.empty;",
+              "    pm.expect(jsonData.paymentUrl).to.include('vnp_TxnRef=' + jsonData.transactionCode);",
+              "    pm.expect(jsonData.paymentUrl).to.include('vnp_Amount=');",
+              "    pm.expect(jsonData.paymentUrl).to.include('vnp_SecureHash=');",
+              "",
+              "    pm.globals.set('vnpay_payment_id', jsonData.paymentId);",
+              "    pm.globals.set('vnpay_transaction_code', jsonData.transactionCode);",
+              "    pm.globals.set('vnpay_payment_url', jsonData.paymentUrl);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": {{vnpay_order_id}}\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/payments/vnpay/url",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "vnpay",
+            "url"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/payments/order/{orderId} (Kiểm tra payment VNPay pending)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.8: Lấy payment theo order thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.8: Có payment VNPay pending\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "    var transactionCode = pm.globals.get('vnpay_transaction_code');",
+              "    var payment = jsonData.find(function (item) {",
+              "        return item.transactionCode === transactionCode;",
+              "    });",
+              "    pm.expect(payment).to.not.equal(undefined);",
+              "    pm.expect(payment.method).to.equal('vnpay');",
+              "    pm.expect(payment.status).to.equal('pending');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "url": {
+          "raw": "{{url}}/api/payments/order/{{vnpay_order_id}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "order",
+            "{{vnpay_order_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST /api/payments/vnpay/url (Order không tồn tại - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.9: Order không tồn tại phải trả về 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.9: Phải trả về mã lỗi order_not_found\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code));",
+              "    pm.expect(code).to.equal('order_not_found');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          },
+          {
+            "key": "X-Auth-Token",
+            "value": "{{vnpay_customer_token}}",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"orderId\": 99999999\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/payments/vnpay/url",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "vnpay",
+            "url"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/payments/vnpay/return (Thiếu secure hash - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.10: VNPay return thiếu secure hash phải trả về 400 Bad Request\", function () {",
+              "    pm.response.to.have.status(400);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.10: Phải trả về mã lỗi signature invalid\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = jsonData.code || jsonData.Code || (jsonData.extensions && (jsonData.extensions.code || jsonData.extensions.Code));",
+              "    pm.expect(code).to.equal('payment_gateway_signature_invalid');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/payments/vnpay/return?vnp_TxnRef=INVALID&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_Amount=10000000",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "vnpay",
+            "return"
+          ],
+          "query": [
+            {
+              "key": "vnp_TxnRef",
+              "value": "INVALID"
+            },
+            {
+              "key": "vnp_ResponseCode",
+              "value": "00"
+            },
+            {
+              "key": "vnp_TransactionStatus",
+              "value": "00"
+            },
+            {
+              "key": "vnp_Amount",
+              "value": "10000000"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "GET /api/payments/vnpay/ipn (Thiếu secure hash - VNPay response 97)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-18.11: VNPay IPN luôn trả về 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-18.11: IPN thiếu secure hash trả mã 97\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var rspCode = jsonData.rspCode || jsonData.RspCode || jsonData.code || jsonData.Code;",
+              "    pm.expect(rspCode).to.equal('97');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/payments/vnpay/ipn?vnp_TxnRef=INVALID&vnp_ResponseCode=00&vnp_TransactionStatus=00&vnp_Amount=10000000",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "payments",
+            "vnpay",
+            "ipn"
+          ],
+          "query": [
+            {
+              "key": "vnp_TxnRef",
+              "value": "INVALID"
+            },
+            {
+              "key": "vnp_ResponseCode",
+              "value": "00"
+            },
+            {
+              "key": "vnp_TransactionStatus",
+              "value": "00"
+            },
+            {
+              "key": "vnp_Amount",
+              "value": "10000000"
+            }
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+},
+{
+  "name": "HOM-19: MarketingService - Coupon",
+  "item": [
+    {
+      "name": "HOM-19.1: GET /api/marketing/coupons (Lấy danh sách coupon)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.1: Lấy danh sách coupon thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-19.1: Response là mảng\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.be.an('array');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.2: POST /api/marketing/coupons (Tạo coupon thành công)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.globals.set('coupon_test_code', 'SALE' + Math.floor(Date.now() / 1000));",
+              "pm.globals.set('coupon_expiry_date', new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.2: Tạo coupon thành công - Status 201 Created\", function () {",
+              "    pm.response.to.have.status(201);",
+              "});",
+              "",
+              "pm.test(\"HOM-19.2: Response coupon đúng dữ liệu\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData).to.have.property('id');",
+              "    pm.expect(jsonData.code).to.equal(pm.globals.get('coupon_test_code'));",
+              "    pm.expect(jsonData.discountPercentage).to.equal(10);",
+              "    pm.expect(jsonData.maxUsage).to.equal(100);",
+              "    pm.expect(jsonData.currentUsage).to.equal(0);",
+              "    pm.expect(jsonData.isActive).to.equal(true);",
+              "    pm.globals.set('coupon_test_id', jsonData.id);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json",
+            "type": "text"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n    \"code\": \"{{coupon_test_code}}\",\n    \"discountPercentage\": 10,\n    \"expiryDate\": \"{{coupon_expiry_date}}\",\n    \"maxUsage\": 100\n}"
+        },
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.3: GET /api/marketing/coupons/validate/{code} (Validate coupon hợp lệ)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.3: Validate coupon hợp lệ - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-19.3: Response coupon đúng code\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    pm.expect(jsonData.code).to.equal(pm.globals.get('coupon_test_code'));",
+              "    pm.expect(jsonData.discountPercentage).to.equal(10);",
+              "    pm.expect(jsonData.isActive).to.equal(true);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons/validate/{{coupon_test_code}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons",
+            "validate",
+            "{{coupon_test_code}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.4: GET /api/marketing/coupons (Danh sách có coupon vừa tạo)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.4: Lấy danh sách coupon thành công - Status 200 OK\", function () {",
+              "    pm.response.to.have.status(200);",
+              "});",
+              "",
+              "pm.test(\"HOM-19.4: Danh sách có coupon vừa tạo\", function () {",
+              "    var jsonData = pm.response.json();",
+              "    var code = pm.globals.get('coupon_test_code');",
+              "    var found = jsonData.some(function (item) {",
+              "        return item.code === code;",
+              "    });",
+              "    pm.expect(found).to.equal(true);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.5: GET /api/marketing/coupons/validate/{code} (Coupon không tồn tại - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.5: Coupon không tồn tại trả về 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});",
+              "",
+              "pm.test(\"HOM-19.5: Response có message lỗi\", function () {",
+              "    pm.expect(pm.response.text()).to.include('Mã giảm giá không hợp lệ');",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons/validate/NOTFOUND{{$timestamp}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons",
+            "validate",
+            "NOTFOUND{{$timestamp}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.6: DELETE /api/marketing/coupons/{id} (Xóa coupon thành công)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.6: Xóa coupon thành công - Status 204 No Content\", function () {",
+              "    pm.response.to.have.status(204);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons/{{coupon_test_id}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons",
+            "{{coupon_test_id}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.7: GET /api/marketing/coupons/validate/{code} (Validate sau khi xóa - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.7: Coupon đã xóa trả về 404 Not Found\", function () {",
+              "    pm.response.to.have.status(404);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons/validate/{{coupon_test_code}}",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons",
+            "validate",
+            "{{coupon_test_code}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "HOM-19.8: DELETE /api/marketing/coupons/{id} (Xóa coupon không tồn tại - Thất bại)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test(\"HOM-19.8: Xóa coupon không tồn tại trả lỗi server hoặc not found\", function () {",
+              "    pm.expect(pm.response.code).to.be.oneOf([404, 500]);",
+              "});"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{url}}/api/marketing/coupons/99999999",
+          "host": [
+            "{{url}}"
+          ],
+          "path": [
+            "api",
+            "marketing",
+            "coupons",
+            "99999999"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+},
+        {
             "name": "HOM-2: UserService - Register",
             "item": [
                 {
