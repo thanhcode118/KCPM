@@ -46,7 +46,8 @@ pipeline {
         stage('4. Start DB & Backend') {
             steps {
                 echo '=== Khởi động SQL Server Container ==='
-                // Dừng và dọn dẹp container cũ trước để tránh lỗi trùng tên 'beeshop-sql'
+                // Xóa cứng bất kỳ container nào có tên 'beeshop-sql' đang chạy trên hệ thống để tránh xung đột giữa các Workspace (@2, @3...)
+                powershell 'docker rm -f beeshop-sql'
                 powershell 'docker compose -f docker-compose.sql.yml down'
                 powershell 'docker compose -f docker-compose.sql.yml up -d'
 
@@ -127,8 +128,9 @@ pipeline {
             // Đảm bảo tắt tiến trình dotnet chạy ngầm để giải phóng cổng 5020 cho build tiếp theo
             powershell 'Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue'
             
-            // Dừng database container
+            // Dừng database container và xóa cứng để tránh xung đột
             powershell 'docker compose -f docker-compose.sql.yml down'
+            powershell 'docker rm -f beeshop-sql'
         }
         success {
             echo '=== BẢN BUILD VÀ CÁC BÀI TEST ĐỀU THÀNH CÔNG! 🎉 ==='
