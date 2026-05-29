@@ -54,10 +54,10 @@ pipeline {
                 // Tắt các tiến trình dotnet cũ chạy ngầm (nếu có) để giải phóng cổng 5020
                 powershell 'Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue'
                 
-                // Khởi chạy ứng dụng Web API dưới nền
+                // Khởi chạy ứng dụng Web API dưới nền và chuyển hướng log ra file để không làm treo Jenkins Pipeline
                 powershell '''
-                    $proc = Start-Process dotnet -ArgumentList "run --project HomeDecorShop/HomeDecorShop.API/HomeDecorShop.API.csproj --urls http://localhost:5020" -PassThru -NoNewWindow
-                    echo "Backend API dang duoc khoi chay. Cho 15s de he thong san sang..."
+                    $proc = Start-Process dotnet -ArgumentList "run --project HomeDecorShop/HomeDecorShop.API/HomeDecorShop.API.csproj --urls http://localhost:5020" -RedirectStandardOutput "backend.log" -RedirectStandardError "backend_err.log" -PassThru
+                    echo "Backend API dang duoc khoi chay ngam. Cho 15s de he thong san sang..."
                     Start-Sleep -Seconds 15
                 '''
                 
