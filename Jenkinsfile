@@ -37,8 +37,14 @@ pipeline {
             post {
                 always {
                     echo '=== Lưu trữ kết quả Unit Test ==='
-                    // Hiển thị báo cáo kết quả kiểm thử trực tiếp trên giao diện Jenkins
-                    mstest testResultsFile: '**/TestResults/*.trx', keepBenchmarkOutputs: true
+                    script {
+                        try {
+                            // Hiển thị báo cáo kết quả kiểm thử trực tiếp trên giao diện Jenkins
+                            mstest testResultsFile: '**/TestResults/*.trx', keepBenchmarkOutputs: true
+                        } catch (Exception e) {
+                            echo "WARNING: Khong the hien thi bieu do Unit Test vi thieu plugin 'MSTest'. Vui long truy cap http://localhost:8080/pluginManager/available de cai dat plugin 'MSTest'."
+                        }
+                    }
                 }
             }
         }
@@ -88,19 +94,29 @@ pipeline {
             post {
                 always {
                     echo '=== Xuất báo cáo kết quả Newman API Test ==='
-                    // Xuất đồ thị kiểm thử API lên Jenkins
-                    junit 'newman-results/newman-report.xml'
-                    
-                    // Lưu trữ trang HTML báo cáo kết quả API
-                    publishHTML([
-                        allowMissing: false,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'newman-results',
-                        reportFiles: 'newman-report.html',
-                        reportName: 'Newman API Integration Report',
-                        reportTitles: 'Newman API Integration Test Report'
-                    ])
+                    script {
+                        try {
+                            // Xuất đồ thị kiểm thử API lên Jenkins
+                            junit 'newman-results/newman-report.xml'
+                        } catch (Exception e) {
+                            echo "WARNING: Khong the hien thi do thi Newman vi thieu plugin 'JUnit'."
+                        }
+
+                        try {
+                            // Lưu trữ trang HTML báo cáo kết quả API
+                            publishHTML([
+                                allowMissing: false,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'newman-results',
+                                reportFiles: 'newman-report.html',
+                                reportName: 'Newman API Integration Report',
+                                reportTitles: 'Newman API Integration Test Report'
+                            ])
+                        } catch (Exception e) {
+                            echo "WARNING: Khong the hien thi bao cao HTML Newman vi thieu plugin 'HTML Publisher'. Vui long vao http://localhost:8080/pluginManager/available de cai dat."
+                        }
+                    }
                 }
             }
         }
