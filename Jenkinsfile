@@ -4,6 +4,7 @@ pipeline {
     environment {
         DOTNET_CLI_HOME = "${WORKSPACE}\\.dotnet"
         API_URL = "http://localhost:5020"
+        NEWMAN_CMD = "C:\\Users\\LENOVO\\AppData\\Roaming\\npm\\newman.cmd"
     }
 
     stages {
@@ -22,7 +23,9 @@ pipeline {
 
                 powershell '''
                     dotnet restore HomeDecorShop/HomeDecorShop.sln
-                    dotnet build HomeDecorShop/HomeDecorShop.sln --configuration Release --no-restore
+                    dotnet build HomeDecorShop/HomeDecorShop.sln `
+                        --configuration Release `
+                        --no-restore
                 '''
             }
         }
@@ -50,6 +53,7 @@ pipeline {
 
         stage('4. Start DB & Backend') {
             steps {
+
                 echo '=== Dọn môi trường cũ ==='
 
                 powershell '''
@@ -79,7 +83,7 @@ pipeline {
                         -WindowStyle Hidden
                 '''
 
-                echo '=== Kiểm tra API đã chạy chưa ==='
+                echo '=== Kiểm tra API ==='
 
                 powershell '''
                     $ready = $false
@@ -91,20 +95,20 @@ pipeline {
                             break
                         }
                         catch {
-                            Write-Host "API chua san sang, retry..."
+                            Write-Host "API chua san sang... retry"
                             Start-Sleep -Seconds 2
                         }
                     }
 
                     if (-not $ready) {
-                        Write-Host "API khong khoi dong duoc!"
+                        Write-Host "API startup failed"
                         exit 1
                     }
 
-                    Write-Host "API da san sang."
+                    Write-Host "API da san sang"
                 '''
 
-                echo '=== Seed dữ liệu mẫu ==='
+                echo '=== Seed dữ liệu ==='
 
                 powershell '''
                     try {
@@ -112,11 +116,11 @@ pipeline {
                             -Method Post `
                             -Uri http://localhost:5020/api/Maintenance/seed/all
 
-                        Write-Host "Seed thanh cong:"
+                        Write-Host "Seed thanh cong"
                         Write-Host $response
                     }
                     catch {
-                        Write-Host "Seed that bai:"
+                        Write-Host "Seed that bai"
                         Write-Host $_
                         exit 1
                     }
@@ -125,9 +129,10 @@ pipeline {
         }
 
         stage('5. Run Newman API Tests') {
+
             steps {
 
-                echo '=== Chạy Newman API Test ==='
+                echo '=== Tạo thư mục report ==='
 
                 powershell '''
                     New-Item `
@@ -136,8 +141,11 @@ pipeline {
                         -Path newman-results
                 '''
 
+                echo '=== Chạy Newman ==='
+
                 powershell '''
-                    newman run HomeDecorShop/HomeDecorShop_Postman.json `
+                    & "C:\\Users\\LENOVO\\AppData\\Roaming\\npm\\newman.cmd" run `
+                        HomeDecorShop/HomeDecorShop_Postman.json `
                         --env-var "url=http://localhost:5020" `
                         --reporters cli,junit,html `
                         --reporter-junit-export newman-results/newman-report.xml `
@@ -146,9 +154,10 @@ pipeline {
             }
 
             post {
+
                 always {
 
-                    echo '=== Publish Newman Report ==='
+                    echo '=== Publish Newman Reports ==='
 
                     script {
 
@@ -156,7 +165,7 @@ pipeline {
                             junit 'newman-results/newman-report.xml'
                         }
                         catch (Exception e) {
-                            echo "WARNING: Thiếu plugin JUnit."
+                            echo "WARNING: Khong tim thay JUnit report."
                         }
 
                         try {
@@ -170,7 +179,7 @@ pipeline {
                             ])
                         }
                         catch (Exception e) {
-                            echo "WARNING: Thiếu HTML Publisher plugin."
+                            echo "WARNING: HTML Publisher plugin missing."
                         }
                     }
                 }
@@ -192,7 +201,7 @@ pipeline {
         }
 
         success {
-            echo '=== BUILD + TEST THÀNH CÔNG 🎉 ==='
+            echo '=== BUILD + API TEST + UNIT TEST THÀNH CÔNG 🎉 ==='
         }
 
         failure {
