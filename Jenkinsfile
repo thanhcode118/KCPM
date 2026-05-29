@@ -37,14 +37,8 @@ pipeline {
             post {
                 always {
                     echo '=== Lưu trữ kết quả Unit Test ==='
-                    script {
-                        try {
-                            // Hiển thị báo cáo kết quả kiểm thử trực tiếp trên giao diện Jenkins
-                            mstest testResultsFile: '**/TestResults/*.trx', keepBenchmarkOutputs: true
-                        } catch (Exception e) {
-                            echo "WARNING: Khong the hien thi bieu do Unit Test vi thieu plugin 'MSTest'. Vui long truy cap http://localhost:8080/pluginManager/available de cai dat plugin 'MSTest'."
-                        }
-                    }
+                    // Lưu trữ file TRX thô làm Artifact để tải về xem, không lo lỗi thiếu plugin
+                    archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
                 }
             }
         }
