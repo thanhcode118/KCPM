@@ -46,9 +46,14 @@ pipeline {
         stage('4. Start DB & Backend') {
             steps {
                 echo '=== Khởi động SQL Server Container ==='
+                // Dừng và dọn dẹp container cũ trước để tránh lỗi trùng tên 'beeshop-sql'
+                powershell 'docker compose -f docker-compose.sql.yml down'
                 powershell 'docker compose -f docker-compose.sql.yml up -d'
 
                 echo '=== Khởi chạy Backend Service ngầm (Port 5020) ==='
+                // Tắt các tiến trình dotnet cũ chạy ngầm (nếu có) để giải phóng cổng 5020
+                powershell 'Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue'
+                
                 // Khởi chạy ứng dụng Web API dưới nền
                 powershell '''
                     $proc = Start-Process dotnet -ArgumentList "run --project HomeDecorShop/HomeDecorShop.API/HomeDecorShop.API.csproj --urls http://localhost:5020" -PassThru -NoNewWindow
