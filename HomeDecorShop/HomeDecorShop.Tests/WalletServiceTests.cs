@@ -555,4 +555,284 @@ public void PayOrder_InvalidToken_ThrowsUnauthorizedException()
 
     Assert.Equal(AppErrorCodes.AuthTokenInvalid, exception.Code);
 }
+[Fact]
+public void ProcessRefundPayment_ValidRefund_DeductsAdminWalletAndAddsCustomerWallet()
+{
+    // Arrange
+    var customerId = _testUser.UserId;
+    var refundAmount = 300000m;
+    var orderNumber = "ORD-REFUND-001";
+
+    var customerWallet = new Wallet
+    {
+        Id = 1,
+        UserId = customerId,
+        Balance = 100000m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    var admin = new User
+    {
+        UserId = 99,
+        Email = "admin@test.com",
+        FullName = "Admin",
+        Role = UserRole.Admin,
+        IsActive = true
+    };
+
+    var adminWallet = new Wallet
+    {
+        Id = 2,
+        UserId = admin.UserId,
+        Balance = 1000000m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    _mockUserRepository
+        .Setup(r => r.GetAdmins())
+        .Returns(new List<User> { admin });
+
+    _mockWalletRepository
+        .Setup(r => r.GetByUserId(It.IsAny<int>()))
+        .Returns<int>(userId =>
+        {
+            if (userId == customerId) return customerWallet;
+            if (userId == admin.UserId) return adminWallet;
+            return null;
+        });
+
+    _mockWalletRepository
+        .Setup(r => r.Update(It.IsAny<Wallet>()))
+        .Returns((Wallet wallet) => wallet);
+
+    _mockWalletRepository
+        .Setup(r => r.CreateTransaction(It.IsAny<WalletTransaction>()))
+        .Returns((WalletTransaction transaction) => transaction);
+
+    // Act
+    _walletService.ProcessRefundPayment(customerId, refundAmount, orderNumber);
+
+    // Assert
+    _mockWalletRepository.Verify(r => r.Update(It.Is<Wallet>(
+        w => w.UserId == admin.UserId && w.Balance == 700000m
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.Update(It.Is<Wallet>(
+        w => w.UserId == customerId && w.Balance == 400000m
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.CreateTransaction(It.Is<WalletTransaction>(
+        t => t.WalletId == adminWallet.Id
+             && t.Amount == -refundAmount
+             && t.Type == WalletTransactionType.Deposit
+             && t.Status == WalletTransactionStatus.Success
+             && t.Reference == $"REFUND-ORDER-{orderNumber}"
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.CreateTransaction(It.Is<WalletTransaction>(
+        t => t.WalletId == customerWallet.Id
+             && t.Amount == refundAmount
+             && t.Type == WalletTransactionType.Deposit
+             && t.Status == WalletTransactionStatus.Success
+             && t.Reference == $"REFUND-{orderNumber}"
+    )), Times.Once);
+}
+[Fact]
+public void ProcessRefundPayment_CustomerWalletDoesNotExist_CreatesCustomerWalletAndRefunds()
+{
+    // Arrange
+    var customerId = _testUser.UserId;
+    var refundAmount = 250000m;
+    var orderNumber = "ORD-REFUND-002";
+
+    var admin = new User
+    {
+        UserId = 99,
+        Email = "admin@test.com",
+        FullName = "Admin",
+        Role = UserRole.Admin,
+        IsActive = true
+    };
+
+    var adminWallet = new Wallet
+    {
+        Id = 2,
+        UserId = admin.UserId,
+        Balance = 1000000m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    var createdCustomerWallet = new Wallet
+    {
+        Id = 3,
+        UserId = customerId,
+        Balance = 0m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    _mockUserRepository
+        .Setup(r => r.GetAdmins())
+        .Returns(new List<User> { admin });
+
+    _mockWalletRepository
+        .Setup(r => r.GetByUserId(It.IsAny<int>()))
+        .Returns<int>(userId =>
+        {
+            if (userId == admin.UserId) return adminWallet;
+            if (userId == customerId) return null;
+            return null;
+        });
+
+    _mockWalletRepository
+        .Setup(r => r.Create(It.Is<Wallet>(w => w.UserId == customerId)))
+        .Returns(createdCustomerWallet);
+
+    _mockWalletRepository
+        .Setup(r => r.Update(It.IsAny<Wallet>()))
+        .Returns((Wallet wallet) => wallet);
+
+    _mockWalletRepository
+        .Setup(r => r.CreateTransaction(It.IsAny<WalletTransaction>()))
+        .Returns((WalletTransaction transaction) => transaction);
+
+    // Act
+    _walletService.ProcessRefundPayment(customerId, refundAmount, orderNumber);
+
+    // Assert
+    _mockWalletRepository.Verify(r => r.Create(It.Is<Wallet>(
+        w => w.UserId == customerId && w.Balance == 0m
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.Update(It.Is<Wallet>(
+        w => w.UserId == customerId && w.Balance == refundAmount
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.CreateTransaction(It.Is<WalletTransaction>(
+        t => t.WalletId == createdCustomerWallet.Id
+             && t.Amount == refundAmount
+             && t.Reference == $"REFUND-{orderNumber}"
+    )), Times.Once);
+}
+[Fact]
+public void ProcessRefundPayment_AdminWalletDoesNotExist_CreatesAdminWalletAndDeductsRefundAmount()
+{
+    // Arrange
+    var customerId = _testUser.UserId;
+    var refundAmount = 200000m;
+    var orderNumber = "ORD-REFUND-003";
+
+    var admin = new User
+    {
+        UserId = 99,
+        Email = "admin@test.com",
+        FullName = "Admin",
+        Role = UserRole.Admin,
+        IsActive = true
+    };
+
+    var createdAdminWallet = new Wallet
+    {
+        Id = 4,
+        UserId = admin.UserId,
+        Balance = 0m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    var customerWallet = new Wallet
+    {
+        Id = 1,
+        UserId = customerId,
+        Balance = 50000m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    _mockUserRepository
+        .Setup(r => r.GetAdmins())
+        .Returns(new List<User> { admin });
+
+    _mockWalletRepository
+        .Setup(r => r.GetByUserId(It.IsAny<int>()))
+        .Returns<int>(userId =>
+        {
+            if (userId == customerId) return customerWallet;
+            if (userId == admin.UserId) return null;
+            return null;
+        });
+
+    _mockWalletRepository
+        .Setup(r => r.Create(It.Is<Wallet>(w => w.UserId == admin.UserId)))
+        .Returns(createdAdminWallet);
+
+    _mockWalletRepository
+        .Setup(r => r.Update(It.IsAny<Wallet>()))
+        .Returns((Wallet wallet) => wallet);
+
+    _mockWalletRepository
+        .Setup(r => r.CreateTransaction(It.IsAny<WalletTransaction>()))
+        .Returns((WalletTransaction transaction) => transaction);
+
+    // Act
+    _walletService.ProcessRefundPayment(customerId, refundAmount, orderNumber);
+
+    // Assert
+    _mockWalletRepository.Verify(r => r.Create(It.Is<Wallet>(
+        w => w.UserId == admin.UserId && w.Balance == 0m
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.Update(It.Is<Wallet>(
+        w => w.UserId == admin.UserId && w.Balance == -refundAmount
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.CreateTransaction(It.Is<WalletTransaction>(
+        t => t.WalletId == createdAdminWallet.Id
+             && t.Amount == -refundAmount
+             && t.Reference == $"REFUND-ORDER-{orderNumber}"
+    )), Times.Once);
+}
+[Fact]
+public void ProcessRefundPayment_WhenNoAdminExists_StillRefundsCustomerWallet()
+{
+    // Arrange
+    var customerId = _testUser.UserId;
+    var refundAmount = 150000m;
+    var orderNumber = "ORD-REFUND-004";
+
+    var customerWallet = new Wallet
+    {
+        Id = 1,
+        UserId = customerId,
+        Balance = 50000m,
+        UpdatedAt = DateTime.UtcNow
+    };
+
+    _mockUserRepository
+        .Setup(r => r.GetAdmins())
+        .Returns(new List<User>());
+
+    _mockWalletRepository
+        .Setup(r => r.GetByUserId(customerId))
+        .Returns(customerWallet);
+
+    _mockWalletRepository
+        .Setup(r => r.Update(It.IsAny<Wallet>()))
+        .Returns((Wallet wallet) => wallet);
+
+    _mockWalletRepository
+        .Setup(r => r.CreateTransaction(It.IsAny<WalletTransaction>()))
+        .Returns((WalletTransaction transaction) => transaction);
+
+    // Act
+    _walletService.ProcessRefundPayment(customerId, refundAmount, orderNumber);
+
+    // Assert
+    _mockWalletRepository.Verify(r => r.Update(It.Is<Wallet>(
+        w => w.UserId == customerId && w.Balance == 200000m
+    )), Times.Once);
+
+    _mockWalletRepository.Verify(r => r.CreateTransaction(It.Is<WalletTransaction>(
+        t => t.WalletId == customerWallet.Id
+             && t.Amount == refundAmount
+             && t.Reference == $"REFUND-{orderNumber}"
+    )), Times.Once);
+}
 }
