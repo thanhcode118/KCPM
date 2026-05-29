@@ -148,16 +148,16 @@ namespace HomeDecorShop.Tests.Services
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(7, result.RevenueChartData.Count); // Biểu đồ bắt buộc phải có đủ 7 phần tử
+            Assert.Equal(7, result.RevenueChart.Count); // Biểu đồ bắt buộc phải có đủ 7 phần tử
 
             // Lấy phần tử cuối cùng (tương ứng với i = 0, tức là ngày hôm nay)
-            var todayChartItem = result.RevenueChartData.Last();
-            Assert.Equal(today.ToString("dd/MM"), todayChartItem.DateLabel);
+            var todayChartItem = result.RevenueChart.Last();
+            Assert.Equal(today.ToString("dd/MM"), todayChartItem.Date);
             Assert.Equal(500000m, todayChartItem.Revenue); // 200k + 300k = 500k
 
             // Lấy phần tử kế cuối (tương ứng với ngày hôm qua)
-            var yesterdayChartItem = result.RevenueChartData.ElementAt(result.RevenueChartData.Count - 2);
-            Assert.Equal(today.AddDays(-1).ToString("dd/MM"), yesterdayChartItem.DateLabel);
+            var yesterdayChartItem = result.RevenueChart.ElementAt(result.RevenueChart.Count - 2);
+            Assert.Equal(today.AddDays(-1).ToString("dd/MM"), yesterdayChartItem.Date);
             Assert.Equal(150000m, yesterdayChartItem.Revenue); // Chỉ tính đơn đã Paid, bỏ đơn Pending
         }
 
