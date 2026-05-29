@@ -2,14 +2,15 @@ pipeline {
     agent any
 
     environment {
-        // Cấu hình các biến môi trường
         DOTNET_CLI_HOME = "${WORKSPACE}\\.dotnet"
+        API_URL = "http://localhost:5020"
     }
 
     stages {
+
         stage('1. Checkout Code') {
             steps {
-                echo '=== Tải mã nguồn mới nhất từ kho lưu trữ ==='
+                echo '=== Tải mã nguồn mới nhất ==='
                 cleanWs()
                 checkout scm
             }
@@ -17,16 +18,19 @@ pipeline {
 
         stage('2. Restore & Build Backend') {
             steps {
-                echo '=== Khôi phục các gói NuGet và Biên dịch ứng dụng Backend ==='
-                powershell 'dotnet restore HomeDecorShop/HomeDecorShop.sln'
-                powershell 'dotnet build HomeDecorShop/HomeDecorShop.sln --configuration Release'
+                echo '=== Restore & Build .NET Backend ==='
+
+                powershell '''
+                    dotnet restore HomeDecorShop/HomeDecorShop.sln
+                    dotnet build HomeDecorShop/HomeDecorShop.sln --configuration Release --no-restore
+                '''
             }
         }
 
         stage('3. Run C# Unit Tests') {
             steps {
-                echo '=== Khởi chạy bộ Unit Test xUnit ==='
-                // Chạy dotnet test và thu thập báo cáo kết quả kiểm thử (.trx)
+                echo '=== Chạy Unit Test xUnit ==='
+
                 powershell '''
                     dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj `
                         --configuration Release `
@@ -34,10 +38,11 @@ pipeline {
                         --collect:"XPlat Code Coverage"
                 '''
             }
+
             post {
                 always {
-                    echo '=== Lưu trữ kết quả Unit Test ==='
-                    // Lưu trữ file TRX thô làm Artifact để tải về xem, không lo lỗi thiếu plugin
+                    echo '=== Lưu kết quả Unit Test ==='
+
                     archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
                 }
             }
@@ -45,31 +50,74 @@ pipeline {
 
         stage('4. Start DB & Backend') {
             steps {
-                echo '=== Khởi động SQL Server Container ==='
-                // Xóa cứng bất kỳ container nào có tên 'beeshop-sql' đang chạy trên hệ thống để tránh xung đột giữa các Workspace (@2, @3...)
-                powershell 'docker rm -f beeshop-sql'
-                powershell 'docker compose -f docker-compose.sql.yml down'
-                powershell 'docker compose -f docker-compose.sql.yml up -d'
+                echo '=== Dọn môi trường cũ ==='
 
-                echo '=== Khởi chạy Backend Service ngầm (Port 5020) ==='
-                // Tắt các tiến trình dotnet cũ chạy ngầm (nếu có) để giải phóng cổng 5020
-                powershell 'Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue'
-                
-                // Khởi chạy ứng dụng Web API dưới nền bằng lệnh 'start' của cmd để tách biệt hoàn toàn tiến trình khỏi Jenkins (tránh bị treo)
                 powershell '''
-                    cmd /c "start /min dotnet run --project HomeDecorShop/HomeDecorShop.API/HomeDecorShop.API.csproj --urls http://localhost:5020"
-                    echo "Backend API dang duoc khoi chay ngam. Cho 15s de he thong san sang..."
-                    Start-Sleep -Seconds 15
+                    Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue
+                    docker compose -f docker-compose.sql.yml down
+                    docker rm -f beeshop-sql 2>$null
                 '''
-                
-                echo '=== Seed dữ liệu mẫu vào cơ sở dữ liệu ==='
-                // Tự động seed dữ liệu mẫu để phục vụ cho các bài test Newman
+
+                echo '=== Khởi động SQL Server ==='
+
+                powershell '''
+                    docker compose -f docker-compose.sql.yml up -d
+                '''
+
+                echo '=== Chờ SQL Server sẵn sàng ==='
+
+                powershell '''
+                    Start-Sleep -Seconds 30
+                '''
+
+                echo '=== Khởi động Backend API ngầm ==='
+
+                powershell '''
+                    Start-Process `
+                        -FilePath "dotnet" `
+                        -ArgumentList "run --project HomeDecorShop/HomeDecorShop.API/HomeDecorShop.API.csproj --urls http://localhost:5020" `
+                        -WindowStyle Hidden
+                '''
+
+                echo '=== Kiểm tra API đã chạy chưa ==='
+
+                powershell '''
+                    $ready = $false
+
+                    for ($i = 0; $i -lt 30; $i++) {
+                        try {
+                            Invoke-WebRequest http://localhost:5020/swagger -UseBasicParsing
+                            $ready = $true
+                            break
+                        }
+                        catch {
+                            Write-Host "API chua san sang, retry..."
+                            Start-Sleep -Seconds 2
+                        }
+                    }
+
+                    if (-not $ready) {
+                        Write-Host "API khong khoi dong duoc!"
+                        exit 1
+                    }
+
+                    Write-Host "API da san sang."
+                '''
+
+                echo '=== Seed dữ liệu mẫu ==='
+
                 powershell '''
                     try {
-                        $response = Invoke-RestMethod -Method Post http://localhost:5020/api/Maintenance/seed/all
-                        echo "Seed du lieu thanh cong: $response"
-                    } catch {
-                        echo "Loi khi seed du lieu: $_"
+                        $response = Invoke-RestMethod `
+                            -Method Post `
+                            -Uri http://localhost:5020/api/Maintenance/seed/all
+
+                        Write-Host "Seed thanh cong:"
+                        Write-Host $response
+                    }
+                    catch {
+                        Write-Host "Seed that bai:"
+                        Write-Host $_
                         exit 1
                     }
                 '''
@@ -78,11 +126,16 @@ pipeline {
 
         stage('5. Run Newman API Tests') {
             steps {
-                echo '=== Khởi chạy kiểm thử tự động API bằng Newman ==='
-                // Tạo thư mục lưu kết quả test của Newman
-                powershell 'New-Item -ItemType Directory -Force -Path newman-results'
-                
-                // Chạy bộ sưu tập Postman, sinh báo cáo định dạng JUnit (XML) và HTML đẹp mắt
+
+                echo '=== Chạy Newman API Test ==='
+
+                powershell '''
+                    New-Item `
+                        -ItemType Directory `
+                        -Force `
+                        -Path newman-results
+                '''
+
                 powershell '''
                     newman run HomeDecorShop/HomeDecorShop_Postman.json `
                         --env-var "url=http://localhost:5020" `
@@ -91,30 +144,33 @@ pipeline {
                         --reporter-html-export newman-results/newman-report.html
                 '''
             }
+
             post {
                 always {
-                    echo '=== Xuất báo cáo kết quả Newman API Test ==='
+
+                    echo '=== Publish Newman Report ==='
+
                     script {
+
                         try {
-                            // Xuất đồ thị kiểm thử API lên Jenkins
                             junit 'newman-results/newman-report.xml'
-                        } catch (Exception e) {
-                            echo "WARNING: Khong the hien thi do thi Newman vi thieu plugin 'JUnit'."
+                        }
+                        catch (Exception e) {
+                            echo "WARNING: Thiếu plugin JUnit."
                         }
 
                         try {
-                            // Lưu trữ trang HTML báo cáo kết quả API
                             publishHTML([
-                                allowMissing: false,
+                                allowMissing: true,
                                 alwaysLinkToLastBuild: true,
                                 keepAll: true,
                                 reportDir: 'newman-results',
                                 reportFiles: 'newman-report.html',
-                                reportName: 'Newman API Integration Report',
-                                reportTitles: 'Newman API Integration Test Report'
+                                reportName: 'Newman API Report'
                             ])
-                        } catch (Exception e) {
-                            echo "WARNING: Khong the hien thi bao cao HTML Newman vi thieu plugin 'HTML Publisher'. Vui long vao http://localhost:8080/pluginManager/available de cai dat."
+                        }
+                        catch (Exception e) {
+                            echo "WARNING: Thiếu HTML Publisher plugin."
                         }
                     }
                 }
@@ -123,20 +179,24 @@ pipeline {
     }
 
     post {
+
         always {
-            echo '=== Dọn dẹp tài nguyên và các tiến trình nền ==='
-            // Đảm bảo tắt tiến trình dotnet chạy ngầm để giải phóng cổng 5020 cho build tiếp theo
-            powershell 'Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue'
-            
-            // Dừng database container và xóa cứng để tránh xung đột
-            powershell 'docker compose -f docker-compose.sql.yml down'
-            powershell 'docker rm -f beeshop-sql'
+
+            echo '=== Cleanup ==='
+
+            powershell '''
+                Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue
+                docker compose -f docker-compose.sql.yml down
+                docker rm -f beeshop-sql 2>$null
+            '''
         }
+
         success {
-            echo '=== BẢN BUILD VÀ CÁC BÀI TEST ĐỀU THÀNH CÔNG! 🎉 ==='
+            echo '=== BUILD + TEST THÀNH CÔNG 🎉 ==='
         }
+
         failure {
-            echo '=== BẢN BUILD HOẶC KỂM THỬ THẤT BẠI. VUI LÒNG KIỂM TRA LẠI LOGS! ❌ ==='
+            echo '=== BUILD HOẶC TEST THẤT BẠI ❌ ==='
         }
     }
 }
