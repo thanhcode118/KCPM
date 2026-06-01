@@ -10,7 +10,7 @@ pipeline {
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
         JIRA_PROJECT_KEY = 'HOM'
         JIRA_USER_EMAIL  = 'Thanhhh1005@gmail.com'
-        JIRA_API_TOKEN   = credentials('jira-api-token')      // Lưu trong Jenkins Credentials
+        JIRA_API_TOKEN   = credentials('jira-api-token')
     }
 
     stages {
@@ -226,103 +226,37 @@ pipeline {
             script {
                 echo '=== TẠO JIRA ISSUE TỰ ĐỘNG ==='
 
-                // --- Round-robin: Danh sách Account ID của 4 thành viên ---
-                // TODO: Thay bằng Account ID thật của team (xem hướng dẫn bên dưới)
+                // Round-robin 4 thành viên
                 def teamMembers = [
-                    '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',   // Nguyễn Hà Thanh
-                    '712020:3c276ba2-59aa-4d18-b629-708badf63148',   // NguyenNgocToan
-                    '712020:13aa95c8-c131-4b20-af19-2334569cfa55',   // Thanh Lê
-                    '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'   // Tiếp Nguyễn Thành
+                    '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',
+                    '712020:3c276ba2-59aa-4d18-b629-708badf63148',
+                    '712020:13aa95c8-c131-4b20-af19-2334569cfa55',
+                    '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'
                 ]
-                def assigneeIndex = env.BUILD_NUMBER.toInteger() % teamMembers.size()
-                def assigneeId = teamMembers[assigneeIndex]
+                def idx        = env.BUILD_NUMBER.toInteger() % teamMembers.size()
+                def assigneeId = teamMembers[idx]
 
-                // --- Thu thập thông tin lỗi ---
-                def failedStageName = 'Unknown'
-                def buildLog = ''
-                try {
-                    def logLines = currentBuild.rawBuild.getLog(80)
-                    buildLog = logLines.join('\n')
+                def jiraUrl    = env.JIRA_BASE_URL
+                def jiraKey    = env.JIRA_PROJECT_KEY
+                def jiraEmail  = env.JIRA_USER_EMAIL
+                def jiraToken  = env.JIRA_API_TOKEN
+                def buildNum   = env.BUILD_NUMBER
+                def buildUrl   = env.BUILD_URL ?: 'N/A'
 
-                    // Tìm stage thất bại từ log
-                    for (line in logLines.reverse()) {
-                        def m = (line =~ /Stage '([^']+)'/)
-                        if (m.find()) {
-                            failedStageName = m.group(1)
-                            break
-                        }
-                    }
-                } catch (Exception e) {
-                    buildLog = "Khong the doc build log: ${e.message}"
-                }
+                // JSON body một dòng (tránh lỗi here-string trong Groovy)
+                def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins] Build #${buildNum} FAILED","description":{"version":1,"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Project: HomeDecorShop | Build: #${buildNum} | URL: ${buildUrl} | Assignee index: ${idx}"}]}]},"issuetype":{"name":"Bug"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
 
-                // --- Cắt log nếu quá dài (Jira giới hạn ký tự) ---
-                if (buildLog.length() > 5000) {
-                    buildLog = buildLog.substring(buildLog.length() - 5000)
-                }
-
-                // --- Escape ký tự đặc biệt cho JSON ---
-                def safeLog = buildLog
-                    .replace('\\', '\\\\')
-                    .replace('"', '\\"')
-                    .replace('\n', '\\n')
-                    .replace('\r', '')
-                    .replace('\t', '    ')
-
-                def issueSummary = "[Jenkins] Build #${env.BUILD_NUMBER} FAILED - ${failedStageName}"
-                def issueDesc = "*Project*: HomeDecorShop\\n*Build*: #${env.BUILD_NUMBER}\\n*Stage that bai*: ${failedStageName}\\n*Build URL*: ${env.BUILD_URL}\\n\\n*Chi tiet loi:*\\n{code}\\n${safeLog}\\n{code}"
-
-                // --- Gọi Jira REST API tạo Bug ---
                 powershell """
-                    \$headers = @{
-                        'Authorization' = 'Basic ' + [Convert]::ToBase64String(
-                            [Text.Encoding]::ASCII.GetBytes('${JIRA_USER_EMAIL}:${JIRA_API_TOKEN}')
-                        )
-                        'Content-Type' = 'application/json; charset=utf-8'
-                    }
-
-                    \$body = @"
-{
-    "fields": {
-        "project": { "key": "${JIRA_PROJECT_KEY}" },
-        "summary": "${issueSummary}",
-        "description": {
-            "version": 1,
-            "type": "doc",
-            "content": [
-                {
-                    "type": "paragraph",
-                    "content": [
-                        {
-                            "type": "text",
-                            "text": "${issueDesc}"
-                        }
-                    ]
-                }
-            ]
-        },
-        "issuetype": { "name": "Bug" },
-        "assignee": { "accountId": "${assigneeId}" },
-        "priority": { "name": "High" },
-        "labels": ["auto-jenkins", "ci-cd"]
-    }
-}
-"@
+                    \$creds   = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('${jiraEmail}:${jiraToken}'))
+                    \$headers = @{ 'Authorization' = "Basic \$creds" }
+                    \$bodyBytes = [Text.Encoding]::UTF8.GetBytes('${jsonBody.replace("'", "''")}')
 
                     try {
-                        \$response = Invoke-RestMethod ``
-                            -Uri '${JIRA_BASE_URL}/rest/api/3/issue' ``
-                            -Method POST ``
-                            -Headers \$headers ``
-                            -Body ([System.Text.Encoding]::UTF8.GetBytes(\$body)) ``
-                            -ContentType 'application/json; charset=utf-8'
-
-                        Write-Host "JIRA ISSUE CREATED: \$(\$response.key)"
-                        Write-Host "Link: ${JIRA_BASE_URL}/browse/\$(\$response.key)"
-                        Write-Host "Assigned to member index: ${assigneeIndex}"
-                    }
-                    catch {
-                        Write-Host "FAILED to create Jira issue"
+                        \$res = Invoke-RestMethod -Uri '${jiraUrl}/rest/api/3/issue' -Method POST -Headers \$headers -Body \$bodyBytes -ContentType 'application/json'
+                        Write-Host "=== JIRA ISSUE CREATED: \$(\$res.key) ==="
+                        Write-Host "Link: ${jiraUrl}/browse/\$(\$res.key)"
+                    } catch {
+                        Write-Host "=== FAILED to create Jira issue ==="
                         Write-Host \$_.Exception.Message
                         Write-Host \$_.ErrorDetails.Message
                     }
