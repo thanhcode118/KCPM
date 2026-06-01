@@ -20,6 +20,14 @@ pipeline {
                 echo '=== Tải mã nguồn mới nhất ==='
                 cleanWs()
                 checkout scm
+
+                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
+                powershell '''
+                    Write-Host "Gia lap loi de test Jira integration..."
+                    Write-Host "ERROR: Khong tim thay file cau hinh quan trong!"
+                    exit 1
+                '''
+                // ===== [TEST JIRA] Xoa 5 dong tren sau khi test xong =====
             }
         }
 
