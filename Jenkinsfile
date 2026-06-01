@@ -23,11 +23,12 @@ pipeline {
 
                 // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
                 powershell '''
-                    Write-Host "Gia lap loi de test Jira integration..."
-                    Write-Host "ERROR: Khong tim thay file cau hinh quan trong!"
+                    $errorMsg = "ERROR: Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
+                    Write-Host $errorMsg
+                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
                     exit 1
                 '''
-                // ===== [TEST JIRA] Xoa 5 dong tren sau khi test xong =====
+                // ===== [TEST JIRA] Xoa 8 dong tren sau khi test xong =====
             }
         }
 
@@ -36,12 +37,17 @@ pipeline {
                 echo '=== Restore & Build .NET Backend ==='
 
                 powershell '''
-                    dotnet restore HomeDecorShop/HomeDecorShop.sln --force
-                    if ($LASTEXITCODE -ne 0) { exit 1 }
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        dotnet restore HomeDecorShop/HomeDecorShop.sln --force
+                        if ($LASTEXITCODE -ne 0) { throw "dotnet restore that bai voi exit code $LASTEXITCODE" }
 
-                    dotnet build HomeDecorShop/HomeDecorShop.sln `
-                        --configuration Release
-                    if ($LASTEXITCODE -ne 0) { exit 1 }
+                        dotnet build HomeDecorShop/HomeDecorShop.sln --configuration Release
+                        if ($LASTEXITCODE -ne 0) { throw "dotnet build that bai voi exit code $LASTEXITCODE" }
+                    } catch {
+                        $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                        exit 1
+                    }
                 '''
             }
         }
@@ -51,17 +57,23 @@ pipeline {
                 echo '=== Chạy Unit Test xUnit ==='
 
                 powershell '''
-                    dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj `
-                        --configuration Release `
-                        --logger "trx;LogFileName=unittest-results.trx" `
-                        --collect:"XPlat Code Coverage"
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj `
+                            --configuration Release `
+                            --logger "trx;LogFileName=unittest-results.trx" `
+                            --collect:"XPlat Code Coverage"
+                        if ($LASTEXITCODE -ne 0) { throw "Unit test that bai: $LASTEXITCODE test(s) failed. Xem chi tiet trong file unittest-results.trx" }
+                    } catch {
+                        $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                        exit 1
+                    }
                 '''
             }
 
             post {
                 always {
                     echo '=== Lưu kết quả Unit Test ==='
-
                     archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
                 }
             }
@@ -71,7 +83,6 @@ pipeline {
             steps {
 
                 echo '=== Dọn môi trường cũ ==='
-
                 powershell '''
                     Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue
                     docker compose -f docker-compose.sql.yml down
@@ -79,19 +90,16 @@ pipeline {
                 '''
 
                 echo '=== Khởi động SQL Server ==='
-
                 powershell '''
                     docker compose -f docker-compose.sql.yml up -d
                 '''
 
                 echo '=== Chờ SQL Server sẵn sàng ==='
-
                 powershell '''
                     Start-Sleep -Seconds 30
                 '''
 
                 echo '=== Khởi động Backend API ngầm ==='
-
                 powershell '''
                     Start-Process `
                         -FilePath "dotnet" `
@@ -100,44 +108,37 @@ pipeline {
                 '''
 
                 echo '=== Kiểm tra API ==='
-
                 powershell '''
                     $ready = $false
-
                     for ($i = 0; $i -lt 30; $i++) {
                         try {
                             Invoke-WebRequest http://localhost:5020/swagger -UseBasicParsing
                             $ready = $true
                             break
-                        }
-                        catch {
-                            Write-Host "API chua san sang... retry"
+                        } catch {
+                            Write-Host "API chua san sang... retry $i"
                             Start-Sleep -Seconds 2
                         }
                     }
-
                     if (-not $ready) {
-                        Write-Host "API startup failed"
+                        $msg = "API startup that bai sau 60 giay. Backend khong khoi dong duoc tai http://localhost:5020"
+                        Write-Host $msg
+                        $msg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
                         exit 1
                     }
-
                     Write-Host "API da san sang"
                 '''
 
                 echo '=== Seed dữ liệu ==='
-
                 powershell '''
                     try {
-                        $response = Invoke-RestMethod `
-                            -Method Post `
-                            -Uri http://localhost:5020/api/Maintenance/seed/all
-
+                        $response = Invoke-RestMethod -Method Post -Uri http://localhost:5020/api/Maintenance/seed/all
                         Write-Host "Seed thanh cong"
                         Write-Host $response
-                    }
-                    catch {
-                        Write-Host "Seed that bai"
-                        Write-Host $_
+                    } catch {
+                        $msg = "Seed du lieu that bai: $_"
+                        Write-Host $msg
+                        $msg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
                         exit 1
                     }
                 '''
@@ -145,45 +146,40 @@ pipeline {
         }
 
         stage('5. Run Newman API Tests') {
-
             steps {
 
                 echo '=== Tạo thư mục report ==='
-
                 powershell '''
-                    New-Item `
-                        -ItemType Directory `
-                        -Force `
-                        -Path newman-results
+                    New-Item -ItemType Directory -Force -Path newman-results
                 '''
 
                 echo '=== Chạy Newman ==='
-
                 powershell '''
-                    & "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd" run `
-                        HomeDecorShop/HomeDecorShop_Postman.json `
-                        --env-var "url=http://localhost:5020" `
-                        --reporters cli,junit,html `
-                        --reporter-junit-export newman-results/newman-report.xml `
-                        --reporter-html-export newman-results/newman-report.html
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        & "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd" run `
+                            HomeDecorShop/HomeDecorShop_Postman.json `
+                            --env-var "url=http://localhost:5020" `
+                            --reporters cli,junit,html `
+                            --reporter-junit-export newman-results/newman-report.xml `
+                            --reporter-html-export newman-results/newman-report.html
+                        if ($LASTEXITCODE -ne 0) { throw "Newman API test that bai: $LASTEXITCODE request(s) failed. Xem bao cao tai newman-results/newman-report.html" }
+                    } catch {
+                        $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                        exit 1
+                    }
                 '''
             }
 
             post {
-
                 always {
-
                     echo '=== Publish Newman Reports ==='
-
                     script {
-
                         try {
                             junit 'newman-results/newman-report.xml'
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             echo "WARNING: Khong tim thay JUnit report."
                         }
-
                         try {
                             publishHTML([
                                 allowMissing: true,
@@ -193,8 +189,7 @@ pipeline {
                                 reportFiles: 'newman-report.html',
                                 reportName: 'Newman API Report'
                             ])
-                        }
-                        catch (Exception e) {
+                        } catch (Exception e) {
                             echo "WARNING: HTML Publisher plugin missing."
                         }
                     }
@@ -206,9 +201,7 @@ pipeline {
     post {
 
         always {
-
             echo '=== Cleanup ==='
-
             powershell '''
                 Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue
                 docker compose -f docker-compose.sql.yml down
@@ -226,35 +219,57 @@ pipeline {
             script {
                 echo '=== TẠO JIRA ISSUE TỰ ĐỘNG ==='
 
-                // Round-robin 4 thành viên
+                // ---- Round-robin: 4 thành viên luân phiên nhận bug ----
                 def teamMembers = [
-                    '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',
-                    '712020:3c276ba2-59aa-4d18-b629-708badf63148',
-                    '712020:13aa95c8-c131-4b20-af19-2334569cfa55',
-                    '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'
+                    '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',   // Nguyễn Hà Thanh
+                    '712020:3c276ba2-59aa-4d18-b629-708badf63148',   // NguyenNgocToan
+                    '712020:13aa95c8-c131-4b20-af19-2334569cfa55',   // Thanh Lê
+                    '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'   // Tiếp Nguyễn Thành
                 ]
                 def idx        = env.BUILD_NUMBER.toInteger() % teamMembers.size()
                 def assigneeId = teamMembers[idx]
 
-                def jiraUrl    = env.JIRA_BASE_URL
-                def jiraKey    = env.JIRA_PROJECT_KEY
-                def jiraEmail  = env.JIRA_USER_EMAIL
-                def jiraToken  = env.JIRA_API_TOKEN
-                def buildNum   = env.BUILD_NUMBER
-                def buildUrl   = env.BUILD_URL ?: 'N/A'
+                // ---- Đọc nội dung lỗi từ file do stage ghi ra ----
+                def errorContent = 'Khong ro nguyen nhan loi. Xem Console Output tren Jenkins.'
+                try {
+                    errorContent = readFile('jenkins-error.txt').trim()
+                } catch (Exception e) {
+                    errorContent = "Khong doc duoc file loi: ${e.message}"
+                }
 
-                // JSON body một dòng (tránh lỗi here-string trong Groovy)
-                def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins] Build #${buildNum} FAILED","description":{"version":1,"type":"doc","content":[{"type":"paragraph","content":[{"type":"text","text":"Project: HomeDecorShop | Build: #${buildNum} | URL: ${buildUrl} | Assignee index: ${idx}"}]}]},"issuetype":{"name":"Bug"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
+                // ---- Cắt ngắn nếu quá dài ----
+                if (errorContent.length() > 800) {
+                    errorContent = errorContent.substring(0, 800) + '...(xem them tren Jenkins)'
+                }
+
+                // ---- Escape ký tự đặc biệt trong JSON ----
+                def safeError = errorContent
+                    .replace('\\', '\\\\')
+                    .replace('"', '\\"')
+                    .replace('\n', '\\n')
+                    .replace('\r', '')
+                    .replace('\t', ' ')
+
+                // Metadata
+                def jiraUrl   = env.JIRA_BASE_URL
+                def jiraKey   = env.JIRA_PROJECT_KEY
+                def jiraEmail = env.JIRA_USER_EMAIL
+                def jiraToken = env.JIRA_API_TOKEN
+                def buildNum  = env.BUILD_NUMBER
+                def buildUrl  = env.BUILD_URL ?: 'N/A'
+
+                // ---- Tạo JSON body với nội dung lỗi đầy đủ ----
+                def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins] Build #${buildNum} FAILED","description":{"version":1,"type":"doc","content":[{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Noi dung loi"}]},{"type":"codeBlock","content":[{"type":"text","text":"${safeError}"}]},{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Mo ta"}]},{"type":"paragraph","content":[{"type":"text","text":"Build #${buildNum} tren Jenkins that bai."},{"type":"hardBreak"},{"type":"text","text":"Link xem chi tiet: ${buildUrl}"},{"type":"hardBreak"},{"type":"text","text":"Nguoi duoc giao xu ly: thanh vien so ${idx + 1} (round-robin)"}]}]},"issuetype":{"name":"Bug"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
 
                 powershell """
-                    \$creds   = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('${jiraEmail}:${jiraToken}'))
-                    \$headers = @{ 'Authorization' = "Basic \$creds" }
+                    \$creds    = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('${jiraEmail}:${jiraToken}'))
+                    \$headers  = @{ 'Authorization' = "Basic \$creds" }
                     \$bodyBytes = [Text.Encoding]::UTF8.GetBytes('${jsonBody.replace("'", "''")}')
 
                     try {
                         \$res = Invoke-RestMethod -Uri '${jiraUrl}/rest/api/3/issue' -Method POST -Headers \$headers -Body \$bodyBytes -ContentType 'application/json'
                         Write-Host "=== JIRA ISSUE CREATED: \$(\$res.key) ==="
-                        Write-Host "Link: ${jiraUrl}/browse/\$(\$res.key)"
+                        Write-Host "=== Link: ${jiraUrl}/browse/\$(\$res.key) ==="
                     } catch {
                         Write-Host "=== FAILED to create Jira issue ==="
                         Write-Host \$_.Exception.Message
