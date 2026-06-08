@@ -219,15 +219,19 @@ pipeline {
             script {
                 echo '=== TẠO JIRA ISSUE TỰ ĐỘNG ==='
 
-                // ---- Round-robin: 4 thành viên luân phiên nhận bug ----
-                def teamMembers = [
-                    '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',   // Nguyễn Hà Thanh
-                    '712020:3c276ba2-59aa-4d18-b629-708badf63148',   // NguyenNgocToan
-                    '712020:13aa95c8-c131-4b20-af19-2334569cfa55',   // Thanh Lê
-                    '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'   // Tiếp Nguyễn Thành
+                // ---- Map email Git → Jira Account ID (ai push code lỗi thì nhận bug) ----
+                def emailToJiraId = [
+                    'Thanhhh1005@gmail.com'   : '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',  // Nguyễn Hà Thanh
+                    'nguyenngoctoan@gmail.com' : '712020:3c276ba2-59aa-4d18-b629-708badf63148',  // NguyenNgocToan - SỬA EMAIL NÀY
+                    'thanhle@gmail.com'        : '712020:13aa95c8-c131-4b20-af19-2334569cfa55',  // Thanh Lê - SỬA EMAIL NÀY
+                    'tiepnguyen@gmail.com'     : '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'  // Tiếp Nguyễn Thành - SỬA EMAIL NÀY
                 ]
-                def idx        = env.BUILD_NUMBER.toInteger() % teamMembers.size()
-                def assigneeId = teamMembers[idx]
+                def committerEmail = env.GIT_AUTHOR_EMAIL ?: ''
+                echo "=== Git committer: ${committerEmail} ==="
+                def teamIds    = emailToJiraId.values().toList()
+                def assigneeId = emailToJiraId.containsKey(committerEmail)
+                                    ? emailToJiraId[committerEmail]
+                                    : teamIds[env.BUILD_NUMBER.toInteger() % teamIds.size()]
 
                 // ---- Đọc nội dung lỗi từ file do stage ghi ra ----
                 def errorContent = 'Khong ro nguyen nhan loi. Xem Console Output tren Jenkins.'
