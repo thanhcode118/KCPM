@@ -66,3 +66,6 @@ http://localhost:8080/pluginManager/available
 
 net stop jenkins
 net start jenkins
+
+https://gecko-canning-viability.ngrok-free.dev
+jenkins ngrok

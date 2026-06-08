@@ -4,7 +4,7 @@ pipeline {
     environment {
         DOTNET_CLI_HOME = "${WORKSPACE}\\.dotnet"
         API_URL = "http://localhost:5020"
-        NEWMAN_CMD = "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd"
+        NEWMAN_CMD = powershell(returnStdout: true, script: 'where.exe newman 2>$null | Select-Object -First 1 | ForEach-Object { $_.Trim() }').trim() ?: "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd"
 
         // ===== JIRA INTEGRATION =====
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
@@ -21,14 +21,7 @@ pipeline {
                 cleanWs()
                 checkout scm
 
-                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
-                powershell '''
-                    $errorMsg = "ERROR: Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
-                    Write-Host $errorMsg
-                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
-                    exit 1
-                '''
-                // ===== [TEST JIRA] Xoa 8 dong tren sau khi test xong =====
+
             }
         }
 
@@ -254,28 +247,47 @@ pipeline {
                 def jiraUrl   = env.JIRA_BASE_URL
                 def jiraKey   = env.JIRA_PROJECT_KEY
                 def jiraEmail = env.JIRA_USER_EMAIL
-                def jiraToken = env.JIRA_API_TOKEN
                 def buildNum  = env.BUILD_NUMBER
                 def buildUrl  = env.BUILD_URL ?: 'N/A'
 
                 // ---- Tạo JSON body với nội dung lỗi đầy đủ ----
                 def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins] Build #${buildNum} FAILED","description":{"version":1,"type":"doc","content":[{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Noi dung loi"}]},{"type":"codeBlock","content":[{"type":"text","text":"${safeError}"}]},{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Mo ta"}]},{"type":"paragraph","content":[{"type":"text","text":"Build #${buildNum} tren Jenkins that bai."},{"type":"hardBreak"},{"type":"text","text":"Link xem chi tiet: ${buildUrl}"},{"type":"hardBreak"},{"type":"text","text":"Nguoi duoc giao xu ly: thanh vien so ${idx + 1} (round-robin)"}]}]},"issuetype":{"name":"Bug"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
 
-                powershell """
-                    \$creds    = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes('${jiraEmail}:${jiraToken}'))
-                    \$headers  = @{ 'Authorization' = "Basic \$creds" }
-                    \$bodyBytes = [Text.Encoding]::UTF8.GetBytes('${jsonBody.replace("'", "''")}')
+                // ---- Ghi JSON ra file để tránh mọi vấn đề escape nhiều lớp ----
+                writeFile file: 'jira-payload.json', text: jsonBody
 
-                    try {
-                        \$res = Invoke-RestMethod -Uri '${jiraUrl}/rest/api/3/issue' -Method POST -Headers \$headers -Body \$bodyBytes -ContentType 'application/json'
-                        Write-Host "=== JIRA ISSUE CREATED: \$(\$res.key) ==="
-                        Write-Host "=== Link: ${jiraUrl}/browse/\$(\$res.key) ==="
-                    } catch {
-                        Write-Host "=== FAILED to create Jira issue ==="
-                        Write-Host \$_.Exception.Message
-                        Write-Host \$_.ErrorDetails.Message
-                    }
-                """
+                // ---- Dùng withCredentials + single-quote PS để token không bị Groovy interpolate ----
+                withCredentials([string(credentialsId: 'jira-api-token', variable: 'JIRA_TOKEN_SECRET')]) {
+                    powershell '''
+                        $token   = $env:JIRA_TOKEN_SECRET
+                        $email   = $env:JIRA_USER_EMAIL
+                        $jiraUrl = $env:JIRA_BASE_URL
+
+                        $creds    = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes("${email}:${token}"))
+                        $headers  = @{ Authorization = "Basic $creds"; "Content-Type" = "application/json" }
+                        $bodyBytes = [System.IO.File]::ReadAllBytes((Resolve-Path "jira-payload.json").Path)
+
+                        try {
+                            $res = Invoke-RestMethod -Uri "$jiraUrl/rest/api/3/issue" -Method POST -Headers $headers -Body $bodyBytes -ContentType "application/json"
+                            Write-Host "=== JIRA ISSUE CREATED: $($res.key) ==="
+                            Write-Host "=== Link: $jiraUrl/browse/$($res.key) ==="
+                        } catch {
+                            Write-Host "=== FAILED to create Jira issue ==="
+                            Write-Host "HTTP Status : $($_.Exception.Response.StatusCode.value__)"
+                            Write-Host "Error Msg   : $($_.Exception.Message)"
+                            # Doc response body day du tu Jira de biet chinh xac loi gi
+                            try {
+                                $stream = $_.Exception.Response.GetResponseStream()
+                                $reader = New-Object System.IO.StreamReader($stream)
+                                $reader.BaseStream.Position = 0
+                                $responseBody = $reader.ReadToEnd()
+                                Write-Host "Jira Response Body: $responseBody"
+                            } catch {
+                                Write-Host "ErrorDetails: $($_.ErrorDetails.Message)"
+                            }
+                        }
+                    '''
+                }
             }
         }
     }
