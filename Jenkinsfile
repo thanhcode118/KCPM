@@ -222,9 +222,9 @@ pipeline {
                 // ---- Map email Git → Jira Account ID (ai push code lỗi thì nhận bug) ----
                 def emailToJiraId = [
                     'Thanhhh1005@gmail.com'   : '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c',  // Nguyễn Hà Thanh
-                    'nguyenngoctoan@gmail.com' : '712020:3c276ba2-59aa-4d18-b629-708badf63148',  // NguyenNgocToan - SỬA EMAIL NÀY
-                    'thanhle@gmail.com'        : '712020:13aa95c8-c131-4b20-af19-2334569cfa55',  // Thanh Lê - SỬA EMAIL NÀY
-                    'tiepnguyen@gmail.com'     : '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'  // Tiếp Nguyễn Thành - SỬA EMAIL NÀY
+                    'ngoctoan24042005@gmail.com' : '712020:3c276ba2-59aa-4d18-b629-708badf63148',  // NguyenNgocToan - SỬA EMAIL NÀY
+                    'nguyenhathanh844@gmail.com'        : '712020:13aa95c8-c131-4b20-af19-2334569cfa55',  // Thanh Lê - SỬA EMAIL NÀY
+                    '123tiepnguyenthanh@gmail.com'     : '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'  // Tiếp Nguyễn Thành - SỬA EMAIL NÀY
                 ]
                 def committerEmail = env.GIT_AUTHOR_EMAIL ?: ''
                 echo "=== Git committer: ${committerEmail} ==="
