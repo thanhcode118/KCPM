@@ -21,14 +21,7 @@ pipeline {
                 cleanWs()
                 checkout scm
 
-                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
-                powershell '''
-                    $errorMsg = "ERROR: Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
-                    Write-Host $errorMsg
-                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
-                    exit 1
-                '''
-                // ===== [TEST JIRA] Xoa 8 dong tren sau khi test xong =====
+
             }
         }
 
@@ -145,7 +138,55 @@ pipeline {
             }
         }
 
-        stage('5. Run Newman API Tests') {
+        stage('5. Start Frontend') {
+    steps {
+        echo '=== Khởi động Frontend ==='
+
+        powershell '''
+            $ErrorActionPreference = "Stop"
+
+            try {
+                cd frontend
+
+                npm install
+
+                Start-Process `
+                    -FilePath "cmd.exe" `
+                    -ArgumentList "/c npm run dev -- --host 0.0.0.0 --port 3000" `
+                    -WindowStyle Hidden
+
+                Write-Host "Dang cho Frontend khoi dong..."
+
+                $ready = $false
+                for ($i = 0; $i -lt 30; $i++) {
+                    try {
+                        Invoke-WebRequest http://localhost:3000 -UseBasicParsing
+                        $ready = $true
+                        break
+                    } catch {
+                        Write-Host "Frontend chua san sang... retry $i"
+                        Start-Sleep -Seconds 2
+                    }
+                }
+
+                if (-not $ready) {
+                    $msg = "Frontend startup that bai sau 60 giay. Frontend khong khoi dong duoc tai http://localhost:3000"
+                    Write-Host $msg
+                    $msg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                    exit 1
+                }
+
+                Write-Host "Frontend da san sang tai http://localhost:3000"
+            }
+            catch {
+                $_ | Out-File -FilePath "../jenkins-error.txt" -Encoding utf8
+                exit 1
+            }
+        '''
+    }
+}
+
+        stage('6. Run Newman API Tests') {
             steps {
 
                 echo '=== Tạo thư mục report ==='
@@ -196,6 +237,45 @@ pipeline {
                 }
             }
         }
+stage('7. Run CodeceptJS Tests') {
+    steps {
+        echo '=== Chạy CodeceptJS FE + API Tests ==='
+
+        powershell '''
+            $ErrorActionPreference = "Stop"
+
+            try {
+                cd codecept-tests
+
+                npm install
+
+                $env:FE_URL = "http://localhost:3000"
+                $env:API_URL = "http://localhost:5020"
+
+                npx playwright install chromium
+
+                Write-Host "=== Chay Product Filter Test ==="
+                npx codeceptjs run tests/fe/product_filter_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Filter test that bai voi exit code $LASTEXITCODE"
+                }
+
+                Write-Host "=== Chay Product Detail Bug Test ==="
+                npx codeceptjs run tests/fe/product_detail_bug_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Detail Bug test that bai voi exit code $LASTEXITCODE"
+                }
+
+                Write-Host "=== CodeceptJS tests hoan thanh ==="
+            }
+            catch {
+                $_ | Out-File -FilePath "../jenkins-error.txt" -Encoding utf8
+                exit 1
+            }
+        '''
+    }
+}
+
     }
 
     post {
@@ -204,6 +284,7 @@ pipeline {
             echo '=== Cleanup ==='
             powershell '''
                 Stop-Process -Name dotnet -Force -ErrorAction SilentlyContinue
+                Stop-Process -Name node -Force -ErrorAction SilentlyContinue
                 docker compose -f docker-compose.sql.yml down
                 docker rm -f beeshop-sql 2>$null
             '''
