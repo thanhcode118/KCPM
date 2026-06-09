@@ -186,7 +186,46 @@ pipeline {
     }
 }
 
-        stage('6. Run Newman API Tests') {
+stage('6. Run CodeceptJS Tests') {
+    steps {
+        echo '=== Chạy CodeceptJS FE + API Tests ==='
+
+        powershell '''
+            $ErrorActionPreference = "Stop"
+
+            try {
+                cd codecept-tests
+
+                npm install
+
+                $env:FE_URL = "http://localhost:3000"
+                $env:API_URL = "http://localhost:5020"
+
+                npx playwright install chromium
+
+                Write-Host "=== Chay Product Filter Test ==="
+                npx codeceptjs run tests/fe/product_filter_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Filter test that bai voi exit code $LASTEXITCODE"
+                }
+
+                Write-Host "=== Chay Product Detail Bug Test ==="
+                npx codeceptjs run tests/fe/product_detail_bug_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Detail Bug test that bai voi exit code $LASTEXITCODE"
+                }
+
+                Write-Host "=== CodeceptJS tests hoan thanh ==="
+            }
+            catch {
+                $_ | Out-File -FilePath "../jenkins-error.txt" -Encoding utf8
+                exit 1
+            }
+        '''
+    }
+}
+
+        stage('7. Run Newman API Tests') {
             steps {
 
                 echo '=== Tạo thư mục report ==='
@@ -237,44 +276,7 @@ pipeline {
                 }
             }
         }
-stage('7. Run CodeceptJS Tests') {
-    steps {
-        echo '=== Chạy CodeceptJS FE + API Tests ==='
 
-        powershell '''
-            $ErrorActionPreference = "Stop"
-
-            try {
-                cd codecept-tests
-
-                npm install
-
-                $env:FE_URL = "http://localhost:3000"
-                $env:API_URL = "http://localhost:5020"
-
-                npx playwright install chromium
-
-                Write-Host "=== Chay Product Filter Test ==="
-                npx codeceptjs run tests/fe/product_filter_test.js
-                if ($LASTEXITCODE -ne 0) {
-                    throw "CodeceptJS Product Filter test that bai voi exit code $LASTEXITCODE"
-                }
-
-                Write-Host "=== Chay Product Detail Bug Test ==="
-                npx codeceptjs run tests/fe/product_detail_bug_test.js
-                if ($LASTEXITCODE -ne 0) {
-                    throw "CodeceptJS Product Detail Bug test that bai voi exit code $LASTEXITCODE"
-                }
-
-                Write-Host "=== CodeceptJS tests hoan thanh ==="
-            }
-            catch {
-                $_ | Out-File -FilePath "../jenkins-error.txt" -Encoding utf8
-                exit 1
-            }
-        '''
-    }
-}
 
     }
 
