@@ -1,0 +1,23 @@
+{
+  "name": "codecept-tests",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "codeceptjs run",
+    "test:fe": "codeceptjs run tests/fe",
+    "test:be": "codeceptjs run tests/be",
+    "test:filter": "codeceptjs run tests/fe/product_filter_test.js",
+    "test:detail": "codeceptjs run tests/fe/product_detail_test.js",
+    "test:bug-detail": "codeceptjs run tests/fe/product_detail_bug_test.js",
+    "test:api": "codeceptjs run tests/be/product_api_test.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "devDependencies": {
+    "codeceptjs": "^4.0.6",
+    "playwright": "^1.60.0"
+  }
+}

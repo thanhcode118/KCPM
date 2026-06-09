@@ -60,3 +60,6 @@ test-output.txt
 tmp/
 temp/
 docs/
+HomeDecorShop/HomeDecorShop.Tests/TestResults/
+codecept-tests/node_modules/
+codecept-tests/output/
