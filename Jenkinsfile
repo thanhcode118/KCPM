@@ -226,11 +226,21 @@ pipeline {
                     'nguyenhathanh844@gmail.com'        : '712020:13aa95c8-c131-4b20-af19-2334569cfa55',  // Thanh Lê - SỬA EMAIL NÀY
                     '123tiepnguyenthanh@gmail.com'     : '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'  // Tiếp Nguyễn Thành - SỬA EMAIL NÀY
                 ]
-                def committerEmail = env.GIT_AUTHOR_EMAIL ?: ''
-                echo "=== Git committer: ${committerEmail} ==="
+                // ---- Lấy email người TRIGGER build (bấm Build Now hoặc push code) ----
+                def triggerEmail = ''
+                try {
+                    wrap([$class: 'BuildUser']) {
+                        triggerEmail = env.BUILD_USER_EMAIL ?: ''
+                    }
+                } catch (Exception e) {
+                    // Fallback: dùng git author nếu plugin chưa cài
+                    triggerEmail = env.GIT_AUTHOR_EMAIL ?: ''
+                }
+                echo "=== Triggered by: ${triggerEmail} ==="
+
                 def teamIds    = emailToJiraId.values().toList()
-                def assigneeId = emailToJiraId.containsKey(committerEmail)
-                                    ? emailToJiraId[committerEmail]
+                def assigneeId = emailToJiraId.containsKey(triggerEmail)
+                                    ? emailToJiraId[triggerEmail]
                                     : teamIds[env.BUILD_NUMBER.toInteger() % teamIds.size()]
 
                 // ---- Đọc nội dung lỗi từ file do stage ghi ra ----
