@@ -9,7 +9,7 @@ pipeline {
         // ===== JIRA INTEGRATION =====
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
         JIRA_PROJECT_KEY = 'HOM'
-        JIRA_USER_EMAIL  = 'Thanhhh1005@gmail.com'
+        JIRA_USER_EMAIL  = credentials('jira-user-email')
         JIRA_API_TOKEN   = credentials('jira-api-token')
     }
 
