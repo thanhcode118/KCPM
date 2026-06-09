@@ -272,13 +272,9 @@ pipeline {
                 def buildNum  = env.BUILD_NUMBER
                 def buildUrl  = env.BUILD_URL ?: 'N/A'
 
-                // ---- Xác định reporter = người trigger build ----
-                def reporterId = emailToJiraId.containsKey(triggerEmail)
-                                    ? emailToJiraId[triggerEmail]
-                                    : '712020:5a3019aa-6d3f-409f-83bc-f7b620c2d93c'  // Default: Nguyễn Hà Thanh
-
-                // ---- Tạo JSON body với reporter + assignee đúng người ----
-                def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins] Build #${buildNum} FAILED","description":{"version":1,"type":"doc","content":[{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Noi dung loi"}]},{"type":"codeBlock","content":[{"type":"text","text":"${safeError}"}]},{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Mo ta"}]},{"type":"paragraph","content":[{"type":"text","text":"Build #${buildNum} tren Jenkins that bai."},{"type":"hardBreak"},{"type":"text","text":"Link xem chi tiet: ${buildUrl}"}]}]},"issuetype":{"name":"Bug"},"reporter":{"accountId":"${reporterId}"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
+                // ---- Tạo JSON body với thông tin người trigger ----
+                def triggerInfo = triggerEmail ?: 'Unknown'
+                def jsonBody = """{"fields":{"project":{"key":"${jiraKey}"},"summary":"[Jenkins #${buildNum}] FAILED - Triggered by: ${triggerInfo}","description":{"version":1,"type":"doc","content":[{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Nguoi kich hoat build"}]},{"type":"paragraph","content":[{"type":"text","text":"Email: ${triggerInfo}"}]},{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Noi dung loi"}]},{"type":"codeBlock","content":[{"type":"text","text":"${safeError}"}]},{"type":"heading","attrs":{"level":3},"content":[{"type":"text","text":"Mo ta"}]},{"type":"paragraph","content":[{"type":"text","text":"Build #${buildNum} tren Jenkins that bai."},{"type":"hardBreak"},{"type":"text","text":"Link xem chi tiet: ${buildUrl}"}]}]},"issuetype":{"name":"Bug"},"assignee":{"accountId":"${assigneeId}"},"priority":{"name":"High"},"labels":["auto-jenkins","ci-cd"]}}"""
 
                 // ---- Ghi JSON ra file để tránh lỗi escape nhiều lớp ----
                 writeFile file: 'jira-payload.json', text: jsonBody
