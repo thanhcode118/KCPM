@@ -24,15 +24,6 @@ pipeline {
                 echo '=== Tải mã nguồn mới nhất ==='
                 cleanWs()
                 checkout scm
-                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
-                                powershell '''
-                                    $errorMsg = "ERROR: Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
-                                    Write-Host $errorMsg
-                                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
-                                    exit 1
-                                '''
-                // ===== [TEST JIRA] Xoa 8 dong tren sau khi test xong =====
-
             }
         }
 
