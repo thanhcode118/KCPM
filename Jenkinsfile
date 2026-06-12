@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    triggers {
+        githubPush()
+    }
+
     environment {
         DOTNET_CLI_HOME = "${WORKSPACE}\\.dotnet"
         API_URL = "http://localhost:5020"
