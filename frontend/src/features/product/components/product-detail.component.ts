@@ -13,6 +13,16 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
   imports: [CommonModule, FormsModule, IconComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
+    <section class="bg-white min-h-screen py-10 flex items-center justify-center" *ngIf="productFacade.hasError()">
+      <div class="text-center">
+        <h1 class="text-4xl font-bold text-red-500 mb-4">Sản phẩm không tồn tại</h1>
+        <p class="text-gray-600 text-lg mb-8">{{ productFacade.errorMessage() || 'Sản phẩm bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.' }}</p>
+        <a href="/" class="inline-block bg-honey text-charcoal px-8 py-4 rounded-xl font-bold hover:bg-honey-dark transition-colors shadow-lg">
+          QUAY VỀ TRANG CHỦ
+        </a>
+      </div>
+    </section>
+
     <section class="bg-white min-h-screen py-10" *ngIf="productFacade.selectedProduct() as product">
       <div class="container mx-auto px-4 grid lg:grid-cols-2 gap-12">
         <!-- Gallery -->
@@ -39,7 +49,7 @@ import { AuthFacade } from '@/features/auth/data-access/auth.facade';
             <nav class="flex text-sm text-gray-400 mb-4 items-center gap-2">
               <a href="/" class="hover:text-honey">Trang chủ</a>
               <span>/</span>
-              <a [href]="'/collections/' + product.slug" class="hover:text-honey uppercase tracking-wider">{{ product.category }}</a>
+              <a [href]="'/collections/' + (product.categorySlug || '')" class="hover:text-honey uppercase tracking-wider">{{ product.category }}</a>
             </nav>
             <h1 class="text-4xl font-bold text-charcoal mb-2">{{ product.name | uppercase }}</h1>
             <p class="text-sm text-gray-400 uppercase tracking-widest font-medium">SKU: {{ product.sku }}</p>

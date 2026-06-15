@@ -7,6 +7,7 @@ export interface Product {
   originalPrice?: number;
   categoryId: number;
   category: string;
+  categorySlug?: string;
   image: string;
   hoverImage: string;
   videoUrl?: string;

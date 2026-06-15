@@ -11,6 +11,7 @@ export function mapProductViewDtoToProduct(dto: ProductViewDto): Product {
     originalPrice: dto.oldPrice,
     categoryId: dto.categoryId,
     category: dto.category,
+    categorySlug: dto.categoryNavigation?.slug || dto.category.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/ /g, '-').replace(/[^\w-]+/g, ''),
     image: dto.image,
     hoverImage: dto.hoverImage,
     videoUrl: dto.videoUrl,
