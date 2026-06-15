@@ -8,12 +8,16 @@ pipeline {
     environment {
         DOTNET_CLI_HOME = "${WORKSPACE}\\.dotnet"
         API_URL = "http://localhost:5020"
-        NEWMAN_CMD = "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd"
+        NEWMAN_CMD = "C:\\Users\\admin\\AppData\\Roaming\\npm\\newman.cmd"
 
         // ===== JIRA INTEGRATION =====
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
         JIRA_PROJECT_KEY = 'HOM'
+<<<<<<< Updated upstream
         JIRA_USER_EMAIL  = credentials('jira-user-email')
+=======
+        JIRA_USER_EMAIL  = 'ngoctoan24042005@gmail.com'
+>>>>>>> Stashed changes
         JIRA_API_TOKEN   = credentials('jira-api-token')
     }
 
@@ -239,7 +243,7 @@ stage('6. Run CodeceptJS Tests') {
                 powershell '''
                     $ErrorActionPreference = "Stop"
                     try {
-                        & "C:\\Users\\thanh\\AppData\\Roaming\\npm\\newman.cmd" run `
+                        & "C:\\Users\\admin\\AppData\\Roaming\\npm\\newman.cmd" run `
                             HomeDecorShop/HomeDecorShop_Postman.json `
                             --env-var "url=http://localhost:5020" `
                             --reporters cli,junit,html `
