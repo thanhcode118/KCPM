@@ -13,11 +13,7 @@ pipeline {
         // ===== JIRA INTEGRATION =====
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
         JIRA_PROJECT_KEY = 'HOM'
-<<<<<<< Updated upstream
         JIRA_USER_EMAIL  = credentials('jira-user-email')
-=======
-        JIRA_USER_EMAIL  = 'ngoctoan24042005@gmail.com'
->>>>>>> Stashed changes
         JIRA_API_TOKEN   = credentials('jira-api-token')
     }
 
@@ -28,6 +24,15 @@ pipeline {
                 echo '=== Tải mã nguồn mới nhất ==='
                 cleanWs()
                 checkout scm
+
+                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
+                powershell '''
+                    $errorMsg = "ERROR: [Lỗi ảo test Jira] Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
+                    Write-Host $errorMsg
+                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                    exit 1
+                '''
+                // ===== [TEST JIRA] Xoa đoạn trên sau khi test xong =====
             }
         }
 
