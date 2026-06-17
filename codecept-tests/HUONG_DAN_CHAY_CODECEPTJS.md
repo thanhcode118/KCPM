@@ -10,11 +10,10 @@ Dữ liệu mẫu đã được seed
 
 ---
 
-
 ## 1. Vào thư mục CodeceptJS
 
 ```powershell
-cd E:\KiemChungPhanMem\KCPM\codecept-tests
+cd codecept-tests
 ```
 
 Thư mục này chứa toàn bộ test CodeceptJS của project.
@@ -244,8 +243,6 @@ npm run test:api
 
 ---
 
-
-
 ## 10. Bật trình duyệt khi chạy test
 
 Trong file:
@@ -257,19 +254,19 @@ codecept-tests/codecept.conf.js
 Nếu muốn nhìn thấy trình duyệt mở lên khi test chạy, đổi:
 
 ```js
-show: false
+show: false;
 ```
 
 thành:
 
 ```js
-show: true
+show: true;
 ```
 
 Hoặc nên dùng cách linh hoạt hơn:
 
 ```js
-show: process.env.SHOW_BROWSER === 'true'
+show: process.env.SHOW_BROWSER === "true";
 ```
 
 Khi muốn chạy local có mở trình duyệt:
@@ -359,37 +356,36 @@ thì thêm dòng:
 Ví dụ package.json sau khi thêm:
 
 {
-  "name": "codecept-tests",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "codeceptjs run",
-    "test:fe": "codeceptjs run tests/fe",
-    "test:be": "codeceptjs run tests/be",
-    "test:filter": "codeceptjs run tests/fe/product_filter_test.js",
-    "test:detail": "codeceptjs run tests/fe/product_detail_test.js",
-    "test:bug-detail": "codeceptjs run tests/fe/product_detail_bug_test.js",
-    "test:api": "codeceptjs run tests/be/product_api_test.js",
-    "test:cart": "codeceptjs run tests/fe/cart_test.js"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "devDependencies": {
-    "codeceptjs": "^4.0.6",
-    "playwright": "^1.60.0"
-  }
+"name": "codecept-tests",
+"version": "1.0.0",
+"description": "",
+"main": "index.js",
+"scripts": {
+"test": "codeceptjs run",
+"test:fe": "codeceptjs run tests/fe",
+"test:be": "codeceptjs run tests/be",
+"test:filter": "codeceptjs run tests/fe/product_filter_test.js",
+"test:detail": "codeceptjs run tests/fe/product_detail_test.js",
+"test:bug-detail": "codeceptjs run tests/fe/product_detail_bug_test.js",
+"test:api": "codeceptjs run tests/be/product_api_test.js",
+"test:cart": "codeceptjs run tests/fe/cart_test.js"
+},
+"keywords": [],
+"author": "",
+"license": "ISC",
+"type": "commonjs",
+"devDependencies": {
+"codeceptjs": "^4.0.6",
+"playwright": "^1.60.0"
+}
 }
 
 Lưu ý:
 
 Dòng script trước dòng mới phải có dấu phẩy.
 Dòng script cuối cùng không cần dấu phẩy.
+
 ---
-
-
 
 ## 12. Các file không được commit
 
@@ -425,6 +421,4 @@ codecept-tests/node_modules/
 codecept-tests/output/
 HomeDecorShop/HomeDecorShop.Tests/TestResults/
 
-Lưu file lại.
----
-
+## Lưu file lại.

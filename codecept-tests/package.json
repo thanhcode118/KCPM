@@ -10,6 +10,7 @@
     "test:filter": "codeceptjs run tests/fe/product_filter_test.js",
     "test:detail": "codeceptjs run tests/fe/product_detail_test.js",
     "test:bug-detail": "codeceptjs run tests/fe/product_detail_bug_test.js",
+    "test:cart-bug": "codeceptjs run tests/fe/cart_bug_test.js",
     "test:api": "codeceptjs run tests/be/product_api_test.js"
   },
   "keywords": [],
