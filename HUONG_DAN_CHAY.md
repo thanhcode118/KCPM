@@ -69,3 +69,12 @@ net start jenkins
 
 https://gecko-canning-viability.ngrok-free.dev
 jenkins ngrok
+
+##  testing with playwright
+
+cd frontend
+
+## luong user
+npx playwright test tests/cart-order.spec.ts --headed
+## luong admin
+npx playwright test tests/admin-dashboard.spec.ts --headed
