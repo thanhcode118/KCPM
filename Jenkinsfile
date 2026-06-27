@@ -14,6 +14,9 @@ pipeline {
         JIRA_BASE_URL    = 'https://nguyenhathanh844.atlassian.net'
         JIRA_PROJECT_KEY = 'HOM'
         JIRA_USER_EMAIL  = credentials('jira-user-email')
+=======
+        JIRA_USER_EMAIL  = 'ngoctoan24042005@gmail.com'
+>>>>>>> Stashed changes
         JIRA_API_TOKEN   = credentials('jira-api-token')
     }
 
