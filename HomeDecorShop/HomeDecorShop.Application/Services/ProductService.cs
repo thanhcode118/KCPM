@@ -340,7 +340,7 @@ public sealed class ProductService(
 
     private void ValidatePricing(decimal price, decimal? originalPrice)
     {
-        if (originalPrice is null || originalPrice.Value >= price)
+        if (originalPrice is null || originalPrice.Value <= price) // BUG: Thay đổi thành >= để fix lỗi
         {
             return;
         }
