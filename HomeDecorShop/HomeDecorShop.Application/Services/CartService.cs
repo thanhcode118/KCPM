@@ -43,7 +43,7 @@ public sealed class CartService(
         };
 
         var existingItem = cart.Items.FirstOrDefault(item => item.ProductId == input.ProductId);
-        var desiredQuantity = (existingItem?.Quantity ?? 0) + input.Quantity;
+        var desiredQuantity = input.Quantity; // BUG: Thay đổi thành (existingItem?.Quantity ?? 0) + input.Quantity để fix lỗi
         EnsureStockAvailable(product, desiredQuantity);
 
         if (existingItem is null)

@@ -620,4 +620,322 @@ public class ProductServiceTests
 
         _mockProductRepository.Verify(r => r.Update(product), Times.Once);
     }
+
+    /// <summary>
+    /// Scenario 15: Create thành công khi các trường thông tin hợp lệ.
+    /// </summary>
+    [Fact]
+    public void Create_WithValidInput_ShouldCreateAndReturnProductView()
+    {
+        // Arrange
+        var input = new ProductUpsertInput
+        {
+            Sku = "NEW-SKU",
+            Name = "New Product",
+            Slug = "new-product",
+            Price = 100.0m,
+            OriginalPrice = 150.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            VideoUrl = "video.mp4",
+            Tag = "Hot",
+            SoldPercentage = 0,
+            StockLeft = 50,
+            Rating = 5.0,
+            Reviews = 0,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            InStock = true,
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = true };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+        _mockProductRepository.Setup(r => r.GetBySku("NEW-SKU")).Returns((Product?)null);
+        _mockProductRepository.Setup(r => r.GetBySlug("new-product")).Returns((Product?)null);
+
+        var createdProduct = new Product
+        {
+            ProductId = 99,
+            Sku = "NEW-SKU",
+            ProductName = "New Product",
+            Slug = "new-product",
+            Price = 100.0m,
+            OldPrice = 150.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            VideoUrl = "video.mp4",
+            Tag = "Hot",
+            SoldPercentage = 0,
+            StockLeft = 50,
+            Rating = 5.0,
+            Reviews = 0,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            InStock = true,
+            IsActive = true
+        };
+
+        _mockProductRepository.Setup(r => r.Create(It.IsAny<Product>())).Returns(createdProduct);
+        _mockProductRepository.Setup(r => r.GetById(99)).Returns(createdProduct);
+
+        // Act
+        var result = _productService.Create(input);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(99, result.ProductId);
+        Assert.Equal("NEW-SKU", result.Sku);
+        _mockProductRepository.Verify(r => r.Create(It.IsAny<Product>()), Times.Once);
+    }
+
+    /// <summary>
+    /// Scenario 16: Create thất bại với Sku bị trùng lặp.
+    /// </summary>
+    [Fact]
+    public void Create_WithDuplicateSku_ShouldThrowConflictException()
+    {
+        // Arrange
+        var input = new ProductUpsertInput
+        {
+            Sku = "CH-001",
+            Name = "New Product",
+            Slug = "new-product",
+            Price = 100.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            StockLeft = 50,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = true };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+        _mockProductRepository.Setup(r => r.GetBySku("CH-001")).Returns(new Product { ProductId = 1, Sku = "CH-001" });
+
+        // Act & Assert
+        var exception = Assert.Throws<ConflictException>(() => _productService.Create(input));
+        Assert.Equal("Product SKU is already in use.", exception.Message);
+    }
+
+    /// <summary>
+    /// Scenario 17: Create thất bại với Slug bị trùng lặp.
+    /// </summary>
+    [Fact]
+    public void Create_WithDuplicateSlug_ShouldThrowConflictException()
+    {
+        // Arrange
+        var input = new ProductUpsertInput
+        {
+            Sku = "NEW-SKU",
+            Name = "New Product",
+            Slug = "classic-wooden-chair",
+            Price = 100.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            StockLeft = 50,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = true };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+        _mockProductRepository.Setup(r => r.GetBySku("NEW-SKU")).Returns((Product?)null);
+        _mockProductRepository.Setup(r => r.GetBySlug("classic-wooden-chair")).Returns(new Product { ProductId = 1, Slug = "classic-wooden-chair" });
+
+        // Act & Assert
+        var exception = Assert.Throws<ConflictException>(() => _productService.Create(input));
+        Assert.Equal("Product slug is already in use.", exception.Message);
+    }
+
+    /// <summary>
+    /// Scenario 18: Create thất bại khi OriginalPrice nhỏ hơn Price.
+    /// </summary>
+    [Fact]
+    public void Create_WithOriginalPriceLessThanCurrentPrice_ShouldThrowRequestValidationException()
+    {
+        // Arrange
+        var input = new ProductUpsertInput
+        {
+            Sku = "NEW-SKU",
+            Name = "New Product",
+            Slug = "new-product",
+            Price = 100.0m,
+            OriginalPrice = 50.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            StockLeft = 50,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = true };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+
+        // Act & Assert
+        var exception = Assert.Throws<RequestValidationException>(() => _productService.Create(input));
+        Assert.Equal("Original price must be greater than or equal to the current price.", exception.Message);
+    }
+
+    /// <summary>
+    /// Scenario 19: Create thất bại với Category không hoạt động (IsActive = false).
+    /// </summary>
+    [Fact]
+    public void Create_WithInactiveCategory_ShouldThrowConflictException()
+    {
+        // Arrange
+        var input = new ProductUpsertInput
+        {
+            Sku = "NEW-SKU",
+            Name = "New Product",
+            Slug = "new-product",
+            Price = 100.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "image.jpg",
+            HoverImage = "hover.jpg",
+            StockLeft = 50,
+            Brand = "WoodWorks",
+            Color = "Red",
+            Material = "Wood",
+            Style = "Modern",
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = false };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+
+        // Act & Assert
+        var exception = Assert.Throws<ConflictException>(() => _productService.Create(input));
+        Assert.Equal("Selected category is inactive and cannot be assigned to a product.", exception.Message);
+    }
+
+    /// <summary>
+    /// Scenario 20: Update thành công khi sản phẩm tồn tại và thông tin hợp lệ.
+    /// </summary>
+    [Fact]
+    public void Update_WithValidInput_ShouldUpdateAndReturnProductView()
+    {
+        // Arrange
+        var productId = 1;
+        var existingProduct = new Product
+        {
+            ProductId = productId,
+            Sku = "CH-001",
+            ProductName = "Old Name",
+            Slug = "old-name",
+            Price = 120.0m,
+            CategoryId = 1,
+            IsActive = true
+        };
+
+        var input = new ProductUpsertInput
+        {
+            Sku = "CH-001-MOD",
+            Name = "Updated Chair",
+            Slug = "updated-chair",
+            Price = 130.0m,
+            CategoryId = 1,
+            Category = "Furniture",
+            Image = "new-image.jpg",
+            HoverImage = "new-hover.jpg",
+            StockLeft = 5,
+            Brand = "WoodWorks",
+            Color = "Brown",
+            Material = "Wood",
+            Style = "Classic",
+            IsActive = true
+        };
+
+        var category = new Category { Id = 1, Name = "Furniture", Slug = "furniture", IsActive = true };
+        _mockCategoryRepository.Setup(r => r.GetById(1)).Returns(category);
+        _mockProductRepository.Setup(r => r.GetById(productId)).Returns(existingProduct);
+        _mockProductRepository.Setup(r => r.GetBySku("CH-001-MOD")).Returns((Product?)null);
+        _mockProductRepository.Setup(r => r.GetBySlug("updated-chair")).Returns((Product?)null);
+        _mockProductRepository.Setup(r => r.Update(existingProduct)).Returns(existingProduct);
+
+        // Act
+        var result = _productService.Update(productId, input);
+
+        // Assert
+        Assert.NotNull(result);
+        Assert.Equal(productId, result.ProductId);
+        Assert.Equal("CH-001-MOD", result.Sku);
+        Assert.Equal("Updated Chair", result.ProductName);
+        _mockProductRepository.Verify(r => r.Update(existingProduct), Times.Once);
+    }
+
+    /// <summary>
+    /// Scenario 21: Update trả về null khi sản phẩm không tồn tại.
+    /// </summary>
+    [Fact]
+    public void Update_ProductDoesNotExist_ShouldReturnNull()
+    {
+        // Arrange
+        var input = new ProductUpsertInput { Sku = "NEW-SKU", CategoryId = 1 };
+        _mockProductRepository.Setup(r => r.GetById(999)).Returns((Product?)null);
+
+        // Act
+        var result = _productService.Update(999, input);
+
+        // Assert
+        Assert.Null(result);
+    }
+
+    /// <summary>
+    /// Scenario 22: Delete thành công với mã sản phẩm hợp lệ.
+    /// </summary>
+    [Fact]
+    public void Delete_WithValidId_ShouldCallRepositoryDeleteAndReturnTrue()
+    {
+        // Arrange
+        _mockProductRepository.Setup(r => r.Delete(1)).Returns(true);
+
+        // Act
+        var result = _productService.Delete(1);
+
+        // Assert
+        Assert.True(result);
+        _mockProductRepository.Verify(r => r.Delete(1), Times.Once);
+    }
+
+    /// <summary>
+    /// Scenario 23: Delete trả về false khi sản phẩm không tồn tại.
+    /// </summary>
+    [Fact]
+    public void Delete_WithInvalidId_ShouldReturnFalse()
+    {
+        // Arrange
+        _mockProductRepository.Setup(r => r.Delete(999)).Returns(false);
+
+        // Act
+        var result = _productService.Delete(999);
+
+        // Assert
+        Assert.False(result);
+        _mockProductRepository.Verify(r => r.Delete(999), Times.Once);
+    }
 }

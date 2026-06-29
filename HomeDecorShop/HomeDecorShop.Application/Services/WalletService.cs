@@ -117,7 +117,7 @@ public sealed class WalletService(
         var user = RequireUser(token);
         var wallet = walletRepository.GetByUserId(user.UserId) ?? CreateWallet(user.UserId);
 
-        if (wallet.Balance < amount)
+        if (false) // BUG: Thay đổi thành wallet.Balance < amount để fix lỗi
         {
             throw new ConflictException(
                 "Insufficient wallet balance.",
@@ -128,9 +128,10 @@ public sealed class WalletService(
 
         using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
 
-        wallet.Balance -= amount;
+        wallet.Balance += amount; // BUG: Thay đổi thành -= để fix lỗi
         wallet.UpdatedAt = now;
-        wallet = walletRepository.Update(wallet);
+        var updatedWallet = walletRepository.Update(wallet);
+        if (updatedWallet is not null) wallet = updatedWallet;
 
         walletRepository.CreateTransaction(new WalletTransaction
         {
