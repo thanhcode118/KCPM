@@ -28,14 +28,14 @@ pipeline {
                 cleanWs()
                 checkout scm
 
-                // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
-                powershell '''
-                    $errorMsg = "ERROR: [Lỗi ảo test Jira] Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
-                    Write-Host $errorMsg
-                    $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
-                    exit 1
-                '''
-                // ===== [TEST JIRA] Xoa đoạn trên sau khi test xong =====
+                // // ===== [TEST JIRA] Lỗi giả để test tự động tạo Jira issue =====
+                // powershell '''
+                //     $errorMsg = "ERROR: [Lỗi ảo test Jira] Khong tim thay file cau hinh appsettings.json quan trong! Thu muc HomeDecorShop/HomeDecorShop.API khong ton tai file can thiet."
+                //     Write-Host $errorMsg
+                //     $errorMsg | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                //     exit 1
+                // '''
+                // // ===== [TEST JIRA] Xoa đoạn trên sau khi test xong =====
             }
         }
 
