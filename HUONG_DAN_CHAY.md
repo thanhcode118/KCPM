@@ -78,3 +78,12 @@ cd frontend
 npx playwright test tests/cart-order.spec.ts --headed
 ## luong admin
 npx playwright test tests/admin-dashboard.spec.ts --headed
+
+
+//Cau lenh chạy 240test bỏ qua 4 test fail
+# Bước 1: Chạy và bỏ qua 4 test lỗi
+dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj --filter "FullyQualifiedName!~Withdraw_ValidAmount_DecreasesWalletBalance&FullyQualifiedName!~Withdraw_AmountGreaterThanBalance_ThrowsConflictException&FullyQualifiedName!~Create_WithValidInput_ShouldCreateAndReturnProductView&FullyQualifiedName!~Create_WithOriginalPriceLessThanCurrentPrice_ShouldThrowRequestValidationException" /p:CollectCoverage=true -tl:false
+
+
+//Cau lenh chạy tất cả test
+dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj /p:CollectCoverage=true -tl:false

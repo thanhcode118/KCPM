@@ -8,7 +8,8 @@
     "build": "ng build",
     "preview": "ng serve --configuration=production",
     "test": "ng test --watch=false",
-    "test:watch": "ng test"
+    "test:watch": "ng test",
+    "test:coverage": "vitest run --coverage"
   },
   "dependencies": {
     "@angular/build": "21.1.4",
@@ -29,6 +30,7 @@
     "jsdom": "^29.0.0",
     "typescript": "~5.9.3",
     "vite": "^6.2.0",
-    "vitest": "^4.0.8"
+    "vitest": "^4.0.8",
+    "@vitest/coverage-v8": "^4.0.8"
   }
 }
