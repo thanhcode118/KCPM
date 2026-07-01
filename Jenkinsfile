@@ -15,8 +15,6 @@ pipeline {
         JIRA_PROJECT_KEY = 'HOM'
         JIRA_USER_EMAIL  = credentials('jira-user-email')
         JIRA_API_TOKEN   = credentials('jira-api-token')
-        JIRA_ISSUE_TYPE  = 'Task'
-JIRA_API_VERSION = '3'
     }
 
     stages {
@@ -58,15 +56,42 @@ JIRA_API_VERSION = '3'
             }
         }
 
-stage('3. Run C# Unit Tests') {
-    when {
-        expression { return false }
-    }
+        stage('3. Run C# Unit Tests') {
+            steps {
+                echo '=== Chạy Unit Test xUnit ==='
 
-    steps {
-        echo '=== Bỏ qua C# Unit Tests vì pipeline này chỉ chạy FE CodeceptJS ==='
-    }
-}
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj `
+                            --configuration Release `
+                            --logger "trx;LogFileName=unittest-results.trx" `
+                            /p:CollectCoverage=true `
+                            /p:CoverletOutputFormat=cobertura `
+                            /p:CoverletOutput=./TestResults/
+                        if ($LASTEXITCODE -ne 0) { throw "Unit test that bai: $LASTEXITCODE test(s) failed. Xem chi tiet trong file unittest-results.trx" }
+                    } catch {
+                        $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                        exit 1
+                    }
+                '''
+            }
+
+            post {
+                always {
+                    echo '=== Lưu kết quả Unit Test ==='
+                    archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**/TestResults/*.xml', allowEmptyArchive: true
+                    script {
+                        try {
+                            publishCoverage adapters: [coberturaAdapter('**/TestResults/coverage.cobertura.xml')]
+                        } catch (Exception e) {
+                            echo "WARNING: Khong the publish coverage. Co the thieu Coverage Plugin. Chi tiet: ${e.message}"
+                        }
+                    }
+                }
+            }
+        }
 
         stage('4. Start DB & Backend') {
             steps {
@@ -182,12 +207,14 @@ stage('3. Run C# Unit Tests') {
     }
 }
 
-stage('6. Run FE CodeceptJS Tests Only') {
+stage('6. Run CodeceptJS Tests') {
     steps {
-        echo '=== Chạy FE CodeceptJS Tests Only ==='
+        echo '=== Chạy CodeceptJS FE + API Tests ==='
 
-        catchError(buildResult: 'SUCCESS', stageResult: 'UNSTABLE') {
-            powershell '''
+        powershell '''
+            $ErrorActionPreference = "Stop"
+
+            try {
                 cd codecept-tests
 
                 npm install
@@ -195,82 +222,81 @@ stage('6. Run FE CodeceptJS Tests Only') {
                 $env:FE_URL = "http://localhost:3000"
                 $env:API_URL = "http://localhost:5020"
 
-                $env:JIRA_BASE_URL = $env:JIRA_BASE_URL
-                $env:JIRA_PROJECT_KEY = $env:JIRA_PROJECT_KEY
-                $env:JIRA_USER_EMAIL = $env:JIRA_USER_EMAIL
-                $env:JIRA_EMAIL = $env:JIRA_USER_EMAIL
-                $env:JIRA_API_TOKEN = $env:JIRA_API_TOKEN
-                $env:JIRA_ISSUE_TYPE = "Task"
-                $env:JIRA_API_VERSION = "3"
-
                 npx playwright install chromium
 
-                npm run test:fe:ci
-            '''
-        }
-    }
+                Write-Host "=== Chay Product Filter Test ==="
+                npx codeceptjs run tests/fe/product_filter_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Filter test that bai voi exit code $LASTEXITCODE"
+                }
 
-    post {
-        always {
-            echo '=== Lưu log FE CodeceptJS ==='
-            archiveArtifacts artifacts: 'codecept-tests/fe-codecept-results/**/*, codecept-tests/output/**/*', allowEmptyArchive: true
-        }
-    }
-}
+                Write-Host "=== Chay Product Detail Bug Test ==="
+                npx codeceptjs run tests/fe/product_detail_bug_test.js
+                if ($LASTEXITCODE -ne 0) {
+                    throw "CodeceptJS Product Detail Bug test that bai voi exit code $LASTEXITCODE"
+                }
 
-/*
-stage('7. Run Newman API Tests') {
-    steps {
-
-        echo '=== Tạo thư mục report ==='
-        powershell '''
-            New-Item -ItemType Directory -Force -Path newman-results
-        '''
-
-        echo '=== Chạy Newman ==='
-        powershell '''
-            $ErrorActionPreference = "Stop"
-            try {
-                & "C:\\Users\\admin\\AppData\\Roaming\\npm\\newman.cmd" run `
-                    HomeDecorShop/HomeDecorShop_Postman.json `
-                    --env-var "url=http://localhost:5020" `
-                    --reporters cli,junit,html `
-                    --reporter-junit-export newman-results/newman-report.xml `
-                    --reporter-html-export newman-results/newman-report.html
-                if ($LASTEXITCODE -ne 0) { throw "Newman API test that bai: $LASTEXITCODE request(s) failed. Xem bao cao tai newman-results/newman-report.html" }
-            } catch {
-                $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                Write-Host "=== CodeceptJS tests hoan thanh ==="
+            }
+            catch {
+                $_ | Out-File -FilePath "../jenkins-error.txt" -Encoding utf8
                 exit 1
             }
         '''
     }
+}
 
-    post {
-        always {
-            echo '=== Publish Newman Reports ==='
-            script {
-                try {
-                    junit 'newman-results/newman-report.xml'
-                } catch (Exception e) {
-                    echo "WARNING: Khong tim thay JUnit report."
-                }
-                try {
-                    publishHTML([
-                        allowMissing: true,
-                        alwaysLinkToLastBuild: true,
-                        keepAll: true,
-                        reportDir: 'newman-results',
-                        reportFiles: 'newman-report.html',
-                        reportName: 'Newman API Report'
-                    ])
-                } catch (Exception e) {
-                    echo "WARNING: HTML Publisher plugin missing."
+        stage('7. Run Newman API Tests') {
+            steps {
+
+                echo '=== Tạo thư mục report ==='
+                powershell '''
+                    New-Item -ItemType Directory -Force -Path newman-results
+                '''
+
+                echo '=== Chạy Newman ==='
+                powershell '''
+                    $ErrorActionPreference = "Stop"
+                    try {
+                        & "C:\\Users\\admin\\AppData\\Roaming\\npm\\newman.cmd" run `
+                            HomeDecorShop/HomeDecorShop_Postman.json `
+                            --env-var "url=http://localhost:5020" `
+                            --reporters cli,junit,html `
+                            --reporter-junit-export newman-results/newman-report.xml `
+                            --reporter-html-export newman-results/newman-report.html
+                        if ($LASTEXITCODE -ne 0) { throw "Newman API test that bai: $LASTEXITCODE request(s) failed. Xem bao cao tai newman-results/newman-report.html" }
+                    } catch {
+                        $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
+                        exit 1
+                    }
+                '''
+            }
+
+            post {
+                always {
+                    echo '=== Publish Newman Reports ==='
+                    script {
+                        try {
+                            junit 'newman-results/newman-report.xml'
+                        } catch (Exception e) {
+                            echo "WARNING: Khong tim thay JUnit report."
+                        }
+                        try {
+                            publishHTML([
+                                allowMissing: true,
+                                alwaysLinkToLastBuild: true,
+                                keepAll: true,
+                                reportDir: 'newman-results',
+                                reportFiles: 'newman-report.html',
+                                reportName: 'Newman API Report'
+                            ])
+                        } catch (Exception e) {
+                            echo "WARNING: HTML Publisher plugin missing."
+                        }
+                    }
                 }
             }
         }
-    }
-}
-*/
 
 
     }
@@ -291,7 +317,6 @@ stage('7. Run Newman API Tests') {
             echo '=== BUILD + API TEST + UNIT TEST THÀNH CÔNG 🎉 ==='
         }
 
-/*
         failure {
             echo '=== BUILD HOẶC TEST THẤT BẠI ❌ ==='
 
@@ -305,7 +330,6 @@ stage('7. Run Newman API Tests') {
                     'nguyenhathanh844@gmail.com'        : '712020:13aa95c8-c131-4b20-af19-2334569cfa55',  // Thanh Lê - SỬA EMAIL NÀY
                     '123tiepnguyenthanh@gmail.com'     : '712020:0f0e1f4b-2bb3-4a9d-a90e-597b8d90f701'  // Tiếp Nguyễn Thành - SỬA EMAIL NÀY
                 ]
-
                 // ---- Lấy email người TRIGGER build (bấm Build Now hoặc push code) ----
                 def triggerEmail = ''
                 try {
@@ -389,6 +413,5 @@ stage('7. Run Newman API Tests') {
                 }
             }
         }
-*/
     }
 }
