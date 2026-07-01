@@ -15,7 +15,13 @@
     "coverage:blackbox": "node scripts/calc-blackbox-coverage.js",
     "coverage:blackbox:write": "node scripts/calc-blackbox-coverage.js --write",
     "test:be:catalog": "codeceptjs run tests/be/catalog_api_test.js",
-    "test:api": "codeceptjs run tests/be/product_api_test.js"
+    "test:be:cart-order": "codeceptjs run tests/be/cart_order_api_test.js",
+    "test:be:payment-wallet": "codeceptjs run tests/be/payment_wallet_api_test.js",
+    "test:be:admin": "codeceptjs run tests/be/admin_api_test.js",
+    "test:be:system-content": "codeceptjs run tests/be/system_content_api_test.js",
+    "test:api": "codeceptjs run tests/be/product_api_test.js",
+    "test:fe:public": "codeceptjs run tests/fe/public_catalog_ui_test.js",
+    "test:fe:auth": "codeceptjs run tests/fe/auth_account_ui_test.js"
   },
   "keywords": [],
   "author": "",
