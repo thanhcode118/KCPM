@@ -69,7 +69,9 @@ pipeline {
                         dotnet test HomeDecorShop/HomeDecorShop.Tests/HomeDecorShop.Tests.csproj `
                             --configuration Release `
                             --logger "trx;LogFileName=unittest-results.trx" `
-                            --collect:"XPlat Code Coverage"
+                            /p:CollectCoverage=true `
+                            /p:CoverletOutputFormat=cobertura `
+                            /p:CoverletOutput=./TestResults/
                         if ($LASTEXITCODE -ne 0) { throw "Unit test that bai: $LASTEXITCODE test(s) failed. Xem chi tiet trong file unittest-results.trx" }
                     } catch {
                         $_ | Out-File -FilePath "jenkins-error.txt" -Encoding utf8
@@ -82,6 +84,14 @@ pipeline {
                 always {
                     echo '=== Lưu kết quả Unit Test ==='
                     archiveArtifacts artifacts: '**/TestResults/*.trx', allowEmptyArchive: true
+                    archiveArtifacts artifacts: '**/TestResults/*.xml', allowEmptyArchive: true
+                    script {
+                        try {
+                            publishCoverage adapters: [coberturaAdapter('**/TestResults/coverage.cobertura.xml')]
+                        } catch (Exception e) {
+                            echo "WARNING: Khong the publish coverage. Co the thieu Coverage Plugin. Chi tiet: ${e.message}"
+                        }
+                    }
                 }
             }
         }
