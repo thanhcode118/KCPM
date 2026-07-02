@@ -297,9 +297,9 @@ export class ProductDetailComponent {
   }
 
   addToCart(): void {
-    const productId = this.productFacade.selectedProduct().id;
-    if (productId > 0) {
-      this.checkoutFacade.addToCart(productId, this.quantity());
+    const product = this.productFacade.selectedProduct();
+    if (product && product.id > 0) {
+      this.checkoutFacade.addProductToCart(product, this.quantity());
       // Optional: triggering a small UI feedback
     }
   }
