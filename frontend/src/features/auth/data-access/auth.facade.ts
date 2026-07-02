@@ -54,6 +54,7 @@ export class AuthFacade {
 
   private readonly currentUserSignal = signal<AuthSession | null>(null);
   private readonly isRestoringSignal = signal(false);
+  private readonly isRestoringSubject = new BehaviorSubject<boolean>(false);
   private readonly loginStateSubject = new BehaviorSubject<LoginFlowState>(createLoginFlowState());
   private readonly registerStateSubject = new BehaviorSubject<RegisterFlowState>(createRegisterFlowState());
   private readonly confirmEmailStateSubject = new BehaviorSubject<ConfirmEmailFlowState>(createConfirmEmailFlowState());
@@ -63,6 +64,7 @@ export class AuthFacade {
   readonly isAdmin = computed(() => this.currentUserSignal()?.role === 'admin');
   readonly addresses = computed(() => this.currentUserSignal()?.addresses ?? []);
   readonly isRestoring = computed(() => this.isRestoringSignal());
+  readonly isRestoring$ = this.isRestoringSubject.asObservable();
   readonly loginState$ = this.loginStateSubject.asObservable();
   readonly registerState$ = this.registerStateSubject.asObservable();
   readonly confirmEmailState$ = this.confirmEmailStateSubject.asObservable();
@@ -74,6 +76,7 @@ export class AuthFacade {
     }
 
     this.isRestoringSignal.set(true);
+    this.isRestoringSubject.next(true);
     this.http.get<AuthResultDto['user']>(apiEndpoints.account.profile, {
       headers: {
         Authorization: `Bearer ${token}`,
@@ -113,7 +116,10 @@ export class AuthFacade {
         return of(null);
       })
     ).subscribe({
-      complete: () => this.isRestoringSignal.set(false)
+      complete: () => {
+        this.isRestoringSignal.set(false);
+        this.isRestoringSubject.next(false);
+      }
     });
   }
 

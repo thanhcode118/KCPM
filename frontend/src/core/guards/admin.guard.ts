@@ -1,7 +1,7 @@
 import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthFacade } from '@/features/auth/data-access/auth.facade';
-import { toObservable } from '@angular/core/rxjs-interop';
+
 import { filter, map } from 'rxjs';
 
 export const adminGuard: CanActivateFn = () => {
@@ -17,7 +17,7 @@ export const adminGuard: CanActivateFn = () => {
   }
 
   if (authFacade.isRestoring()) {
-    return toObservable(authFacade.isRestoring).pipe(
+    return authFacade.isRestoring$.pipe(
       filter(isRestoring => !isRestoring),
       map(() => {
         if (authFacade.isAuthenticated() && authFacade.currentUser()?.role === 'admin') {
