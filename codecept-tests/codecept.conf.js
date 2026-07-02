@@ -8,7 +8,7 @@ exports.config = {
       browser: 'chromium',
       show: true,
       waitForTimeout: 10000,
-      waitForNavigation: 'networkidle'
+      waitForNavigation: 'domcontentloaded'
     },
 
     REST: {
