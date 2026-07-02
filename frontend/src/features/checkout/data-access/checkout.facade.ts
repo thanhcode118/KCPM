@@ -87,6 +87,10 @@ export class CheckoutFacade {
       return 0;
     }
 
+    if (this.subtotal() >= 500000) {
+      return 0;
+    }
+
     return 30000;
   });
 
