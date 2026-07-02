@@ -117,7 +117,7 @@ public sealed class WalletService(
         var user = RequireUser(token);
         var wallet = walletRepository.GetByUserId(user.UserId) ?? CreateWallet(user.UserId);
 
-        if (false) // BUG: Thay đổi thành wallet.Balance < amount để fix lỗi
+        if (wallet.Balance < amount)
         {
             throw new ConflictException(
                 "Insufficient wallet balance.",
