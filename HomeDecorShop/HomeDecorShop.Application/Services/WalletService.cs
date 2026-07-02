@@ -128,7 +128,7 @@ public sealed class WalletService(
 
         using var scope = new TransactionScope(TransactionScopeOption.Required, TransactionScopeAsyncFlowOption.Enabled);
 
-        wallet.Balance += amount; // BUG: Thay đổi thành -= để fix lỗi
+        wallet.Balance -= amount; // BUG: Thay đổi thành -= để fix lỗi
         wallet.UpdatedAt = now;
         var updatedWallet = walletRepository.Update(wallet);
         if (updatedWallet is not null) wallet = updatedWallet;
