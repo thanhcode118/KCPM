@@ -84,9 +84,11 @@ pipeline {
                     archiveArtifacts artifacts: '**/TestResults/*.xml', allowEmptyArchive: true
                     script {
                         try {
-                            publishCoverage adapters: [coberturaAdapter('**/TestResults/coverage.cobertura.xml')]
-                        } catch (Exception e) {
-                            echo "WARNING: Khong the publish coverage. Co the thieu Coverage Plugin. Chi tiet: ${e.message}"
+                            // Tạm thời comment publishCoverage vì thiếu plugin Cobertura trên Jenkins gây ra lỗi NoSuchMethodError
+                            // publishCoverage adapters: [coberturaAdapter('**/TestResults/coverage.cobertura.xml')]
+                            echo "Đã bỏ qua bước publishCoverage do thiếu plugin."
+                        } catch (Throwable t) {
+                            echo "WARNING: Khong the publish coverage. Co the thieu Coverage Plugin. Chi tiet: ${t.message}"
                         }
                     }
                 }
