@@ -2,6 +2,7 @@ import { test, expect } from '@playwright/test';
 import * as fs from 'fs';
 import * as path from 'path';
 
+test.beforeAll(() => {
   const dummyFilePath = path.join(process.cwd(), 'tests', 'bàn.jpg');
   if (!fs.existsSync(dummyFilePath)) {
     fs.writeFileSync(dummyFilePath, 'dummy image content');

@@ -432,6 +432,11 @@ export class AdminDashboardComponent implements OnInit {
     const file = event.target.files[0];
     if (!file) return;
 
+    if (!file.type.startsWith('image/')) {
+      this.showToast('File không hợp lệ, vui lòng chọn file ảnh!', 'error');
+      return;
+    }
+
     this.isUploading = true;
     this.adminProductService.uploadImage(file).subscribe({
       next: (res) => {
@@ -650,6 +655,11 @@ export class AdminDashboardComponent implements OnInit {
   onMarketingImageUpload(event: any, type: 'blog' | 'banner'): void {
     const file = event.target.files[0];
     if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      this.showToast('File không hợp lệ, vui lòng chọn file ảnh!', 'error');
+      return;
+    }
 
     this.isUploading = true;
     this.adminProductService.uploadImage(file).subscribe({
