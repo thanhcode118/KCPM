@@ -48,24 +48,17 @@ export class CommerceStore {
     }
 
     this.activeCart.update((cart) => {
+      let updatedItems;
       const existingItem = cart.items.find((item) => item.productId === product.id);
+      
       if (existingItem) {
-        const nextCart = {
-          ...cart,
-          items: cart.items.map((item) =>
-            item.productId === product.id
-              ? { ...item, quantity: item.quantity + quantity }
-              : item
-          ),
-          updatedAt: new Date().toISOString()
-        };
-        this.persistGuestCart(nextCart);
-        return nextCart;
-      }
-
-      const nextCart = {
-        ...cart,
-        items: [
+        updatedItems = cart.items.map((item) =>
+          item.productId === product.id
+            ? { ...item, quantity: item.quantity + quantity }
+            : item
+        );
+      } else {
+        updatedItems = [
           ...cart.items,
           {
             id: Date.now(),
@@ -75,9 +68,16 @@ export class CommerceStore {
             quantity,
             unitPrice: product.price
           }
-        ],
+        ];
+      }
+
+      const nextCart = {
+        ...cart,
+        items: updatedItems,
+        subtotal: updatedItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0),
         updatedAt: new Date().toISOString()
       };
+      
       this.persistGuestCart(nextCart);
       return nextCart;
     });
@@ -85,9 +85,11 @@ export class CommerceStore {
 
   removeFromCart(productId: number): void {
     this.activeCart.update((cart) => {
+      const updatedItems = cart.items.filter((item) => item.productId !== productId);
       const nextCart = {
         ...cart,
-        items: cart.items.filter((item) => item.productId !== productId),
+        items: updatedItems,
+        subtotal: updatedItems.reduce((sum, item) => sum + (item.unitPrice * item.quantity), 0),
         updatedAt: new Date().toISOString()
       };
       this.persistGuestCart(nextCart);
